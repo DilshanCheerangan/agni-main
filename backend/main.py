@@ -107,6 +107,12 @@ class AnalyzeResponse(BaseModel):
     cultivated_mask_image_path: Optional[str] = None
     within_boundary: bool = False
     land_use_mask_base64: Optional[str] = None
+    # When boundary is used: full image vs selected region vs remaining (outside)
+    full_image_pixels: Optional[int] = None
+    pixels_inside_boundary: Optional[int] = None
+    pixels_outside_boundary: Optional[int] = None
+    percentage_inside_boundary: Optional[float] = None
+    percentage_outside_boundary: Optional[float] = None
     # Land-use breakdown percentages
     water_percentage: float = 0.0
     road_percentage: float = 0.0
@@ -164,10 +170,15 @@ def analyze(
         raise HTTPException(status_code=400, detail=f"OpenCV processing failed: {str(e)}")
 
     h, w = image.shape[:2]
-    total_pixels = h * w
+    full_image_pixels = h * w
+    total_pixels = full_image_pixels
     cultivated_pixels = int(cv2.countNonZero(vegetation_mask))
     use_boundary = False
     polygon_lat_lng = None
+    pixels_inside_boundary = None
+    pixels_outside_boundary = None
+    percentage_inside_boundary = None
+    percentage_outside_boundary = None
 
     if boundary and boundary.strip():
         try:
@@ -184,6 +195,10 @@ def analyze(
                 cultivated_percentage = (cultivated_pixels / total_pixels * 100.0) if total_pixels else 0.0
                 cultivated_percentage = round(cultivated_percentage, 2)
                 use_boundary = True
+                pixels_inside_boundary = total_pixels
+                pixels_outside_boundary = full_image_pixels - total_pixels
+                percentage_inside_boundary = round(total_pixels / full_image_pixels * 100.0, 2) if full_image_pixels else 0.0
+                percentage_outside_boundary = round(pixels_outside_boundary / full_image_pixels * 100.0, 2) if full_image_pixels else 0.0
             else:
                 raise HTTPException(status_code=400, detail="Polygon must have at least 3 points")
         except json.JSONDecodeError:
@@ -291,6 +306,11 @@ def analyze(
         polygon_coordinates=polygon_coordinates,
         cultivated_mask_image_path=cultivated_mask_image_path,
         within_boundary=use_boundary,
+        full_image_pixels=full_image_pixels,
+        pixels_inside_boundary=pixels_inside_boundary,
+        pixels_outside_boundary=pixels_outside_boundary,
+        percentage_inside_boundary=percentage_inside_boundary,
+        percentage_outside_boundary=percentage_outside_boundary,
         land_use_mask_base64=land_use_b64,
         water_percentage=water_pct,
         road_percentage=road_pct,

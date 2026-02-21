@@ -101,6 +101,16 @@ If the backend is at `http://127.0.0.1:8000`, login and analyze should still wor
     curl -X POST http://127.0.0.1:8000/analyze -H "Authorization: Bearer YOUR_TOKEN" -F "file=@path/to/image.jpg"
     ```
 
+## Optional: Better building vs soil detection (free AI)
+
+Buildings and bare soil can look similar (brown/tan). The pipeline does two things:
+
+1. **Rule-based:** Brown regions are classified as buildings only if they are compact and not mostly soil (low overlap with bare-soil mask and reasonably rectangular shape).
+2. **Optional AI (Hugging Face):** If you set a free [Hugging Face token](https://huggingface.co/settings/tokens), the backend can call a semantic segmentation model to add building pixels. Set either:
+   - `BUILDING_SEGMENTATION_HF_TOKEN`, or  
+   - `HF_TOKEN`  
+   in the environment before starting the backend. No token = rule-based only (no API calls).
+
 ## Error handling
 
 - **Invalid image** → 400 with message (e.g. “Invalid image: could not decode”).

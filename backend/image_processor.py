@@ -2,10 +2,13 @@
 AGNI - Real OpenCV image analysis (vegetation and stress detection).
 No mock data; all values from actual image processing.
 Resolution-agnostic vegetation detection via Excess Green (ExG) index.
+Optional: Hugging Face Inference API for building segmentation (set HF_TOKEN or BUILDING_SEGMENTATION_HF_TOKEN).
 """
+import base64
+import os
 import cv2
 import numpy as np
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Optional
 
 # Resolution-agnostic pipeline: max dimension for ExG processing
 EXG_MAX_DIMENSION = 640  # Slightly higher for better detail
@@ -16,10 +19,10 @@ MORPH_CLOSE_ITERATIONS = 2  # Extra closing to merge nearby green
 EXG_DARK_GREEN_MIN = 8  # Lower threshold to capture more green
 EXG_PALE_GREEN_MIN = 5   # Very pale green still counts if G-dominant
 
-# HSV green range (OpenCV H 0-180): typical vegetation green
-HSV_GREEN_H_LOWER, HSV_GREEN_H_UPPER = 28, 85
-HSV_GREEN_S_LOWER, HSV_GREEN_S_UPPER = 40, 255
-HSV_GREEN_V_LOWER, HSV_GREEN_V_UPPER = 40, 255
+# HSV green range (OpenCV H 0-180): typical vegetation green, extended for analysis
+HSV_GREEN_H_LOWER, HSV_GREEN_H_UPPER = 25, 95
+HSV_GREEN_S_LOWER, HSV_GREEN_S_UPPER = 30, 255
+HSV_GREEN_V_LOWER, HSV_GREEN_V_UPPER = 35, 255
 
 # Non-agricultural object detection parameters
 MIN_BUILDING_AREA = 1000  # Minimum area for building detection
@@ -42,11 +45,54 @@ AREA_PLAUSIBLE_HIGH = 0.80  # 80%
 YELLOW_LOWER = np.array([20, 100, 100])
 YELLOW_UPPER = np.array([35, 255, 255])
 
-# HSV for bare soil / non-green land (brown, tan, beige): H 8-25, S 30-180, V 60-220
-BARE_SOIL_H_LOWER, BARE_SOIL_H_UPPER = 8, 25
-BARE_SOIL_S_LOWER, BARE_SOIL_S_UPPER = 30, 180
-BARE_SOIL_V_LOWER, BARE_SOIL_V_UPPER = 60, 220
-MIN_BARE_SOIL_COMPONENT_PIXELS = 300
+# HSV for bare soil / non-green land (brown, tan, beige, ochre): wider for better coverage
+BARE_SOIL_H_LOWER, BARE_SOIL_H_UPPER = 5, 30
+BARE_SOIL_S_LOWER, BARE_SOIL_S_UPPER = 25, 200
+BARE_SOIL_V_LOWER, BARE_SOIL_V_UPPER = 50, 230
+MIN_BARE_SOIL_COMPONENT_PIXELS = 200
+
+# Extended vegetation green (OpenCV H 0-180): include yellow-green and teal
+HSV_GREEN_H_EXTENDED_LOWER, HSV_GREEN_H_EXTENDED_UPPER = 25, 95
+HSV_GREEN_S_EXTENDED_LOWER = 30
+
+# Yellow / stressed vegetation / dry crop (for land use classification)
+YELLOW_STRESS_H_LOWER, YELLOW_STRESS_H_UPPER = 18, 45
+YELLOW_STRESS_S_LOWER, YELLOW_STRESS_S_UPPER = 50, 255
+YELLOW_STRESS_V_LOWER, YELLOW_STRESS_V_UPPER = 80, 255
+
+# Gray / concrete / paved (for roads and built-up)
+GRAY_S_LOWER = 0
+GRAY_S_UPPER = 60
+GRAY_V_LOWER, GRAY_V_UPPER = 60, 220
+MIN_GRAY_COMPONENT_PIXELS = 150
+
+# Water / rivers: HSV blue-cyan (OpenCV H 0-180; 90-130 = cyan/blue), dark water (low V)
+WATER_HSV_H_LOWER, WATER_HSV_H_UPPER = 85, 130   # blue-cyan hue
+WATER_HSV_S_LOWER, WATER_HSV_S_UPPER = 20, 255
+WATER_HSV_V_LOWER, WATER_HSV_V_UPPER = 10, 220  # include dark water
+MIN_WATER_COMPONENT_PIXELS = 100
+
+# Hugging Face building segmentation (free tier): model expects ~512x512
+HF_SEGMENTATION_MODEL = "nvidia/segformer-b1-finetuned-cityscapes-512-512"
+HF_SEGMENTATION_SIZE = 512
+HF_BUILDING_LABELS = ("building", "house", "wall")  # accept any of these
+
+# Asphalt / paved roads: brown-gray (H 0-25), low saturation, mid value
+ASPHALT_H_LOWER, ASPHALT_H_UPPER = 0, 25
+ASPHALT_S_UPPER = 80
+ASPHALT_V_LOWER, ASPHALT_V_UPPER = 40, 200
+MIN_ROAD_COMPONENT_PIXELS = 300   # min area for color-based road patch
+
+# Building / roof colors: brown, red-brown, gray (rooftops)
+ROOF_BROWN_H_LOWER, ROOF_BROWN_H_UPPER = 8, 25
+ROOF_BROWN_S_LOWER, ROOF_BROWN_S_UPPER = 30, 200
+ROOF_BROWN_V_LOWER, ROOF_BROWN_V_UPPER = 40, 200
+ROOF_RED_H_LOWER, ROOF_RED_H_UPPER = 0, 8   # red
+ROOF_RED_H2_LOWER, ROOF_RED_H2_UPPER = 170, 180  # red (wrap)
+MIN_BUILDING_COLOR_PIXELS = 400
+# Building vs soil: reject brown regions that look like soil (high soil overlap or irregular shape)
+BUILDING_SOIL_OVERLAP_MAX = 0.55   # if >55% of candidate is bare_soil, treat as soil
+BUILDING_RECTANGULARITY_MIN = 0.40  # contour area / bbox area (buildings more regular)
 
 
 def _resize_max_dimension(img: np.ndarray, max_dim: int) -> Tuple[np.ndarray, float, Tuple[int, int]]:
@@ -62,49 +108,145 @@ def _resize_max_dimension(img: np.ndarray, max_dim: int) -> Tuple[np.ndarray, fl
     return resized, scale, orig_shape
 
 
+def _get_building_mask_hf(img: np.ndarray, token: str) -> Optional[np.ndarray]:
+    """
+    Optional: get building mask from Hugging Face Inference API (free tier).
+    Uses SegFormer Cityscapes; returns binary mask (255 = building) or None on failure.
+    """
+    try:
+        import requests
+    except ImportError:
+        return None
+    h, w = img.shape[:2]
+    small = cv2.resize(img, (HF_SEGMENTATION_SIZE, HF_SEGMENTATION_SIZE), interpolation=cv2.INTER_AREA)
+    _, buf = cv2.imencode(".jpg", small)
+    b64 = base64.b64encode(buf.tobytes()).decode("ascii")
+    url = f"https://api-inference.huggingface.co/models/{HF_SEGMENTATION_MODEL}"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"inputs": b64}
+    try:
+        r = requests.post(url, json=payload, timeout=30)
+        if r.status_code != 200:
+            return None
+        data = r.json()
+    except Exception:
+        return None
+    if not isinstance(data, list):
+        return None
+    building_mask_small = None
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        label = (item.get("label") or "").lower()
+        if not any(l in label for l in HF_BUILDING_LABELS):
+            continue
+        mask_b64 = item.get("mask")
+        if not mask_b64:
+            continue
+        try:
+            raw = base64.b64decode(mask_b64)
+            nparr = np.frombuffer(raw, np.uint8)
+            mask_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+            if mask_img is not None and mask_img.shape[0] > 0:
+                _, binary = cv2.threshold(mask_img, 127, 255, cv2.THRESH_BINARY)
+                if building_mask_small is None:
+                    building_mask_small = binary
+                else:
+                    building_mask_small = cv2.bitwise_or(building_mask_small, binary)
+        except Exception:
+            continue
+    if building_mask_small is None:
+        return None
+    out = cv2.resize(building_mask_small, (w, h), interpolation=cv2.INTER_NEAREST)
+    return out
+
+
 def detect_water(img: np.ndarray) -> np.ndarray:
     """
-    Detect water (blue-dominant pixels): B > G AND B > R.
-    Refine using morphological opening.
+    Detect water and rivers: (1) blue-dominant B>G, B>R, (2) HSV blue-cyan range,
+    (3) dark water (low V, blue hue). Combines all and fills small gaps.
     Returns binary mask (255 = water, 0 = non-water).
     """
     b, g, r = cv2.split(img.astype(np.float32))
     blue_dominant = (b > g) & (b > r)
-    water_mask = (blue_dominant.astype(np.uint8) * 255)
-    kernel = np.ones((3, 3), np.uint8)
-    water_mask = cv2.morphologyEx(water_mask, cv2.MORPH_OPEN, kernel)
-    return water_mask
+    water_from_rgb = (blue_dominant.astype(np.uint8) * 255)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    # Blue-cyan in HSV (rivers, lakes, canals)
+    blue_cyan = (
+        (h >= WATER_HSV_H_LOWER) & (h <= WATER_HSV_H_UPPER) &
+        (s >= WATER_HSV_S_LOWER) & (v >= WATER_HSV_V_LOWER) & (v <= WATER_HSV_V_UPPER)
+    )
+    # Dark water (shadows, deep water): any blue hue with low value
+    dark_water = (
+        ((h >= 85) & (h <= 130)) & (v < 80) & (s < 180)
+    )
+    water_hsv = ((blue_cyan | dark_water).astype(np.uint8) * 255)
+    water_mask = cv2.bitwise_or(water_from_rgb, water_hsv)
+    kernel_open = np.ones((3, 3), np.uint8)
+    kernel_close = np.ones((5, 5), np.uint8)
+    water_mask = cv2.morphologyEx(water_mask, cv2.MORPH_OPEN, kernel_open)
+    water_mask = cv2.morphologyEx(water_mask, cv2.MORPH_CLOSE, kernel_close)
+    # Keep only components above minimum size (reduce noise)
+    contours, _ = cv2.findContours(water_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    out = np.zeros_like(water_mask)
+    for c in contours:
+        if cv2.contourArea(c) >= MIN_WATER_COMPONENT_PIXELS:
+            cv2.drawContours(out, [c], -1, 255, -1)
+    return out
 
 
 def detect_roads(img: np.ndarray) -> np.ndarray:
     """
-    Detect roads using edge detection and HoughLinesP.
-    Steps: grayscale, Canny edges, HoughLinesP, convert lines to mask.
+    Detect roads: (1) HoughLinesP from edges (linear structures), (2) gray/concrete
+    surfaces, (3) asphalt brown-gray color. Combined so roads and rivers/buildings
+    stay distinguishable when used with water/building masks.
     Returns binary mask (255 = road, 0 = non-road).
     """
+    h, w = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # 1) Line-based: Canny + HoughLinesP
     edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-    h, w = gray.shape
-    min_line_length = max(MIN_ROAD_LINE_LENGTH, int(min(h, w) * 0.1))
-    max_line_gap = int(min(h, w) * 0.05)
+    min_line_length = max(MIN_ROAD_LINE_LENGTH, int(min(h, w) * 0.08))
+    max_line_gap = int(min(h, w) * 0.04)
     lines = cv2.HoughLinesP(
-        edges, rho=1, theta=np.pi/180, threshold=50,
+        edges, rho=1, theta=np.pi/180, threshold=45,
         minLineLength=min_line_length, maxLineGap=max_line_gap
     )
-    road_mask = np.zeros((h, w), dtype=np.uint8)
+    road_lines = np.zeros((h, w), dtype=np.uint8)
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            cv2.line(road_mask, (x1, y1), (x2, y2), 255, 3)
-        kernel = np.ones((5, 5), np.uint8)
-        road_mask = cv2.dilate(road_mask, kernel, iterations=2)
+            thickness = max(3, min(h, w) // 150)
+            cv2.line(road_lines, (x1, y1), (x2, y2), 255, thickness)
+        kernel = np.ones((7, 7), np.uint8)
+        road_lines = cv2.dilate(road_lines, kernel, iterations=2)
+    # 2) Gray/concrete (already defined)
+    gray_surfaces = detect_gray_surfaces(img)
+    # 3) Asphalt: brown-gray low-saturation mid-value
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    asphalt = (
+        (h >= ASPHALT_H_LOWER) & (h <= ASPHALT_H_UPPER) &
+        (s <= ASPHALT_S_UPPER) &
+        (v >= ASPHALT_V_LOWER) & (v <= ASPHALT_V_UPPER)
+    ).astype(np.uint8) * 255
+    contours, _ = cv2.findContours(asphalt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    asphalt_filtered = np.zeros_like(asphalt)
+    for c in contours:
+        if cv2.contourArea(c) >= MIN_ROAD_COMPONENT_PIXELS:
+            cv2.drawContours(asphalt_filtered, [c], -1, 255, -1)
+    road_mask = cv2.bitwise_or(road_lines, gray_surfaces)
+    road_mask = cv2.bitwise_or(road_mask, asphalt_filtered)
+    kernel = np.ones((3, 3), np.uint8)
+    road_mask = cv2.morphologyEx(road_mask, cv2.MORPH_CLOSE, kernel)
     return road_mask
 
 
 def detect_buildings(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray:
     """
-    Detect buildings: low-vegetation high-contrast regions with rectangular shapes.
-    Steps: find low-vegetation areas, detect high-contrast regions, find rectangular contours.
+    Detect buildings: (1) contour-based rectangular shapes in non-vegetation edges,
+    (2) color-based roof detection (brown, red-brown, gray rooftops). Excludes water.
     Returns binary mask (255 = building, 0 = non-building).
     """
     h, w = img.shape[:2]
@@ -112,10 +254,13 @@ def detect_buildings(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray
     non_vegetation = (vegetation_mask == 0).astype(np.uint8) * 255
     if cv2.countNonZero(non_vegetation) == 0:
         return building_mask
+    water_mask = detect_water(img)
+    non_veg_non_water = cv2.bitwise_and(non_vegetation, 255 - water_mask)
+    # 1) Contour-based: rectangular structures from edges
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
-    edges_masked = cv2.bitwise_and(edges, edges, mask=non_vegetation)
+    edges_masked = cv2.bitwise_and(edges, edges, mask=non_veg_non_water)
     contours, _ = cv2.findContours(edges_masked, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     for c in contours:
         area = cv2.contourArea(c)
@@ -128,8 +273,49 @@ def detect_buildings(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray
             aspect_ratio = float(w_rect) / h_rect if h_rect > 0 else 0
             if 0.3 <= aspect_ratio <= 3.0:
                 cv2.drawContours(building_mask, [approx], -1, 255, -1)
-    kernel = np.ones((3, 3), np.uint8)
+    # 2) Color-based: brown and red-brown roofs (tiles, metal)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    roof_brown = (
+        (h >= ROOF_BROWN_H_LOWER) & (h <= ROOF_BROWN_H_UPPER) &
+        (s >= ROOF_BROWN_S_LOWER) & (s <= ROOF_BROWN_S_UPPER) &
+        (v >= ROOF_BROWN_V_LOWER) & (v <= ROOF_BROWN_V_UPPER)
+    )
+    roof_red = (
+        ((h >= ROOF_RED_H_LOWER) & (h <= ROOF_RED_H_UPPER) |
+         (h >= ROOF_RED_H2_LOWER) & (h <= ROOF_RED_H2_UPPER)) &
+        (s >= 40) & (s <= 220) & (v >= 50) & (v <= 200)
+    )
+    roof_color = ((roof_brown | roof_red).astype(np.uint8) * 255)
+    roof_color = cv2.bitwise_and(roof_color, non_veg_non_water)
+    gray_roofs = detect_gray_surfaces(img)
+    gray_roofs = cv2.bitwise_and(gray_roofs, non_veg_non_water)
+    roof_combined = cv2.bitwise_or(roof_color, gray_roofs)
+    bare_soil_mask = detect_bare_soil(img)
+    contours_roof, _ = cv2.findContours(roof_combined, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    for c in contours_roof:
+        area = cv2.contourArea(c)
+        if area < MIN_BUILDING_COLOR_PIXELS:
+            continue
+        x, y, w_rect, h_rect = cv2.boundingRect(c)
+        bbox_area = w_rect * h_rect
+        rectangularity = (area / bbox_area) if bbox_area > 0 else 0
+        if rectangularity < BUILDING_RECTANGULARITY_MIN:
+            continue
+        contour_mask = np.zeros((h, w), dtype=np.uint8)
+        cv2.drawContours(contour_mask, [c], -1, 255, -1)
+        overlap_with_soil = cv2.countNonZero(cv2.bitwise_and(contour_mask, bare_soil_mask))
+        if overlap_with_soil / max(area, 1) > BUILDING_SOIL_OVERLAP_MAX:
+            continue
+        cv2.drawContours(building_mask, [c], -1, 255, -1)
+    kernel = np.ones((5, 5), np.uint8)
     building_mask = cv2.morphologyEx(building_mask, cv2.MORPH_CLOSE, kernel)
+    # Optional: merge with AI building mask from Hugging Face (free API)
+    hf_token = os.environ.get("BUILDING_SEGMENTATION_HF_TOKEN") or os.environ.get("HF_TOKEN")
+    if hf_token:
+        ai_mask = _get_building_mask_hf(img, hf_token)
+        if ai_mask is not None:
+            building_mask = cv2.bitwise_or(building_mask, ai_mask)
     return building_mask
 
 
@@ -159,7 +345,7 @@ def get_non_agricultural_mask_no_roads(img: np.ndarray, vegetation_mask: np.ndar
 
 def detect_vegetation_hsv(img: np.ndarray) -> np.ndarray:
     """
-    Detect green vegetation using HSV. Use alongside ExG for fuller coverage.
+    Detect green vegetation using HSV (extended range for better color understanding).
     Returns binary mask (255 = green vegetation).
     """
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -170,6 +356,40 @@ def detect_vegetation_hsv(img: np.ndarray) -> np.ndarray:
     green = cv2.morphologyEx(green, cv2.MORPH_CLOSE, kernel)
     green = cv2.morphologyEx(green, cv2.MORPH_OPEN, kernel)
     return green
+
+
+def detect_yellow_stress(img: np.ndarray) -> np.ndarray:
+    """
+    Detect yellow / stressed vegetation / dry crop for land use classification.
+    Returns binary mask (255 = yellow/stress).
+    """
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower = np.array([YELLOW_STRESS_H_LOWER, YELLOW_STRESS_S_LOWER, YELLOW_STRESS_V_LOWER])
+    upper = np.array([YELLOW_STRESS_H_UPPER, YELLOW_STRESS_S_UPPER, YELLOW_STRESS_V_UPPER])
+    yellow = cv2.inRange(hsv, lower, upper)
+    kernel = np.ones((3, 3), np.uint8)
+    yellow = cv2.morphologyEx(yellow, cv2.MORPH_CLOSE, kernel)
+    return yellow
+
+
+def detect_gray_surfaces(img: np.ndarray) -> np.ndarray:
+    """
+    Detect gray / concrete / paved surfaces (low saturation, mid value) for land use.
+    Returns binary mask (255 = gray surface).
+    """
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    _, s, v = cv2.split(hsv)
+    low_sat = (s <= GRAY_S_UPPER)
+    mid_val = (v >= GRAY_V_LOWER) & (v <= GRAY_V_UPPER)
+    gray_mask = (low_sat & mid_val).astype(np.uint8) * 255
+    kernel = np.ones((3, 3), np.uint8)
+    gray_mask = cv2.morphologyEx(gray_mask, cv2.MORPH_OPEN, kernel)
+    contours, _ = cv2.findContours(gray_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    out = np.zeros_like(gray_mask)
+    for c in contours:
+        if cv2.contourArea(c) >= MIN_GRAY_COMPONENT_PIXELS:
+            cv2.drawContours(out, [c], -1, 255, -1)
+    return out
 
 
 def detect_bare_soil(img: np.ndarray) -> np.ndarray:
@@ -529,24 +749,33 @@ def get_landuse_mask_image(
     farmable_mask: np.ndarray,
 ) -> np.ndarray:
     """
-    Land use: vegetation (green), bare soil (tan), water (blue), roads (gray), buildings (brown).
+    Land use: water/rivers (blue), roads (gray), buildings (brown), vegetation (green),
+    bare soil (tan), stressed (amber). Detection uses color + shape for roads, rivers, buildings.
     """
     h, w = img.shape[:2]
     out = np.zeros((h, w, 3), dtype=np.uint8)
     out[:] = (35, 35, 35)  # dark background
     water_mask = detect_water(img)
-    road_mask = detect_roads(img)
+    road_mask = detect_roads(img)   # already includes gray + asphalt + lines
     building_mask = detect_buildings(img, vegetation_mask)
+    yellow_mask = detect_yellow_stress(img)
     bare_only = (farmable_mask > 0) & (vegetation_mask == 0)
-    building_bgr = (42, 42, 139)   # brown in BGR
-    road_bgr = (100, 100, 100)     # gray
+    # Vegetation but also yellow (stressed) -> show as amber; pure green otherwise
+    vegetation_green_only = vegetation_mask > 0
+    vegetation_green_only = vegetation_green_only & (yellow_mask == 0)
+    vegetation_stressed = (vegetation_mask > 0) & (yellow_mask > 0)
+    building_bgr = (42, 42, 139)   # brown in BGR (buildings)
+    road_bgr = (100, 100, 100)     # gray (roads)
     vegetation_bgr = (0, 200, 0)   # green
+    stressed_bgr = (0, 165, 255)   # amber/yellow in BGR
     bare_soil_bgr = (42, 165, 200) # tan in BGR
-    water_bgr = (255, 120, 0)      # blue in BGR
-    out[building_mask > 0] = building_bgr
-    out[road_mask > 0] = road_bgr
+    water_bgr = (255, 120, 0)      # blue in BGR (rivers, water)
+    # Draw order: base layers first, then road, then building, then water on top
     out[bare_only] = bare_soil_bgr
-    out[vegetation_mask > 0] = vegetation_bgr
+    out[vegetation_green_only] = vegetation_bgr
+    out[vegetation_stressed] = stressed_bgr
+    out[road_mask > 0] = road_bgr
+    out[building_mask > 0] = building_bgr
     out[water_mask > 0] = water_bgr
     return out
 

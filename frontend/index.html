@@ -52,6 +52,17 @@
       background: none !important;
       border: none !important;
     }
+
+    .analysis-panel-caption {
+      min-height: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .landuse-bar-fill {
+      flex-shrink: 0;
+    }
   </style>
 </head>
 
@@ -263,13 +274,24 @@
               <i class="fas fa-map-marked-alt text-emerald-600"></i>
               Select Farm Location
             </h3>
-            <div class="flex gap-4 mb-4">
-              <button type="button" id="locationMethodMap" class="location-method-btn px-4 py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-medium transition">
-                <i class="fas fa-map mr-2"></i>Map Selection
-              </button>
-              <button type="button" id="locationMethodPincode" class="location-method-btn px-4 py-2 rounded-lg border-2 border-slate-300 bg-white text-slate-700 font-medium transition">
-                <i class="fas fa-map-pin mr-2"></i>Pincode / Place
-              </button>
+            <div class="flex flex-wrap items-center gap-4 mb-4">
+              <div class="flex gap-4">
+                <button type="button" id="locationMethodMap" class="location-method-btn px-4 py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-medium transition">
+                  <i class="fas fa-map mr-2"></i>Map Selection
+                </button>
+                <button type="button" id="locationMethodPincode" class="location-method-btn px-4 py-2 rounded-lg border-2 border-slate-300 bg-white text-slate-700 font-medium transition">
+                  <i class="fas fa-map-pin mr-2"></i>Pincode / Place
+                </button>
+              </div>
+              <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+                <span class="text-sm text-slate-600">Load saved place:</span>
+                <select id="loadSavedPlaceSelect" class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 max-w-[200px]">
+                  <option value="">— Choose one —</option>
+                </select>
+                <button type="button" id="loadSavedPlaceBtn" class="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50" disabled>
+                  <i class="fas fa-map-marker-alt mr-1"></i>Load
+                </button>
+              </div>
             </div>
             
             <!-- Map Selection Method -->
@@ -284,6 +306,11 @@
                   class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled>
                   <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
+                </button>
+                <button type="button" id="savePlaceBtn"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled title="Save this place so you don't need to select the map every time">
+                  <i class="fas fa-save mr-2"></i>Save this place
                 </button>
                 <button type="button" id="clearBoundaryBtn"
                   class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
@@ -421,44 +448,93 @@
             </ul>
           </div>
 
+          <!-- Save place modal -->
+          <div id="savePlaceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+              <h4 class="text-lg font-semibold text-slate-800 mb-4">
+                <i class="fas fa-save text-emerald-600 mr-2"></i>Save this place
+              </h4>
+              <p class="text-sm text-slate-600 mb-4">Give it a name so you can load it next time without redrawing the map.</p>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Place name *</label>
+                  <input type="text" id="savePlaceName" placeholder="e.g., North field, Main farm"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Place / city (optional)</label>
+                  <input type="text" id="savePlaceLocation" placeholder="e.g., Delhi"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Pincode (optional)</label>
+                  <input type="text" id="savePlacePincode" placeholder="e.g., 110001"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+                </div>
+              </div>
+              <div class="flex gap-3 mt-4">
+                <button type="button" id="savePlaceConfirmBtn" class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">
+                  Save
+                </button>
+                <button type="button" id="savePlaceCancelBtn" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+
           <!-- Results Card -->
           <div id="resultsCard" class="hidden bg-white rounded-xl shadow-md border border-slate-200 p-6">
             <div id="withinBoundaryMessage"
               class="hidden mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">
               <i class="fas fa-info-circle mr-2"></i>Analysis performed within selected farm boundary.
             </div>
+            <div id="savePlaceResultRow" class="hidden mb-4">
+              <button type="button" id="savePlaceFromResultsBtn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                <i class="fas fa-save mr-2"></i>Save this place for next time
+              </button>
+            </div>
             <h3 class="text-lg font-semibold text-slate-800 mb-6">Analysis Results</h3>
 
-            <!-- Image Previews (larger map windows) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-              <div class="text-center">
-                <p class="text-xs font-medium text-slate-500 mb-2">Original</p>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+            <!-- Image Previews (larger map windows) - aligned panels -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 items-start">
+              <div class="text-center flex flex-col">
+                <div class="analysis-panel-caption mb-2">
+                  <p class="text-xs font-medium text-slate-500">Original</p>
+                </div>
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                   <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="originalPlaceholder"
                     class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
-              <div class="text-center">
-                <p class="text-xs font-medium text-slate-500 mb-2">Binary Mask</p>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <div class="text-center flex flex-col">
+                <div class="analysis-panel-caption mb-2">
+                  <p class="text-xs font-medium text-slate-500">Binary Mask</p>
+                </div>
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                   <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="binaryMaskPlaceholder"
                     class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
-              <div class="text-center">
-                <p class="text-xs font-medium text-slate-500 mb-2">Overlay</p>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <div class="text-center flex flex-col">
+                <div class="analysis-panel-caption mb-2">
+                  <p class="text-xs font-medium text-slate-500">Overlay</p>
+                </div>
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                   <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="overlayMaskPlaceholder"
                     class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
-              <div class="text-center">
-                <p class="text-xs font-medium text-slate-500 mb-2">Land use</p>
-                <p class="text-xs text-slate-400 mb-1">Water · Roads · Buildings · Vegetation · Bare soil</p>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <div class="text-center flex flex-col">
+                <div class="analysis-panel-caption mb-2">
+                  <p class="text-xs font-medium text-slate-500">Land use</p>
+                  <p class="text-xs text-slate-400">Water · Roads · Buildings · Vegetation · Bare soil</p>
+                </div>
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
                   <img id="landUseMaskPreview" src="" alt="Land use mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="landUseMaskPlaceholder"
                     class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
@@ -512,8 +588,19 @@
             <!-- Detailed Stats -->
             <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
               <p class="text-slate-600 text-sm font-medium mb-3">Area Statistics</p>
+              <div id="boundaryPortionStats" class="hidden mb-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-sm">
+                <p class="font-medium text-emerald-800 mb-2">Selected region vs full image</p>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-700">
+                  <span>Full image</span>
+                  <span id="fullImagePixels" class="font-mono text-right">—</span>
+                  <span>Selected region (inside boundary)</span>
+                  <span id="insideBoundaryPct" class="font-mono text-right">—</span>
+                  <span>Remaining (outside boundary)</span>
+                  <span id="outsideBoundaryPct" class="font-mono text-right">—</span>
+                </div>
+              </div>
               <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <span class="text-slate-500">Total pixels</span>
+                <span class="text-slate-500">Total pixels <span id="totalPixelsLabel" class="text-slate-400">(in selected region)</span></span>
                 <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
                 <span class="text-slate-500">Cultivated pixels</span>
                 <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
@@ -541,42 +628,42 @@
                 <div class="flex items-center gap-3">
                   <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
                   <span class="text-sm text-slate-600 w-24">Vegetation</span>
-                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="barVegetation" class="landuse-bar bg-emerald-500" style="width:0%"></div>
+                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                    <div id="barVegetation" class="landuse-bar-fill h-full rounded-full bg-emerald-500 transition-all duration-300" style="width:0%; min-width:0"></div>
                   </div>
-                  <span id="pctVegetation" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                  <span id="pctVegetation" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
                   <span class="text-sm text-slate-600 w-24">Water</span>
-                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="barWater" class="landuse-bar bg-blue-500" style="width:0%"></div>
+                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                    <div id="barWater" class="landuse-bar-fill h-full rounded-full bg-blue-500 transition-all duration-300" style="width:0%; min-width:0"></div>
                   </div>
-                  <span id="pctWater" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                  <span id="pctWater" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="w-3 h-3 rounded-full bg-gray-400 flex-shrink-0"></span>
                   <span class="text-sm text-slate-600 w-24">Roads</span>
-                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="barRoads" class="landuse-bar bg-gray-400" style="width:0%"></div>
+                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                    <div id="barRoads" class="landuse-bar-fill h-full rounded-full bg-gray-400 transition-all duration-300" style="width:0%; min-width:0"></div>
                   </div>
-                  <span id="pctRoads" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                  <span id="pctRoads" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <span class="w-3 h-3 rounded-full bg-amber-700 flex-shrink-0"></span>
                   <span class="text-sm text-slate-600 w-24">Buildings</span>
-                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="barBuildings" class="landuse-bar bg-amber-700" style="width:0%"></div>
+                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                    <div id="barBuildings" class="landuse-bar-fill h-full rounded-full bg-amber-700 transition-all duration-300" style="width:0%; min-width:0"></div>
                   </div>
-                  <span id="pctBuildings" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                  <span id="pctBuildings" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
                 </div>
                 <div class="flex items-center gap-3 pt-2 border-t border-slate-200">
                   <span class="w-3 h-3 rounded-full bg-lime-500 flex-shrink-0"></span>
                   <span class="text-sm text-slate-700 font-medium w-24">Farmable</span>
-                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div id="barFarmable" class="landuse-bar bg-lime-500" style="width:0%"></div>
+                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                    <div id="barFarmable" class="landuse-bar-fill h-full rounded-full bg-lime-500 transition-all duration-300" style="width:0%; min-width:0"></div>
                   </div>
-                  <span id="pctFarmable" class="text-sm font-bold text-lime-700 w-14 text-right">0%</span>
+                  <span id="pctFarmable" class="text-sm font-bold text-lime-700 w-14 text-right shrink-0">0%</span>
                 </div>
               </div>
             </div>
@@ -828,9 +915,56 @@
                 <i class="fas fa-plus mr-2"></i>Add New Land
               </button>
             </div>
-            <p class="text-sm text-slate-600 mb-4">Manage your multiple farm locations. Each land can be secured with fingerprint authentication.</p>
+            <p class="text-sm text-slate-600 mb-4">Manage your multiple farm locations. Click a place to see current weather and crop analysis.</p>
             <div id="landsList" class="space-y-4">
-              <p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" to get started.</p>
+              <p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" or save a place from Image Analyzer.</p>
+            </div>
+          </div>
+
+          <!-- Land/Place detail modal (current weather + crops) -->
+          <div id="landDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div class="p-6 border-b border-slate-200 flex-shrink-0">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h4 id="landDetailName" class="text-xl font-semibold text-slate-800">—</h4>
+                    <p id="landDetailLocation" class="text-sm text-slate-600 mt-1">—</p>
+                  </div>
+                  <button type="button" id="closeLandDetailModal" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="landDetailLoading" class="p-6 flex items-center justify-center gap-2 text-slate-500">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading current weather &amp; analysis...</span>
+              </div>
+              <div id="landDetailContent" class="hidden flex-1 overflow-y-auto p-6 space-y-4">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                  <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    <i class="fas fa-cloud-sun"></i> Current weather
+                  </h5>
+                  <p id="landDetailWeatherTemp" class="text-2xl font-bold text-blue-800">—</p>
+                  <p id="landDetailWeatherDesc" class="text-sm text-blue-700">—</p>
+                  <p id="landDetailWeatherExtra" class="text-xs text-blue-600 mt-2">—</p>
+                </div>
+                <div id="landDetailCropsBox" class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                  <h5 class="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+                    <i class="fas fa-seedling"></i> Crop recommendations (current conditions)
+                  </h5>
+                  <p id="landDetailCropsSummary" class="text-sm text-emerald-800">—</p>
+                  <div id="landDetailCropsPrimary" class="mt-2 p-3 bg-white rounded-lg border border-emerald-200"></div>
+                  <div id="landDetailCropsSub" class="mt-2 space-y-1 text-sm text-emerald-800"></div>
+                </div>
+              </div>
+              <div class="p-4 border-t border-slate-200 flex-shrink-0 flex gap-2">
+                <button type="button" id="landDetailOpenAnalyzerBtn" class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm hidden">
+                  <i class="fas fa-map mr-2"></i>Open in Image Analyzer
+                </button>
+                <button type="button" id="closeLandDetailModalBtn" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium text-sm">
+                  Close
+                </button>
+              </div>
             </div>
           </div>
           
@@ -1056,6 +1190,7 @@
         updateDashboard();
       } else if (pageName === 'analyzer') {
         initFarmMapIfNeeded();
+        if (typeof refreshSavedPlacesDropdown === 'function') refreshSavedPlacesDropdown();
         if (typeof updateAnalyzeButtonState === 'function') updateAnalyzeButtonState();
       } else if (pageName === 'my-lands') {
         loadMyLands();
@@ -1221,6 +1356,7 @@
       document.getElementById('boundaryError').classList.add('hidden');
       document.getElementById('boundarySummary').textContent = 'Boundary confirmed (' + confirmedBoundaryCoords.length + ' points).';
       document.getElementById('clearBoundaryBtn').classList.remove('hidden');
+      document.getElementById('savePlaceBtn').disabled = false;
       updateAnalyzeButtonState();
     });
 
@@ -1228,11 +1364,111 @@
       if (drawnItems) drawnItems.clearLayers();
       confirmedBoundaryCoords = null;
       document.getElementById('confirmBoundaryBtn').disabled = true;
+      document.getElementById('savePlaceBtn').disabled = true;
       document.getElementById('boundarySummary').textContent = '';
       document.getElementById('clearBoundaryBtn').classList.add('hidden');
       document.getElementById('boundaryError').classList.add('hidden');
       updateAnalyzeButtonState();
     });
+
+    // --- Saved places (load / save) ---
+    const SAVED_PLACES_KEY = 'agni_saved_places';
+    function getSavedPlaces() {
+      try {
+        return JSON.parse(localStorage.getItem(SAVED_PLACES_KEY) || '[]');
+      } catch (e) { return []; }
+    }
+    function setSavedPlaces(arr) {
+      localStorage.setItem(SAVED_PLACES_KEY, JSON.stringify(arr));
+    }
+
+    function refreshSavedPlacesDropdown() {
+      const list = getSavedPlaces();
+      const sel = document.getElementById('loadSavedPlaceSelect');
+      if (!sel) return;
+      const current = sel.value;
+      sel.innerHTML = '<option value="">— Choose one —</option>' +
+        list.map((p, i) => '<option value="' + i + '">' + (p.name || 'Saved place ' + (i + 1)) + '</option>').join('');
+      if (current !== '' && list[parseInt(current, 10)]) sel.value = current;
+      document.getElementById('loadSavedPlaceBtn').disabled = list.length === 0 || sel.value === '';
+    }
+
+    function loadSavedPlaceOntoMap(place) {
+      if (!place || !place.boundary || place.boundary.length < 3) return;
+      initFarmMapIfNeeded();
+      if (!farmMap || !drawnItems) return;
+      drawnItems.clearLayers();
+      const latlngs = place.boundary.map(function (c) { return L.latLng(c[0], c[1]); });
+      const polygon = L.polygon(latlngs, { color: '#059669' });
+      drawnItems.addLayer(polygon);
+      confirmedBoundaryCoords = place.boundary;
+      const centerLat = place.boundary.reduce(function (s, c) { return s + c[0]; }, 0) / place.boundary.length;
+      const centerLng = place.boundary.reduce(function (s, c) { return s + c[1]; }, 0) / place.boundary.length;
+      farmMap.setView([centerLat, centerLng], 14);
+      document.getElementById('locationMethodMap').click();
+      document.getElementById('boundarySummary').textContent = 'Loaded: ' + (place.name || 'Saved place') + ' (' + place.boundary.length + ' points).';
+      document.getElementById('clearBoundaryBtn').classList.remove('hidden');
+      document.getElementById('confirmBoundaryBtn').disabled = false;
+      document.getElementById('savePlaceBtn').disabled = false;
+      document.getElementById('boundaryError').classList.add('hidden');
+      updateAnalyzeButtonState();
+    }
+
+    document.getElementById('loadSavedPlaceSelect').addEventListener('change', function () {
+      document.getElementById('loadSavedPlaceBtn').disabled = this.value === '';
+    });
+    document.getElementById('loadSavedPlaceBtn').addEventListener('click', function () {
+      const idx = document.getElementById('loadSavedPlaceSelect').value;
+      if (idx === '') return;
+      const list = getSavedPlaces();
+      const place = list[parseInt(idx, 10)];
+      if (place) loadSavedPlaceOntoMap(place);
+    });
+
+    document.getElementById('savePlaceBtn').addEventListener('click', function () {
+      if (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3) return;
+      document.getElementById('savePlaceName').value = '';
+      document.getElementById('savePlaceLocation').value = selectedLocationData && selectedLocationData.place ? selectedLocationData.place : '';
+      document.getElementById('savePlacePincode').value = selectedLocationData && selectedLocationData.pincode ? selectedLocationData.pincode : '';
+      document.getElementById('savePlaceModal').classList.remove('hidden');
+    });
+    document.getElementById('savePlaceCancelBtn').addEventListener('click', function () {
+      document.getElementById('savePlaceModal').classList.add('hidden');
+    });
+    document.getElementById('savePlaceConfirmBtn').addEventListener('click', function () {
+      const name = document.getElementById('savePlaceName').value.trim();
+      if (!name) {
+        alert('Please enter a place name.');
+        return;
+      }
+      if (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3) {
+        document.getElementById('savePlaceModal').classList.add('hidden');
+        return;
+      }
+      const list = getSavedPlaces();
+      const place = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+        name: name,
+        boundary: confirmedBoundaryCoords.map(function (c) { return [c[0], c[1]]; }),
+        place: document.getElementById('savePlaceLocation').value.trim(),
+        pincode: document.getElementById('savePlacePincode').value.trim(),
+        savedAt: new Date().toISOString()
+      };
+      list.push(place);
+      setSavedPlaces(list);
+      refreshSavedPlacesDropdown();
+      document.getElementById('savePlaceModal').classList.add('hidden');
+    });
+
+    document.getElementById('savePlaceFromResultsBtn').addEventListener('click', function () {
+      if (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3) return;
+      document.getElementById('savePlaceName').value = '';
+      document.getElementById('savePlaceLocation').value = selectedLocationData && selectedLocationData.place ? selectedLocationData.place : '';
+      document.getElementById('savePlacePincode').value = selectedLocationData && selectedLocationData.pincode ? selectedLocationData.pincode : '';
+      document.getElementById('savePlaceModal').classList.remove('hidden');
+    });
+
+    if (document.getElementById('loadSavedPlaceSelect')) refreshSavedPlacesDropdown();
 
     // --- Capture map as image (only the polygon boundary area) ---
     document.getElementById('captureMapBtn').addEventListener('click', function () {
@@ -1713,40 +1949,200 @@
       }
     });
 
-    // My Lands Management
+    // My Lands Management (includes both manual lands and saved analyzed places)
     let myLands = JSON.parse(localStorage.getItem('agni_lands') || '[]');
+    
+    function getSavedPlacesForLands() {
+      try {
+        return JSON.parse(localStorage.getItem('agni_saved_places') || '[]');
+      } catch (e) { return []; }
+    }
     
     function loadMyLands() {
       const landsList = document.getElementById('landsList');
-      if (myLands.length === 0) {
-        landsList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" to get started.</p>';
+      const savedPlaces = getSavedPlacesForLands();
+      const items = [];
+      myLands.forEach((land, idx) => {
+        items.push({ type: 'land', index: idx, name: land.name, place: land.place || '', pincode: land.pincode || '', notes: land.notes, useFingerprint: land.useFingerprint });
+      });
+      savedPlaces.forEach((place, idx) => {
+        items.push({ type: 'saved_place', index: idx, name: place.name || ('Saved place ' + (idx + 1)), place: place.place || '', pincode: place.pincode || '', boundary: place.boundary });
+      });
+      if (items.length === 0) {
+        landsList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" or save a place from Image Analyzer.</p>';
         return;
       }
-      landsList.innerHTML = myLands.map((land, idx) => `
-        <div class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition">
+      landsList.innerHTML = items.map((item, i) => {
+        const isPlace = item.type === 'saved_place';
+        const editDel = item.type === 'land' ? `
+          <button onclick="editLand(${item.index})" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button onclick="deleteLand(${item.index})" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100">
+            <i class="fas fa-trash"></i>
+          </button>
+        ` : `
+          <button onclick="deleteSavedPlace(${item.index})" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        return `
+        <div class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer land-detail-card" data-type="${item.type}" data-index="${item.index}">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <h4 class="font-semibold text-slate-800 flex items-center gap-2">
-                ${land.name}
-                ${land.useFingerprint ? '<i class="fas fa-fingerprint text-emerald-600 text-sm" title="Fingerprint protected"></i>' : ''}
+                ${item.name}
+                ${isPlace ? '<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">Analyzed</span>' : ''}
+                ${item.useFingerprint ? '<i class="fas fa-fingerprint text-emerald-600 text-sm" title="Fingerprint protected"></i>' : ''}
               </h4>
               <p class="text-sm text-slate-600 mt-1">
-                <i class="fas fa-map-pin mr-1"></i>${land.place}${land.pincode ? ` (${land.pincode})` : ''}
+                <i class="fas fa-map-pin mr-1"></i>${item.place || '—'}${item.pincode ? ' (' + item.pincode + ')' : ''}
               </p>
-              ${land.notes ? `<p class="text-sm text-slate-500 mt-2">${land.notes}</p>` : ''}
+              ${item.notes ? `<p class="text-sm text-slate-500 mt-2">${item.notes}</p>` : ''}
+              <p class="text-xs text-emerald-600 mt-2">Click to see current weather &amp; crop analysis</p>
             </div>
-            <div class="flex gap-2">
-              <button onclick="editLand(${idx})" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button onclick="deleteLand(${idx})" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100">
-                <i class="fas fa-trash"></i>
-              </button>
+            <div class="flex gap-2" onclick="event.stopPropagation();">
+              ${isPlace ? `<button onclick="openInAnalyzer(${item.index})" class="px-3 py-1 text-sm bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100"><i class="fas fa-map mr-1"></i>Open in Analyzer</button>` : ''}
+              ${editDel}
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+      landsList.querySelectorAll('.land-detail-card').forEach(el => {
+        el.addEventListener('click', function () {
+          const type = this.getAttribute('data-type');
+          const index = parseInt(this.getAttribute('data-index'), 10);
+          if (type && !isNaN(index)) openLandDetail(type, index);
+        });
+      });
     }
+    
+    window.deleteSavedPlace = function(idx) {
+      const list = getSavedPlacesForLands();
+      list.splice(idx, 1);
+      localStorage.setItem('agni_saved_places', JSON.stringify(list));
+      loadMyLands();
+      if (typeof refreshSavedPlacesDropdown === 'function') refreshSavedPlacesDropdown();
+    };
+    
+    window.openInAnalyzer = function(savedPlaceIndex) {
+      const list = getSavedPlacesForLands();
+      const place = list[savedPlaceIndex];
+      if (!place || !place.boundary) return;
+      if (typeof loadSavedPlaceOntoMap === 'function') {
+        navigateToPage('analyzer');
+        setTimeout(function() { loadSavedPlaceOntoMap(place); }, 300);
+      } else {
+        navigateToPage('analyzer');
+      }
+    };
+    
+    async function openLandDetail(type, index) {
+      const modal = document.getElementById('landDetailModal');
+      const loading = document.getElementById('landDetailLoading');
+      const content = document.getElementById('landDetailContent');
+      const nameEl = document.getElementById('landDetailName');
+      const locationEl = document.getElementById('landDetailLocation');
+      const openAnalyzerBtn = document.getElementById('landDetailOpenAnalyzerBtn');
+      modal.classList.remove('hidden');
+      loading.classList.remove('hidden');
+      content.classList.add('hidden');
+      openAnalyzerBtn.classList.add('hidden');
+      
+      let name = '', place = '', pincode = '', lat = null, lon = null;
+      if (type === 'land') {
+        const land = myLands[index];
+        name = land.name;
+        place = land.place || '';
+        pincode = land.pincode || '';
+        const query = place || pincode || name;
+        if (query && typeof geocodePincodeOrPlace === 'function') {
+          const res = await geocodePincodeOrPlace(query);
+          if (res) { lat = res.lat; lon = res.lon; }
+        }
+      } else {
+        const list = getSavedPlacesForLands();
+        const p = list[index];
+        name = p.name || 'Saved place';
+        place = p.place || '';
+        pincode = p.pincode || '';
+        if (p.boundary && p.boundary.length >= 3) {
+          lat = p.boundary.reduce((s, c) => s + c[0], 0) / p.boundary.length;
+          lon = p.boundary.reduce((s, c) => s + c[1], 0) / p.boundary.length;
+        }
+        openAnalyzerBtn.classList.remove('hidden');
+        openAnalyzerBtn.onclick = function() { openInAnalyzer(index); };
+      }
+      
+      nameEl.textContent = name;
+      locationEl.textContent = [place, pincode].filter(Boolean).join(' · ') || '—';
+      
+      if (!token) { loading.textContent = 'Please log in.'; return; }
+      try {
+        let weatherData = null;
+        if (lat != null && lon != null) {
+          const wRes = await fetch(`${API_BASE}/weather-by-coords?lat=${lat}&lon=${lon}`, { headers: { 'Authorization': 'Bearer ' + token } });
+          if (wRes.ok) weatherData = await wRes.json();
+        }
+        if (!weatherData && (place || name)) {
+          const city = place || name;
+          const wRes = await fetch(`${API_BASE}/weather?city=${encodeURIComponent(city)}`, { headers: { 'Authorization': 'Bearer ' + token } });
+          if (wRes.ok) weatherData = await wRes.json();
+        }
+        if (!weatherData || !weatherData.success) {
+          document.getElementById('landDetailWeatherTemp').textContent = '—';
+          document.getElementById('landDetailWeatherDesc').textContent = 'Weather unavailable.';
+          document.getElementById('landDetailWeatherExtra').textContent = '';
+        } else {
+          document.getElementById('landDetailWeatherTemp').textContent = (weatherData.temp != null ? Math.round(weatherData.temp) + '°C' : '—');
+          document.getElementById('landDetailWeatherDesc').textContent = (weatherData.weather_description || weatherData.name || '—');
+          document.getElementById('landDetailWeatherExtra').textContent = [
+            weatherData.name ? '📍 ' + weatherData.name : '',
+            weatherData.humidity != null ? 'Humidity ' + weatherData.humidity + '%' : '',
+            weatherData.wind_speed != null ? 'Wind ' + weatherData.wind_speed + ' m/s' : ''
+          ].filter(Boolean).join('  ·  ');
+        }
+        
+        const temp = weatherData && weatherData.temp != null ? weatherData.temp : 25;
+        const humidity = weatherData && weatherData.humidity != null ? weatherData.humidity : 60;
+        const cropLat = lat != null ? lat : 20.5937;
+        const cropLon = lon != null ? lon : 78.9629;
+        const cropRes = await fetch(`${API_BASE}/recommend-crops?temp=${temp}&humidity=${humidity}&lat=${cropLat}&cultivated_pct=50&water_pct=5&farmable_space_pct=50`, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (cropRes.ok) {
+          const cropData = await cropRes.json();
+          document.getElementById('landDetailCropsSummary').textContent = cropData.summary || '—';
+          if (cropData.primary_crop) {
+            const c = cropData.primary_crop;
+            document.getElementById('landDetailCropsPrimary').innerHTML = `<strong>${c.emoji} ${c.name}</strong> (${c.match_pct || 0}% match) · ${c.category} · ${c.duration}`;
+          } else {
+            document.getElementById('landDetailCropsPrimary').innerHTML = '—';
+          }
+          const sub = (cropData.sub_suggestions || []).slice(0, 5).map(c => `${c.emoji} ${c.name} (${c.match_pct}%)`).join(', ');
+          document.getElementById('landDetailCropsSub').textContent = sub ? 'Also consider: ' + sub : '';
+        } else {
+          document.getElementById('landDetailCropsSummary').textContent = 'Crop recommendations unavailable.';
+          document.getElementById('landDetailCropsPrimary').innerHTML = '';
+          document.getElementById('landDetailCropsSub').textContent = '';
+        }
+      } catch (e) {
+        document.getElementById('landDetailWeatherTemp').textContent = '—';
+        document.getElementById('landDetailWeatherDesc').textContent = 'Could not load data.';
+        document.getElementById('landDetailWeatherExtra').textContent = '';
+        document.getElementById('landDetailCropsSummary').textContent = 'Could not load crop recommendations.';
+        document.getElementById('landDetailCropsPrimary').innerHTML = '';
+        document.getElementById('landDetailCropsSub').textContent = '';
+      }
+      loading.classList.add('hidden');
+      content.classList.remove('hidden');
+    }
+    
+    document.getElementById('closeLandDetailModal').addEventListener('click', function() {
+      document.getElementById('landDetailModal').classList.add('hidden');
+    });
+    document.getElementById('closeLandDetailModalBtn').addEventListener('click', function() {
+      document.getElementById('landDetailModal').classList.add('hidden');
+    });
     
     window.editLand = function(idx) {
       const land = myLands[idx];
@@ -1915,14 +2311,28 @@
         // Display results
         if (data.within_boundary) {
           document.getElementById('withinBoundaryMessage').classList.remove('hidden');
+          document.getElementById('savePlaceResultRow').classList.remove('hidden');
         } else {
           document.getElementById('withinBoundaryMessage').classList.add('hidden');
+          document.getElementById('savePlaceResultRow').classList.add('hidden');
         }
         document.getElementById('cultivatedPct').textContent = data.cultivated_percentage + '%';
         document.getElementById('stressPct').textContent = data.stress_percentage + '%';
         document.getElementById('trustScore').textContent = data.trust_score;
         document.getElementById('classificationResult').textContent = data.classification || '—';
         document.getElementById('advisory').textContent = data.advisory || '—';
+        const boundarySection = document.getElementById('boundaryPortionStats');
+        const totalPixelsLabel = document.getElementById('totalPixelsLabel');
+        if (data.within_boundary && data.full_image_pixels != null) {
+          boundarySection.classList.remove('hidden');
+          document.getElementById('fullImagePixels').textContent = (data.full_image_pixels || 0).toLocaleString() + ' px';
+          document.getElementById('insideBoundaryPct').textContent = (data.percentage_inside_boundary ?? 0) + '% (' + (data.pixels_inside_boundary || 0).toLocaleString() + ' px)';
+          document.getElementById('outsideBoundaryPct').textContent = (data.percentage_outside_boundary ?? 0) + '% (' + (data.pixels_outside_boundary || 0).toLocaleString() + ' px)';
+          totalPixelsLabel.textContent = '(in selected region)';
+        } else {
+          boundarySection.classList.add('hidden');
+          totalPixelsLabel.textContent = '';
+        }
         document.getElementById('totalPixels').textContent = (data.total_pixels || 0).toLocaleString();
         document.getElementById('cultivatedPixels').textContent = (data.cultivated_pixels || 0).toLocaleString();
         document.getElementById('nonCultivatedPixels').textContent = (data.non_cultivated_pixels || 0).toLocaleString();
@@ -2041,19 +2451,18 @@
         { id: 'Buildings', value: data.building_percentage ?? 0 },
         { id: 'Farmable', value: data.farmable_space_percentage ?? 0 },
       ];
-      // Trigger animation after a short delay
-      setTimeout(() => {
-        fields.forEach(f => {
-          const val = Number.isFinite(f.value) ? f.value : parseFloat(f.value) || 0;
-          const bar = document.getElementById('bar' + f.id);
-          const pct = document.getElementById('pct' + f.id);
-          if (bar) {
-            const clamped = Math.max(0, Math.min(val, 100));
-            bar.style.width = clamped + '%';
-          }
-          if (pct) pct.textContent = val.toFixed(1) + '%';
-        });
-      }, 100);
+      fields.forEach(f => {
+        const val = Number.isFinite(f.value) ? f.value : parseFloat(f.value) || 0;
+        const bar = document.getElementById('bar' + f.id);
+        const pct = document.getElementById('pct' + f.id);
+        if (bar) {
+          const clamped = Math.max(0, Math.min(val, 100));
+          const widthPct = clamped;
+          bar.style.width = widthPct + '%';
+          bar.style.minWidth = (clamped > 0 && clamped < 1) ? '2%' : '0';
+        }
+        if (pct) pct.textContent = val.toFixed(1) + '%';
+      });
     }
 
     // ===== CROP RECOMMENDATION SYSTEM =====
