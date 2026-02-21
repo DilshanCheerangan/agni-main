@@ -225,11 +225,11 @@ def detect_roads(img: np.ndarray) -> np.ndarray:
     gray_surfaces = detect_gray_surfaces(img)
     # 3) Asphalt: brown-gray low-saturation mid-value
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    h, s, v = cv2.split(hsv)
+    h_ch, s_ch, v_ch = cv2.split(hsv)
     asphalt = (
-        (h >= ASPHALT_H_LOWER) & (h <= ASPHALT_H_UPPER) &
-        (s <= ASPHALT_S_UPPER) &
-        (v >= ASPHALT_V_LOWER) & (v <= ASPHALT_V_UPPER)
+        (h_ch >= ASPHALT_H_LOWER) & (h_ch <= ASPHALT_H_UPPER) &
+        (s_ch <= ASPHALT_S_UPPER) &
+        (v_ch >= ASPHALT_V_LOWER) & (v_ch <= ASPHALT_V_UPPER)
     ).astype(np.uint8) * 255
     contours, _ = cv2.findContours(asphalt, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     asphalt_filtered = np.zeros_like(asphalt)
@@ -275,16 +275,16 @@ def detect_buildings(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray
                 cv2.drawContours(building_mask, [approx], -1, 255, -1)
     # 2) Color-based: brown and red-brown roofs (tiles, metal)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    h, s, v = cv2.split(hsv)
+    h_ch, s_ch, v_ch = cv2.split(hsv)
     roof_brown = (
-        (h >= ROOF_BROWN_H_LOWER) & (h <= ROOF_BROWN_H_UPPER) &
-        (s >= ROOF_BROWN_S_LOWER) & (s <= ROOF_BROWN_S_UPPER) &
-        (v >= ROOF_BROWN_V_LOWER) & (v <= ROOF_BROWN_V_UPPER)
+        (h_ch >= ROOF_BROWN_H_LOWER) & (h_ch <= ROOF_BROWN_H_UPPER) &
+        (s_ch >= ROOF_BROWN_S_LOWER) & (s_ch <= ROOF_BROWN_S_UPPER) &
+        (v_ch >= ROOF_BROWN_V_LOWER) & (v_ch <= ROOF_BROWN_V_UPPER)
     )
     roof_red = (
-        ((h >= ROOF_RED_H_LOWER) & (h <= ROOF_RED_H_UPPER) |
-         (h >= ROOF_RED_H2_LOWER) & (h <= ROOF_RED_H2_UPPER)) &
-        (s >= 40) & (s <= 220) & (v >= 50) & (v <= 200)
+        ((h_ch >= ROOF_RED_H_LOWER) & (h_ch <= ROOF_RED_H_UPPER) |
+         (h_ch >= ROOF_RED_H2_LOWER) & (h_ch <= ROOF_RED_H2_UPPER)) &
+        (s_ch >= 40) & (s_ch <= 220) & (v_ch >= 50) & (v_ch <= 200)
     )
     roof_color = ((roof_brown | roof_red).astype(np.uint8) * 255)
     roof_color = cv2.bitwise_and(roof_color, non_veg_non_water)
