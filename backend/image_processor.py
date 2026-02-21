@@ -11,6 +11,8 @@ from typing import Tuple, List, Dict, Any
 EXG_MAX_DIMENSION = 512
 MIN_VEGETATION_COMPONENT_PIXELS = 500
 MORPH_KERNEL_SIZE = (5, 5)
+# Include dark green: pixels with normalized ExG >= this and green-dominant (G>R, G>B) are vegetation
+EXG_DARK_GREEN_MIN = 18
 
 # Non-agricultural object detection parameters
 MIN_BUILDING_AREA = 1000  # Minimum area for building detection
@@ -234,6 +236,11 @@ def exg_vegetation_pipeline(img: np.ndarray) -> Tuple[np.ndarray, int, int, int,
     blurred = cv2.GaussianBlur(exg_norm, (5, 5), 0)
     blurred_uint8 = blurred.astype(np.uint8)
     _, binary_uint8 = cv2.threshold(blurred_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # Include dark green: green-dominant pixels (G>R, G>B) with ExG above low threshold
+    green_dominant = (g > r) & (g > b)
+    dark_green = (exg_norm >= EXG_DARK_GREEN_MIN) & green_dominant
+    dark_green_uint8 = (dark_green.astype(np.float32) * 255).astype(np.uint8)
+    binary_uint8 = cv2.bitwise_or(binary_uint8, dark_green_uint8)
     kernel = np.ones(MORPH_KERNEL_SIZE, np.uint8)
     closed = cv2.morphologyEx(binary_uint8, cv2.MORPH_CLOSE, kernel)
     pixels_before_removal = int(cv2.countNonZero(closed))
@@ -380,6 +387,87 @@ def compute_deterministic_confidence(
         "confidence": confidence,
         "exg_variance": round(exg_variance, 2),
     }
+
+
+def polygon_to_image_mask(
+    polygon_lat_lng: List[List[float]], height: int, width: int
+) -> np.ndarray:
+    """
+    Map polygon (list of [lat, lng]) to image coordinate space.
+    Assume polygon bbox spans full image; map proportionally.
+    Returns binary mask (255 inside polygon, 0 outside).
+    """
+    if not polygon_lat_lng or len(polygon_lat_lng) < 3:
+        raise ValueError("Polygon must have at least 3 points")
+    
+    arr = np.array(polygon_lat_lng, dtype=np.float64)
+    lats = arr[:, 0]
+    lngs = arr[:, 1]
+    min_lat, max_lat = lats.min(), lats.max()
+    min_lng, max_lng = lngs.min(), lngs.max()
+    
+    if max_lat - min_lat <= 1e-9:
+        max_lat = min_lat + 1e-9
+    if max_lng - min_lng <= 1e-9:
+        max_lng = min_lng + 1e-9
+    
+    # Map lat/lng to image coords: x = lng, y = from top (lat max = 0)
+    xs = (lngs - min_lng) / (max_lng - min_lng) * (width - 1)
+    ys = (1.0 - (lats - min_lat) / (max_lat - min_lat)) * (height - 1)
+    pts = np.column_stack([xs, ys]).astype(np.int32)
+    
+    mask = np.zeros((height, width), dtype=np.uint8)
+    cv2.fillPoly(mask, [pts], 255)
+    return mask
+
+
+def clip_cultivated_mask_by_boundary(
+    cultivated_mask: np.ndarray,
+    polygon_lat_lng: List[List[float]],
+) -> Tuple[np.ndarray, int, int]:
+    """
+    Clip cultivated mask by polygon boundary (lat/lng mapped to image).
+    Returns (clipped_mask, cultivated_pixels_inside, total_pixels_inside).
+    """
+    h, w = cultivated_mask.shape[:2]
+    polygon_mask = polygon_to_image_mask(polygon_lat_lng, h, w)
+    total_inside = int(cv2.countNonZero(polygon_mask))
+    if total_inside == 0:
+        return cultivated_mask, int(cv2.countNonZero(cultivated_mask)), h * w
+    
+    clipped = cv2.bitwise_and(cultivated_mask, polygon_mask)
+    cultivated_inside = int(cv2.countNonZero(clipped))
+    return clipped, cultivated_inside, total_inside
+
+
+def get_landuse_mask_image(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray:
+    """
+    Build a single mask image showing land use: vegetation (green), water (blue), roads (gray), buildings (brown).
+    Uses existing OpenCV detectors only (no AI/API). Returns BGR image.
+    """
+    h, w = img.shape[:2]
+    out = np.zeros((h, w, 3), dtype=np.uint8)
+    out[:] = (35, 35, 35)  # dark background
+    water_mask = detect_water(img)
+    road_mask = detect_roads(img)
+    building_mask = detect_buildings(img, vegetation_mask)
+    # Priority (later overwrites): background < buildings < roads < vegetation < water
+    building_bgr = (42, 42, 139)   # brown in BGR
+    road_bgr = (100, 100, 100)    # gray
+    vegetation_bgr = (0, 200, 0)   # green
+    water_bgr = (255, 120, 0)      # blue in BGR
+    out[building_mask > 0] = building_bgr
+    out[road_mask > 0] = road_bgr
+    out[vegetation_mask > 0] = vegetation_bgr
+    out[water_mask > 0] = water_bgr
+    return out
+
+
+def get_landuse_mask_png(img: np.ndarray, vegetation_mask: np.ndarray) -> bytes:
+    """Encode land-use mask image as PNG bytes."""
+    bgr = get_landuse_mask_image(img, vegetation_mask)
+    _, buf = cv2.imencode(".png", bgr)
+    return buf.tobytes()
 
 
 def get_overlay_mask(img: np.ndarray, binary_mask: np.ndarray) -> np.ndarray:

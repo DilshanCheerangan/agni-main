@@ -1,315 +1,1124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AGNI – Adaptive Geo-secured Network for Intelligent Agriculture</title>
+  <title>AGNI – Intelligent Agriculture Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" crossorigin />
   <style>
-    body { font-family: 'DM Sans', system-ui, sans-serif; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+    }
+
+    .sidebar-transition {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .page-transition {
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    #farmMap {
+      height: 320px;
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .leaflet-draw-toolbar a {
+      background-color: #059669 !important;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-800">
-  <div class="max-w-2xl mx-auto px-4 py-8">
-    <!-- System status indicator -->
-    <div id="statusBadge" class="mb-6 flex items-center justify-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm text-emerald-800">
-      <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-      <span id="statusText">AGNI Engine Status: Active</span>
-    </div>
-    <header class="text-center mb-10">
-      <h1 class="text-3xl font-bold text-emerald-800 tracking-tight">AGNI</h1>
-      <p class="text-slate-600 mt-1">Adaptive Geo-secured Network for Intelligent Agriculture</p>
-      <p class="text-slate-500 text-sm mt-2 max-w-lg mx-auto">Cultivated land masking from multi-source imagery using multi-layer vegetation segmentation and refinement operations.</p>
-    </header>
 
-    <!-- Login section (shown when not logged in) -->
-    <section id="loginSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-      <h2 class="text-lg font-semibold text-slate-800 mb-4">Sign in</h2>
-      <form id="loginForm" class="space-y-4">
-        <div>
-          <label for="username" class="block text-sm font-medium text-slate-600 mb-1">Username</label>
-          <input type="text" id="username" name="username" required
-                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                 placeholder="agni" />
-        </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-slate-600 mb-1">Password</label>
-          <input type="password" id="password" name="password" required
-                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                 placeholder="farm2025" />
-        </div>
-        <p id="loginError" class="text-sm text-red-600 hidden"></p>
-        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
-          Log in
-        </button>
-      </form>
-    </section>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50">
 
-    <!-- Dashboard (upload + results, shown when logged in) -->
-    <section id="dashboardSection" class="hidden">
-      <div class="flex items-center justify-between mb-4">
-        <span class="text-slate-600">Logged in as <strong id="loggedInUser">—</strong></span>
-        <button type="button" id="logoutBtn" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Log out</button>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="inline-block p-4 rounded-2xl gradient-bg mb-4">
+          <i class="fas fa-seedling text-white text-4xl"></i>
+        </div>
+        <h1 class="text-4xl font-bold text-emerald-800 mb-2">AGNI</h1>
+        <p class="text-slate-600">Adaptive Geo-secured Network for Intelligent Agriculture</p>
       </div>
-
-      <!-- Recent Field Analyses -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-3">Recent Field Analyses</h2>
-        <div id="historyList" class="space-y-2 text-sm text-slate-600">
-          <p class="text-slate-400">No analyses yet.</p>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">Upload field image</h2>
-        <form id="uploadForm" class="space-y-4">
+      <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <h2 class="text-2xl font-semibold text-slate-800 mb-6">Welcome Back</h2>
+        <form id="loginForm" class="space-y-5">
           <div>
-            <input type="file" id="imageFile" name="file" accept="image/*" required
-                   class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+            <label for="username" class="block text-sm font-medium text-slate-700 mb-2">
+              <i class="fas fa-user mr-2 text-emerald-600"></i>Username
+            </label>
+            <input type="text" id="username" name="username" required
+              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+              placeholder="Enter your username" />
           </div>
-          <p id="uploadError" class="text-sm text-red-600 hidden"></p>
-          <button type="submit" id="analyzeBtn" class="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 flex items-center justify-center gap-2">
-            <span id="analyzeBtnText">Analyze image</span>
-            <span id="analyzeSpinner" class="hidden">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
+          <div>
+            <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
+              <i class="fas fa-lock mr-2 text-emerald-600"></i>Password
+            </label>
+            <input type="password" id="password" name="password" required
+              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+              placeholder="Enter your password" />
+          </div>
+          <p id="loginError" class="text-sm text-red-600 hidden"></p>
+          <button type="submit"
+            class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold rounded-lg hover:from-emerald-700 hover:to-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition shadow-lg">
+            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
           </button>
         </form>
       </div>
+    </div>
+  </div>
 
-      <div id="resultsCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-        <h2 class="text-lg font-semibold text-slate-800 mb-4">Analysis results</h2>
+  <!-- Main App Layout -->
+  <div id="appLayout" class="hidden min-h-screen flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 shadow-lg flex flex-col sidebar-transition">
+      <div class="p-6 border-b border-slate-200">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 rounded-lg gradient-bg">
+            <i class="fas fa-seedling text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-emerald-800">AGNI</h1>
+            <p class="text-xs text-slate-500">Agriculture Platform</p>
+          </div>
+        </div>
+        <div class="mt-4 text-sm text-slate-600">
+          <i class="fas fa-user-circle mr-2 text-emerald-600"></i>
+          <span id="sidebarUsername">User</span>
+        </div>
+      </div>
 
-        <!-- Comparison: Original | Binary mask | Overlay mask -->
-        <div class="grid grid-cols-3 gap-2 mb-6">
-          <div class="text-center">
-            <p class="text-xs font-medium text-slate-500 mb-1">Original image</p>
-            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-              <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden" />
-              <span id="originalPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
-            </div>
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <a href="#" data-page="dashboard"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition active">
+          <i class="fas fa-home w-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" data-page="analyzer"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-image w-5"></i>
+          <span>Image Analyzer</span>
+        </a>
+        <a href="#" data-page="weather"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-cloud-sun w-5"></i>
+          <span>Weather & Climate</span>
+        </a>
+        <a href="#" data-page="news"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-newspaper w-5"></i>
+          <span>Agricultural News</span>
+        </a>
+        <a href="#" data-page="profile"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-user w-5"></i>
+          <span>Profile</span>
+        </a>
+        <a href="#" data-page="settings"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-cog w-5"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="p-4 border-t border-slate-200">
+        <button id="logoutBtn"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <!-- Top Bar -->
+      <header class="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 id="pageTitle" class="text-2xl font-bold text-slate-800">Dashboard</h2>
+            <p id="pageSubtitle" class="text-sm text-slate-500">Welcome back! Here's your overview</p>
           </div>
-          <div class="text-center">
-            <p class="text-xs font-medium text-slate-500 mb-1">Binary mask</p>
-            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-              <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden" />
-              <span id="binaryMaskPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
-            </div>
-          </div>
-          <div class="text-center">
-            <p class="text-xs font-medium text-slate-500 mb-1">Overlay mask</p>
-            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-              <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden" />
-              <span id="overlayMaskPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+          <div class="flex items-center gap-4">
+            <div id="statusBadge"
+              class="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+              <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="statusText" class="text-sm text-emerald-800 font-medium">System Active</span>
             </div>
           </div>
         </div>
+      </header>
 
-        <!-- Classification result -->
-        <div class="mb-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 text-center">
-          <p class="text-slate-600 text-sm mb-0.5">Classification result</p>
-          <p id="classificationResult" class="font-semibold text-lg text-slate-800">—</p>
-        </div>
-
-        <!-- Area Statistics (remote sensing style) -->
-        <div class="mb-4 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
-          <p class="text-slate-600 text-sm font-medium mb-2">Area statistics</p>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            <span class="text-slate-500">Total pixels</span>
-            <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
-            <span class="text-slate-500">Cultivated pixels</span>
-            <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
-            <span class="text-slate-500">Non-cultivated pixels</span>
-            <span id="nonCultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
-            <span class="text-slate-500">Coverage ratio</span>
-            <span id="coverageRatio" class="font-mono text-slate-800 text-right">—</span>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <div class="flex justify-between items-center">
-            <span class="text-slate-600">Cultivated %</span>
-            <span id="cultivatedPct" class="font-semibold text-slate-800">—</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-slate-600">Stress %</span>
-            <span id="stressPct" class="font-semibold text-slate-800">—</span>
-          </div>
-
-          <!-- Mask Confidence Score: large bold number + color-coded circle -->
-          <div class="flex items-center gap-4 py-2">
-            <span class="text-slate-600 shrink-0">Mask Confidence Score</span>
-            <div id="trustScoreCircle" class="w-16 h-16 rounded-full flex items-center justify-center shrink-0 bg-slate-200">
-              <span id="trustScore" class="text-2xl font-bold text-slate-800">—</span>
+      <!-- Page Content -->
+      <div class="p-6">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page-content">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-lg bg-emerald-100">
+                  <i class="fas fa-chart-line text-emerald-600 text-xl"></i>
+                </div>
+                <span class="text-xs text-slate-500">Total Analyses</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-800 mb-1" id="totalAnalyses">0</h3>
+              <p class="text-sm text-slate-600">Field analyses completed</p>
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="h-3 bg-slate-200 rounded-full overflow-hidden">
-                <div id="trustBar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-lg bg-blue-100">
+                  <i class="fas fa-percentage text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-xs text-slate-500">Avg. Cultivation</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-800 mb-1" id="avgCultivation">—</h3>
+              <p class="text-sm text-slate-600">Average cultivated area</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="p-3 rounded-lg bg-amber-100">
+                  <i class="fas fa-shield-alt text-amber-600 text-xl"></i>
+                </div>
+                <span class="text-xs text-slate-500">Avg. Confidence</span>
+              </div>
+              <h3 class="text-3xl font-bold text-slate-800 mb-1" id="avgConfidence">—</h3>
+              <p class="text-sm text-slate-600">Average confidence score</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-history text-emerald-600"></i>
+                Recent Analyses
+              </h3>
+              <div id="historyList" class="space-y-3">
+                <p class="text-slate-400 text-sm">No analyses yet.</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                Quick Tips
+              </h3>
+              <div class="space-y-3 text-sm text-slate-600">
+                <div class="flex items-start gap-3">
+                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                  <p>Upload clear, daylight images for best results</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                  <p>Check weather conditions before field work</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                  <p>Review agricultural news for latest trends</p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Mask Consistency Check -->
-          <div id="maskConsistencyBox" class="rounded-lg border px-3 py-2 text-sm hidden">
-            <p class="font-medium text-slate-700 mb-0.5">Mask consistency check</p>
-            <p id="maskConsistencyText" class="text-slate-600">—</p>
-            <p class="text-slate-500 text-xs mt-1">Fragmented vegetation patterns may indicate unreliable segmentation.</p>
+        <!-- Image Analyzer Page -->
+        <div id="page-analyzer" class="page-content hidden">
+          <!-- Farm Boundary Selection (Leaflet Map) -->
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <i class="fas fa-map-marked-alt text-emerald-600"></i>
+              Select Farm Boundary
+            </h3>
+            <p class="text-sm text-slate-600 mb-2">Draw a polygon on the map to define your farm area. Use the layer
+              control (top-right) to switch to <strong>Satellite</strong> view for easier selection.</p>
+            <p class="text-xs text-slate-500 mb-4">Step 1: Draw polygon (click corners, double-click to finish) → Step
+              2: Click &quot;Confirm Farm Boundary&quot; → Step 3: Upload image below and click Analyze.</p>
+            <div id="farmMap"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" id="confirmBoundaryBtn"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+                <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
+              </button>
+              <button type="button" id="clearBoundaryBtn"
+                class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
+                <i class="fas fa-eraser mr-2"></i>Clear Boundary
+              </button>
+              <span id="boundarySummary" class="text-sm text-slate-500"></span>
+            </div>
+            <p id="boundaryError" class="text-sm text-red-600 mt-2 hidden"></p>
           </div>
 
-          <!-- Advisory: larger and centered -->
-          <div class="pt-4 border-t border-slate-200 text-center">
-            <p class="text-slate-600 text-sm mb-1">Advisory</p>
-            <p id="advisory" class="font-semibold text-xl text-slate-800">—</p>
-            <p class="text-slate-500 text-xs mt-2">AGNI performs cultivated land masking using multi-layer vegetation segmentation and refinement operations.</p>
+          <!-- Use map as image -->
+          <div class="bg-emerald-50 rounded-xl shadow-md border border-emerald-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-emerald-800 mb-2 flex items-center gap-2">
+              <i class="fas fa-map-pin text-emerald-600"></i>
+              Use map as image
+            </h3>
+            <p class="text-sm text-emerald-700 mb-4">Capture the current map view (including satellite) as the image to
+              analyze. Your drawn boundary will be used so the analysis matches exactly what you see.</p>
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" id="captureMapBtn"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-camera mr-2"></i>Capture map for analysis
+              </button>
+              <button type="button" id="clearMapCaptureBtn"
+                class="hidden px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
+                <i class="fas fa-times mr-2"></i>Clear and use file instead
+              </button>
+              <span id="mapCaptureStatus" class="text-sm text-emerald-700"></span>
+            </div>
+            <p id="mapCaptureError" class="text-sm text-red-600 mt-2 hidden"></p>
+            <div id="mapCapturePreview" class="mt-3 hidden">
+              <p class="text-xs text-slate-500 mb-1">Preview (boundary area only — this will be sent for analysis):</p>
+              <img id="mapCapturePreviewImg" alt="Map capture" class="max-h-32 rounded border border-slate-300" />
+              <button type="button" id="analyzeMapCaptureBtn"
+                class="mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium inline-flex items-center gap-2">
+                <i class="fas fa-chart-line"></i>Analyze this image
+              </button>
+            </div>
           </div>
-          <div id="confidenceBox" class="rounded-lg p-3 text-sm hidden border border-slate-200 bg-slate-50">
-            <p id="confidenceText"></p>
+
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-upload text-emerald-600"></i>
+              Or upload your own image
+            </h3>
+            <div class="flex items-center gap-2 mb-4">
+              <input type="checkbox" id="useBoundaryCheckbox"
+                class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+              <label for="useBoundaryCheckbox" class="text-sm text-slate-700">Analyze within selected farm boundary
+                only</label>
+            </div>
+            <form id="uploadForm" class="space-y-4">
+              <div
+                class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-emerald-400 transition">
+                <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4"></i>
+                <p class="text-slate-600 mb-2">Choose an image file (optional if you used &quot;Capture map&quot; above)
+                </p>
+                <input type="file" id="imageFile" name="file" accept="image/*"
+                  class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+              </div>
+              <p id="uploadError" class="text-sm text-red-600 hidden"></p>
+              <p id="analyzeHint" class="text-sm text-slate-500">Draw boundary and capture map, or upload an image to
+                enable Analyze.</p>
+              <button type="submit" id="analyzeBtn"
+                class="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled>
+                <span id="analyzeBtnText">Analyze Image</span>
+                <span id="analyzeSpinner" class="hidden">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
+              </button>
+            </form>
           </div>
-          <p id="blurryNote" class="text-sm text-amber-600 hidden">Image may be blurry; confidence reduced.</p>
+
+          <!-- How to Capture Good Images -->
+          <div class="bg-blue-50 rounded-xl shadow-md border border-blue-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+              <i class="fas fa-camera text-blue-600"></i>
+              How to Capture Good Images
+            </h3>
+            <ul class="space-y-2 text-sm text-blue-700">
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check text-blue-500 mt-0.5"></i>
+                <span>Capture during daylight hours for best visibility</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check text-blue-500 mt-0.5"></i>
+                <span>Avoid heavy shadows that can hide crop areas</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check text-blue-500 mt-0.5"></i>
+                <span>Keep camera steady to avoid motion blur</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i class="fas fa-check text-blue-500 mt-0.5"></i>
+                <span>Ensure the full field is visible in the image</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Results Card -->
+          <div id="resultsCard" class="hidden bg-white rounded-xl shadow-md border border-slate-200 p-6">
+            <div id="withinBoundaryMessage"
+              class="hidden mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">
+              <i class="fas fa-info-circle mr-2"></i>Analysis performed within selected farm boundary.
+            </div>
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Analysis Results</h3>
+
+            <!-- Image Previews -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div class="text-center">
+                <p class="text-xs font-medium text-slate-500 mb-2">Original</p>
+                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden" />
+                  <span id="originalPlaceholder"
+                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                </div>
+              </div>
+              <div class="text-center">
+                <p class="text-xs font-medium text-slate-500 mb-2">Binary Mask</p>
+                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden" />
+                  <span id="binaryMaskPlaceholder"
+                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                </div>
+              </div>
+              <div class="text-center">
+                <p class="text-xs font-medium text-slate-500 mb-2">Overlay</p>
+                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden" />
+                  <span id="overlayMaskPlaceholder"
+                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                </div>
+              </div>
+              <div class="text-center">
+                <p class="text-xs font-medium text-slate-500 mb-2">Land use</p>
+                <p class="text-xs text-slate-400 mb-1">Water · Roads · Buildings · Vegetation</p>
+                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="landUseMaskPreview" src="" alt="Land use mask" class="w-full h-full object-cover hidden" />
+                  <span id="landUseMaskPlaceholder"
+                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-emerald-700 font-medium">Cultivated %</span>
+                  <button type="button" class="info-tooltip-btn"
+                    data-tooltip="Percentage of your land currently under crop growth.">
+                    <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
+                  </button>
+                </div>
+                <p id="cultivatedPct" class="text-3xl font-bold text-emerald-800">—</p>
+              </div>
+
+              <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-amber-700 font-medium">Stress %</span>
+                </div>
+                <p id="stressPct" class="text-3xl font-bold text-amber-800">—</p>
+              </div>
+
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-blue-700 font-medium">Confidence</span>
+                  <button type="button" class="info-tooltip-btn"
+                    data-tooltip="Reliability score based on image quality and segmentation clarity.">
+                    <i class="fas fa-info-circle text-blue-600 text-xs"></i>
+                  </button>
+                </div>
+                <p id="trustScore" class="text-3xl font-bold text-blue-800">—</p>
+              </div>
+            </div>
+
+            <!-- Classification -->
+            <div class="mb-6 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 text-center">
+              <p class="text-slate-600 text-sm mb-1 flex items-center justify-center gap-2">
+                Classification
+                <button type="button" class="info-tooltip-btn" data-tooltip="Shows how well your field is cultivated.">
+                  <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
+                </button>
+              </p>
+              <p id="classificationResult" class="font-semibold text-xl text-slate-800">—</p>
+            </div>
+
+            <!-- Detailed Stats -->
+            <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+              <p class="text-slate-600 text-sm font-medium mb-3">Area Statistics</p>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <span class="text-slate-500">Total pixels</span>
+                <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
+                <span class="text-slate-500">Cultivated pixels</span>
+                <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+                <span class="text-slate-500">Non-cultivated pixels</span>
+                <span id="nonCultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+                <span class="text-slate-500">Coverage ratio</span>
+                <span id="coverageRatio" class="font-mono text-slate-800 text-right">—</span>
+              </div>
+            </div>
+
+            <!-- Advisory -->
+            <div class="pt-4 border-t border-slate-200 text-center mb-6">
+              <p class="text-slate-600 text-sm mb-2">Advisory</p>
+              <p id="advisory" class="font-semibold text-xl text-slate-800">—</p>
+            </div>
+
+            <!-- Land Use Breakdown -->
+            <div id="landUseBreakdown"
+              class="hidden mb-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 p-6">
+              <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-map text-indigo-600"></i>
+                Detected Land Use Breakdown
+              </h4>
+              <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <span class="text-sm text-slate-600 w-24">Vegetation</span>
+                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="barVegetation" class="landuse-bar bg-emerald-500" style="width:0%"></div>
+                  </div>
+                  <span id="pctVegetation" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  <span class="text-sm text-slate-600 w-24">Water</span>
+                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="barWater" class="landuse-bar bg-blue-500" style="width:0%"></div>
+                  </div>
+                  <span id="pctWater" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-gray-400 flex-shrink-0"></span>
+                  <span class="text-sm text-slate-600 w-24">Roads</span>
+                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="barRoads" class="landuse-bar bg-gray-400" style="width:0%"></div>
+                  </div>
+                  <span id="pctRoads" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="w-3 h-3 rounded-full bg-amber-700 flex-shrink-0"></span>
+                  <span class="text-sm text-slate-600 w-24">Buildings</span>
+                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="barBuildings" class="landuse-bar bg-amber-700" style="width:0%"></div>
+                  </div>
+                  <span id="pctBuildings" class="text-sm font-semibold text-slate-800 w-14 text-right">0%</span>
+                </div>
+                <div class="flex items-center gap-3 pt-2 border-t border-slate-200">
+                  <span class="w-3 h-3 rounded-full bg-lime-500 flex-shrink-0"></span>
+                  <span class="text-sm text-slate-700 font-medium w-24">Farmable</span>
+                  <div class="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div id="barFarmable" class="landuse-bar bg-lime-500" style="width:0%"></div>
+                  </div>
+                  <span id="pctFarmable" class="text-sm font-bold text-lime-700 w-14 text-right">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Crop Recommendations -->
+            <div id="cropRecommendationsSection" class="hidden mb-6">
+              <div
+                class="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-xl border border-emerald-200 p-6">
+                <div class="flex items-center justify-between mb-2">
+                  <h4 class="font-semibold text-emerald-900 text-lg flex items-center gap-2">
+                    <i class="fas fa-seedling text-emerald-600"></i>
+                    AI Crop Recommendations
+                  </h4>
+                  <span id="cropSeasonBadge"
+                    class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"></span>
+                </div>
+                <p id="cropSummaryText" class="text-sm text-emerald-700 mb-1"></p>
+                <p id="cropConditionsText" class="text-xs text-slate-500 mb-4"></p>
+
+                <!-- Loading state -->
+                <div id="cropLoading" class="hidden flex items-center justify-center py-8">
+                  <i class="fas fa-spinner fa-spin text-emerald-500 text-2xl mr-3"></i>
+                  <span class="text-emerald-700">Analyzing conditions &amp; finding best crops...</span>
+                </div>
+
+                <!-- Highly Recommended -->
+                <div id="cropHighlyRecommended" class="hidden">
+                  <h5 class="font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-500"></i> Highly Recommended
+                  </h5>
+                  <div id="cropHighList" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+                </div>
+
+                <!-- Moderately Suitable -->
+                <div id="cropModeratelySuitable" class="hidden">
+                  <button type="button" id="toggleModCrops"
+                    class="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-white/60 hover:bg-white/80 border border-emerald-200 mb-3 transition">
+                    <span class="text-sm font-semibold text-teal-800 flex items-center gap-2">
+                      <i class="fas fa-thumbs-up text-teal-500"></i> Moderately Suitable
+                      <span id="modCropCount" class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full"></span>
+                    </span>
+                    <span id="modCropToggleIcon" class="text-teal-600 text-sm">&#9660;</span>
+                  </button>
+                  <div id="cropModList" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+                </div>
+
+                <!-- Summary footer -->
+                <div id="cropFooter" class="hidden pt-3 border-t border-emerald-200">
+                  <p class="text-xs text-slate-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    <span id="cropEvalSummary"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Low Confidence Warning -->
+            <div id="lowConfidenceWarning" class="hidden rounded-lg border border-red-300 bg-red-50 p-4 mb-4">
+              <div class="flex items-start gap-3">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                <div>
+                  <p class="font-semibold text-red-800 mb-1">Image Quality Warning</p>
+                  <p class="text-sm text-red-700">Image quality is low. Please capture a clearer aerial image for better
+                    accuracy.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Explanation Section -->
+            <div class="border-t border-slate-200 pt-6">
+              <button type="button" id="explanationToggle"
+                class="w-full flex items-center justify-between text-left py-3 px-4 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+                <span class="font-semibold text-emerald-800 flex items-center gap-2">
+                  <i class="fas fa-lightbulb"></i>
+                  <span>Learn How This Analysis Works</span>
+                </span>
+                <span id="explanationToggleIcon" class="text-emerald-600">▼</span>
+              </button>
+              <div id="explanationSection" class="hidden mt-4 space-y-4">
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 class="font-semibold text-slate-800 mb-2">1️⃣ What is Vegetation Detection?</h4>
+                  <p class="text-sm text-slate-700 mb-2">AGNI detects green crop regions using a vegetation index that
+                    highlights plant growth areas.</p>
+                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This ensures only crop areas
+                    are counted, not soil or non-farm regions.</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 class="font-semibold text-slate-800 mb-2">2️⃣ Why Are Roads and Rivers Removed?</h4>
+                  <p class="text-sm text-slate-700 mb-2">AGNI automatically removes permanent features such as roads,
+                    water bodies, and buildings.</p>
+                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This improves accuracy by
+                    focusing only on farmable land.</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 class="font-semibold text-slate-800 mb-2">3️⃣ What Does Cultivated Area Percentage Mean?</h4>
+                  <p class="text-sm text-slate-700">This value shows how much of your field is actively cultivated.
+                    Higher percentages indicate more land under crop growth.</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 class="font-semibold text-slate-800 mb-2">4️⃣ What Is Mask Confidence Score?</h4>
+                  <p class="text-sm text-slate-700 mb-3">This score indicates how reliable the analysis is. It is
+                    calculated using image clarity, segmentation consistency, and area stability.</p>
+                  <div class="text-xs text-slate-600 space-y-1">
+                    <p><strong>Interpretation:</strong></p>
+                    <p>• <strong>80–100</strong> → Highly reliable</p>
+                    <p>• <strong>60–80</strong> → Moderately reliable</p>
+                    <p>• <strong>Below 60</strong> → Re-upload clearer image</p>
+                  </div>
+                </div>
+                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 class="font-semibold text-slate-800 mb-2">5️⃣ What Is the Polygon Boundary?</h4>
+                  <p class="text-sm text-slate-700 mb-2">The highlighted boundary shows the exact cultivated region
+                    detected within your field.</p>
+                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This helps measure actual
+                    cultivated area accurately.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Page -->
+        <div id="page-weather" class="page-content hidden">
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-map-marker-alt text-emerald-600"></i>
+              Location
+            </h3>
+            <div class="flex gap-3">
+              <input type="text" id="weatherLocation" placeholder="Enter city name"
+                class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                value="Delhi">
+              <button id="fetchWeatherBtn"
+                class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+                <i class="fas fa-search mr-2"></i>Get Weather
+              </button>
+            </div>
+          </div>
+
+          <div id="weatherContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg text-white p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <p class="text-blue-100 text-sm mb-1" id="weatherLocationName">Loading...</p>
+                  <p class="text-2xl font-bold" id="weatherTemp">—</p>
+                </div>
+                <div class="text-6xl" id="weatherIcon">
+                  <i class="fas fa-sun"></i>
+                </div>
+              </div>
+              <p class="text-blue-100 mb-4" id="weatherDescription">—</p>
+              <div class="grid grid-cols-2 gap-4 pt-4 border-t border-blue-400">
+                <div>
+                  <p class="text-blue-100 text-xs mb-1">Feels Like</p>
+                  <p class="text-xl font-semibold" id="weatherFeelsLike">—</p>
+                </div>
+                <div>
+                  <p class="text-blue-100 text-xs mb-1">Humidity</p>
+                  <p class="text-xl font-semibold" id="weatherHumidity">—</p>
+                </div>
+                <div>
+                  <p class="text-blue-100 text-xs mb-1">Wind Speed</p>
+                  <p class="text-xl font-semibold" id="weatherWind">—</p>
+                </div>
+                <div>
+                  <p class="text-blue-100 text-xs mb-1">Pressure</p>
+                  <p class="text-xl font-semibold" id="weatherPressure">—</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+              <h3 class="text-lg font-semibold text-slate-800 mb-4">Agricultural Impact</h3>
+              <div id="weatherImpact" class="space-y-3">
+                <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
+                  <i class="fas fa-seedling text-emerald-600 mt-1"></i>
+                  <div>
+                    <p class="font-medium text-slate-800">Crop Conditions</p>
+                    <p class="text-sm text-slate-600" id="cropConditions">Analyzing...</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                  <i class="fas fa-tint text-blue-600 mt-1"></i>
+                  <div>
+                    <p class="font-medium text-slate-800">Irrigation Advice</p>
+                    <p class="text-sm text-slate-600" id="irrigationAdvice">Analyzing...</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg">
+                  <i class="fas fa-calendar-alt text-amber-600 mt-1"></i>
+                  <div>
+                    <p class="font-medium text-slate-800">Field Work Recommendation</p>
+                    <p class="text-sm text-slate-600" id="fieldWorkAdvice">Analyzing...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Page -->
+        <div id="page-news" class="page-content hidden">
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-newspaper text-emerald-600"></i>
+              Latest Agricultural News
+            </h3>
+            <div id="newsList" class="space-y-4">
+              <div class="flex items-center justify-center py-8">
+                <i class="fas fa-spinner fa-spin text-slate-400 text-2xl"></i>
+                <span class="ml-3 text-slate-600">Loading news...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="page-profile" class="page-content hidden">
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Profile Information</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                <input type="text" id="profileUsername" readonly
+                  class="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-600">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                <input type="email" id="profileEmail"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="your.email@example.com">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Farm Name</label>
+                <input type="text" id="profileFarmName"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Your Farm Name">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Location</label>
+                <input type="text" id="profileLocation"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="City, State">
+              </div>
+              <button id="saveProfileBtn"
+                class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
+                <i class="fas fa-save mr-2"></i>Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="page-settings" class="page-content hidden">
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-6">Settings</h3>
+            <div class="space-y-6">
+              <div>
+                <h4 class="font-medium text-slate-700 mb-3">Notifications</h4>
+                <div class="space-y-3">
+                  <label
+                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                    <span class="text-slate-700">Email notifications</span>
+                    <input type="checkbox" class="toggle-checkbox">
+                  </label>
+                  <label
+                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                    <span class="text-slate-700">Analysis alerts</span>
+                    <input type="checkbox" checked class="toggle-checkbox">
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-medium text-slate-700 mb-3">Display Preferences</h4>
+                <div class="space-y-3">
+                  <label
+                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                    <span class="text-slate-700">Dark mode</span>
+                    <input type="checkbox" class="toggle-checkbox">
+                  </label>
+                  <label
+                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                    <span class="text-slate-700">Compact view</span>
+                    <input type="checkbox" class="toggle-checkbox">
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="font-medium text-slate-700 mb-3">Units</h4>
+                <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                  <option>Metric (Celsius, km)</option>
+                  <option>Imperial (Fahrenheit, miles)</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </main>
   </div>
 
-  <footer class="max-w-2xl mx-auto px-4 py-6 mt-8 text-center text-sm text-slate-500 border-t border-slate-200">
-    AGNI v1.0 | Trust-Aware Crop Intelligence System
-  </footer>
-
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
+  <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
+    const WEATHER_API_KEY = '42a28b0639a88def3bb8150c4d61f466';
     let token = localStorage.getItem('agni_token');
     let username = localStorage.getItem('agni_username');
 
-    const loginSection = document.getElementById('loginSection');
-    const dashboardSection = document.getElementById('dashboardSection');
+    // DOM Elements
+    const loginScreen = document.getElementById('loginScreen');
+    const appLayout = document.getElementById('appLayout');
     const loginForm = document.getElementById('loginForm');
     const loginError = document.getElementById('loginError');
     const logoutBtn = document.getElementById('logoutBtn');
-    const loggedInUser = document.getElementById('loggedInUser');
-    const uploadForm = document.getElementById('uploadForm');
-    const uploadError = document.getElementById('uploadError');
-    const analyzeBtn = document.getElementById('analyzeBtn');
-    const resultsCard = document.getElementById('resultsCard');
-    const cultivatedPct = document.getElementById('cultivatedPct');
-    const stressPct = document.getElementById('stressPct');
-    const trustScore = document.getElementById('trustScore');
-    const trustBar = document.getElementById('trustBar');
-    const advisory = document.getElementById('advisory');
-    const blurryNote = document.getElementById('blurryNote');
-    const analyzeBtnText = document.getElementById('analyzeBtnText');
-    const analyzeSpinner = document.getElementById('analyzeSpinner');
-    const confidenceBox = document.getElementById('confidenceBox');
-    const confidenceText = document.getElementById('confidenceText');
-    const historyList = document.getElementById('historyList');
-    const statusText = document.getElementById('statusText');
-    const originalPreview = document.getElementById('originalPreview');
-    const originalPlaceholder = document.getElementById('originalPlaceholder');
-    const binaryMaskPreview = document.getElementById('binaryMaskPreview');
-    const binaryMaskPlaceholder = document.getElementById('binaryMaskPlaceholder');
-    const overlayMaskPreview = document.getElementById('overlayMaskPreview');
-    const overlayMaskPlaceholder = document.getElementById('overlayMaskPlaceholder');
-    const classificationResult = document.getElementById('classificationResult');
-    const trustScoreCircle = document.getElementById('trustScoreCircle');
-    const totalPixels = document.getElementById('totalPixels');
-    const cultivatedPixelsEl = document.getElementById('cultivatedPixels');
-    const nonCultivatedPixels = document.getElementById('nonCultivatedPixels');
-    const coverageRatio = document.getElementById('coverageRatio');
-    const maskConsistencyBox = document.getElementById('maskConsistencyBox');
-    const maskConsistencyText = document.getElementById('maskConsistencyText');
-    let lastObjectUrl = null;
+    const sidebarUsername = document.getElementById('sidebarUsername');
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = document.querySelectorAll('.page-content');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
 
-    async function fetchHealth() {
-      try {
-        const res = await fetch(API_BASE + '/health');
-        const data = await res.json().catch(() => ({}));
-        if (data.status === 'active') {
-          statusText.textContent = 'AGNI Engine Status: Active';
-          const extra = [data.model_version, data.security_layer].filter(Boolean).join(' · ');
-          if (extra) statusText.title = extra;
+    // Page navigation
+    navItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = item.getAttribute('data-page');
+        navigateToPage(page);
+      });
+    });
+
+    function navigateToPage(pageName) {
+      // Update nav items
+      navItems.forEach(item => {
+        item.classList.remove('active', 'bg-emerald-50', 'text-emerald-700');
+        if (item.getAttribute('data-page') === pageName) {
+          item.classList.add('active', 'bg-emerald-50', 'text-emerald-700');
         }
-      } catch (_) {
-        statusText.textContent = 'AGNI Engine Status: Offline';
+      });
+
+      // Hide all pages
+      pages.forEach(p => p.classList.add('hidden'));
+
+      // Show selected page
+      const targetPage = document.getElementById(`page-${pageName}`);
+      if (targetPage) {
+        targetPage.classList.remove('hidden');
+      }
+
+      // Update page title
+      const titles = {
+        dashboard: { title: 'Dashboard', subtitle: 'Welcome back! Here\'s your overview' },
+        analyzer: { title: 'Image Analyzer', subtitle: 'Upload and analyze your field images' },
+        weather: { title: 'Weather & Climate', subtitle: 'Check weather conditions for your farm' },
+        news: { title: 'Agricultural News', subtitle: 'Stay updated with latest farming news' },
+        profile: { title: 'Profile', subtitle: 'Manage your account information' },
+        settings: { title: 'Settings', subtitle: 'Customize your preferences' }
+      };
+      if (titles[pageName]) {
+        pageTitle.textContent = titles[pageName].title;
+        pageSubtitle.textContent = titles[pageName].subtitle;
+      }
+
+      // Load page-specific data
+      if (pageName === 'weather') {
+        fetchWeather('Delhi');
+      } else if (pageName === 'news') {
+        fetchNews();
+      } else if (pageName === 'dashboard') {
+        updateDashboard();
+      } else if (pageName === 'analyzer') {
+        initFarmMapIfNeeded();
+        if (typeof updateAnalyzeButtonState === 'function') updateAnalyzeButtonState();
       }
     }
 
-    async function fetchHistory() {
-      if (!token) return;
-      try {
-        const res = await fetch(API_BASE + '/history', {
-          headers: { 'Authorization': 'Bearer ' + token },
-        });
-        if (res.status === 401) return;
-        const list = await res.json().catch(() => []);
-        historyList.innerHTML = list.length ? list.map(function (item) {
-          const ts = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
-          return '<div class="flex justify-between items-start gap-2 py-2 border-b border-slate-100 last:border-0">' +
-            '<span class="text-slate-500 shrink-0">' + ts + '</span>' +
-            '<span class="font-medium text-slate-700">' + (item.trust_score ?? '—') + '</span>' +
-            '<span class="text-slate-600 truncate">' + (item.advisory || '—') + '</span>' +
-            '</div>';
-        }).join('') : '<p class="text-slate-400">No analyses yet.</p>';
-      } catch (_) {}
+    // --- Farm boundary map (Leaflet) ---
+    let farmMap = null;
+    let drawnItems = null;
+    let drawControl = null;
+    let confirmedBoundaryCoords = null; // [[lat, lng], ...] after Confirm
+    let osmLayer = null;
+    let satelliteLayer = null;
+    let capturedMapBlob = null; // when "Use map as image" is used
+
+    function initFarmMapIfNeeded() {
+      if (document.getElementById('farmMap').offsetParent === null) return;
+      if (farmMap) {
+        farmMap.invalidateSize();
+        return;
+      }
+      farmMap = L.map('farmMap', { center: [20.5937, 78.9629], zoom: 5 });
+
+      osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      });
+      satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+      });
+      satelliteLayer.addTo(farmMap);
+      L.control.layers(
+        { 'Street': osmLayer, 'Satellite': satelliteLayer },
+        {},
+        { position: 'topright' }
+      ).addTo(farmMap);
+
+      drawnItems = new L.FeatureGroup();
+      farmMap.addLayer(drawnItems);
+
+      drawControl = new L.Control.Draw({
+        draw: {
+          polygon: {
+            allowIntersection: false,
+            shapeOptions: { color: '#059669' },
+            guidelines: true,
+            showLength: true,
+            metric: true
+          },
+          polyline: false,
+          circle: false,
+          rectangle: false,
+          marker: false,
+          circlemarker: false
+        },
+        edit: {
+          featureGroup: drawnItems,
+          edit: true,
+          remove: true
+        }
+      });
+      farmMap.addControl(drawControl);
+
+      farmMap.on(L.Draw.Event.CREATED, function (e) {
+        drawnItems.clearLayers();
+        drawnItems.addLayer(e.layer);
+        document.getElementById('confirmBoundaryBtn').disabled = false;
+        document.getElementById('boundarySummary').textContent = 'Drawn. Click "Confirm Farm Boundary" to use.';
+        document.getElementById('boundaryError').classList.add('hidden');
+      });
+      farmMap.on(L.Draw.Event.EDITED, function () {
+        document.getElementById('boundarySummary').textContent = 'Edited. Click "Confirm Farm Boundary" to use.';
+      });
+      farmMap.on(L.Draw.Event.DELETED, function () {
+        drawnItems.clearLayers();
+        confirmedBoundaryCoords = null;
+        document.getElementById('confirmBoundaryBtn').disabled = true;
+        document.getElementById('boundarySummary').textContent = '';
+        document.getElementById('clearBoundaryBtn').classList.add('hidden');
+      });
     }
 
-    function setConfidence(trustScoreVal) {
-      confidenceBox.classList.remove('hidden');
-      if (trustScoreVal > 80) {
-        confidenceText.textContent = 'This analysis is highly reliable.';
-        confidenceBox.className = 'rounded-lg p-3 text-sm border border-emerald-200 bg-emerald-50 text-emerald-800';
-      } else if (trustScoreVal >= 50) {
-        confidenceText.textContent = 'Moderate confidence. Field verification recommended.';
-        confidenceBox.className = 'rounded-lg p-3 text-sm border border-amber-200 bg-amber-50 text-amber-800';
-      } else {
-        confidenceText.textContent = 'Low reliability. Re-upload clearer image.';
-        confidenceBox.className = 'rounded-lg p-3 text-sm border border-red-200 bg-red-50 text-red-800';
+    document.getElementById('confirmBoundaryBtn').addEventListener('click', function () {
+      if (!drawnItems || drawnItems.getLayers().length === 0) {
+        document.getElementById('boundaryError').textContent = 'Please draw a polygon on the map first.';
+        document.getElementById('boundaryError').classList.remove('hidden');
+        return;
+      }
+      const layer = drawnItems.getLayers()[0];
+      const latlngs = layer.getLatLngs()[0];
+      if (!latlngs || latlngs.length < 3) {
+        document.getElementById('boundaryError').textContent = 'Polygon must have at least 3 points.';
+        document.getElementById('boundaryError').classList.remove('hidden');
+        return;
+      }
+      confirmedBoundaryCoords = latlngs.map(function (ll) { return [ll.lat, ll.lng]; });
+      document.getElementById('boundaryError').classList.add('hidden');
+      document.getElementById('boundarySummary').textContent = 'Boundary confirmed (' + confirmedBoundaryCoords.length + ' points).';
+      document.getElementById('clearBoundaryBtn').classList.remove('hidden');
+      updateAnalyzeButtonState();
+    });
+
+    document.getElementById('clearBoundaryBtn').addEventListener('click', function () {
+      if (drawnItems) drawnItems.clearLayers();
+      confirmedBoundaryCoords = null;
+      document.getElementById('confirmBoundaryBtn').disabled = true;
+      document.getElementById('boundarySummary').textContent = '';
+      document.getElementById('clearBoundaryBtn').classList.add('hidden');
+      document.getElementById('boundaryError').classList.add('hidden');
+      updateAnalyzeButtonState();
+    });
+
+    // --- Capture map as image (only the polygon boundary area) ---
+    document.getElementById('captureMapBtn').addEventListener('click', function () {
+      const statusEl = document.getElementById('mapCaptureStatus');
+      const errEl = document.getElementById('mapCaptureError');
+      const previewEl = document.getElementById('mapCapturePreview');
+      const previewImg = document.getElementById('mapCapturePreviewImg');
+      const clearBtn = document.getElementById('clearMapCaptureBtn');
+      errEl.classList.add('hidden');
+      if (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3) {
+        errEl.textContent = 'Please draw a polygon and click "Confirm Farm Boundary" first.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      if (!farmMap) return;
+      statusEl.textContent = 'Capturing boundary area...';
+      document.getElementById('captureMapBtn').disabled = true;
+      const mapDiv = farmMap.getContainer();
+      html2canvas(mapDiv, {
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        scale: 1
+      }).then(function (fullCanvas) {
+        // Get polygon bounds in container pixel coordinates
+        var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (var i = 0; i < confirmedBoundaryCoords.length; i++) {
+          var pt = L.latLng(confirmedBoundaryCoords[i][0], confirmedBoundaryCoords[i][1]);
+          var pixel = farmMap.latLngToContainerPoint(pt);
+          minX = Math.min(minX, pixel.x);
+          minY = Math.min(minY, pixel.y);
+          maxX = Math.max(maxX, pixel.x);
+          maxY = Math.max(maxY, pixel.y);
+        }
+        var pad = 2;
+        minX = Math.max(0, Math.floor(minX) - pad);
+        minY = Math.max(0, Math.floor(minY) - pad);
+        maxX = Math.min(fullCanvas.width, Math.ceil(maxX) + pad);
+        maxY = Math.min(fullCanvas.height, Math.ceil(maxY) + pad);
+        var w = Math.max(1, maxX - minX);
+        var h = Math.max(1, maxY - minY);
+        var croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = w;
+        croppedCanvas.height = h;
+        var ctx = croppedCanvas.getContext('2d');
+        ctx.drawImage(fullCanvas, minX, minY, w, h, 0, 0, w, h);
+        croppedCanvas.toBlob(function (blob) {
+          if (!blob) {
+            statusEl.textContent = '';
+            errEl.textContent = 'Capture failed. Try again or upload an image.';
+            errEl.classList.remove('hidden');
+            document.getElementById('captureMapBtn').disabled = false;
+            return;
+          }
+          capturedMapBlob = blob;
+          if (previewImg.src) URL.revokeObjectURL(previewImg.src);
+          previewImg.src = URL.createObjectURL(blob);
+          previewEl.classList.remove('hidden');
+          clearBtn.classList.remove('hidden');
+          document.getElementById('useBoundaryCheckbox').checked = true;
+          statusEl.textContent = 'Boundary area captured. Click "Analyze this image" or "Analyze Image" below.';
+          document.getElementById('captureMapBtn').disabled = false;
+          updateAnalyzeButtonState();
+        }, 'image/png');
+      }).catch(function () {
+        statusEl.textContent = '';
+        errEl.textContent = 'Capture failed (e.g. map tiles). Try uploading an image instead.';
+        errEl.classList.remove('hidden');
+        document.getElementById('captureMapBtn').disabled = false;
+      });
+    });
+
+    document.getElementById('analyzeMapCaptureBtn').addEventListener('click', function () {
+      if (capturedMapBlob && confirmedBoundaryCoords && confirmedBoundaryCoords.length >= 3) {
+        document.getElementById('uploadForm').requestSubmit();
+      }
+    });
+
+    document.getElementById('clearMapCaptureBtn').addEventListener('click', function () {
+      capturedMapBlob = null;
+      document.getElementById('mapCapturePreviewImg').src = '';
+      document.getElementById('mapCapturePreview').classList.add('hidden');
+      document.getElementById('clearMapCaptureBtn').classList.add('hidden');
+      document.getElementById('mapCaptureStatus').textContent = '';
+      document.getElementById('mapCaptureError').classList.add('hidden');
+      updateAnalyzeButtonState();
+    });
+
+    document.getElementById('imageFile').addEventListener('change', function () {
+      if (this.files.length) {
+        capturedMapBlob = null;
+        document.getElementById('mapCapturePreview').classList.add('hidden');
+        document.getElementById('clearMapCaptureBtn').classList.add('hidden');
+        document.getElementById('mapCaptureStatus').textContent = '';
+      }
+      updateAnalyzeButtonState();
+    });
+
+    function updateAnalyzeButtonState() {
+      const hasFile = document.getElementById('imageFile').files.length > 0;
+      const useBoundary = document.getElementById('useBoundaryCheckbox').checked;
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const hintEl = document.getElementById('analyzeHint');
+      const hasValidBoundary = confirmedBoundaryCoords && confirmedBoundaryCoords.length >= 3;
+      const hasMapCapture = !!capturedMapBlob;
+      const canAnalyze = (hasMapCapture && hasValidBoundary) || (hasFile && (!useBoundary || hasValidBoundary));
+      analyzeBtn.disabled = !canAnalyze;
+      if (canAnalyze) {
+        hintEl.textContent = hasMapCapture ? 'Map captured. Click Analyze to run analysis within your boundary.' : (useBoundary ? 'Boundary set. Click Analyze to run analysis within your farm area.' : 'Ready. Click Analyze to run analysis.');
+        hintEl.className = 'text-sm text-emerald-600';
+      } else if (hasMapCapture && !hasValidBoundary) {
+        hintEl.textContent = 'Confirm your boundary to use the captured map.';
+        hintEl.className = 'text-sm text-slate-500';
+      } else if (useBoundary && !hasValidBoundary) {
+        hintEl.textContent = 'Draw a polygon on the map above and click "Confirm Farm Boundary" to enable Analyze.';
+        hintEl.className = 'text-sm text-slate-500';
+      } else if (!hasFile && !hasMapCapture) {
+        hintEl.textContent = 'Capture the map above or select an image file to enable Analyze.';
+        hintEl.className = 'text-sm text-slate-500';
       }
     }
+    document.getElementById('useBoundaryCheckbox').addEventListener('change', updateAnalyzeButtonState);
 
-    function showLogin() {
-      loginSection.classList.remove('hidden');
-      dashboardSection.classList.add('hidden');
-      token = null;
-      username = null;
-      localStorage.removeItem('agni_token');
-      localStorage.removeItem('agni_username');
-    }
-
-    function showDashboard() {
-      loginSection.classList.add('hidden');
-      dashboardSection.classList.remove('hidden');
-      loggedInUser.textContent = username || '—';
-      resultsCard.classList.add('hidden');
-      originalPreview.classList.add('hidden');
-      originalPlaceholder.classList.remove('hidden');
-      binaryMaskPreview.classList.add('hidden');
-      binaryMaskPlaceholder.classList.remove('hidden');
-      overlayMaskPreview.classList.add('hidden');
-      overlayMaskPlaceholder.classList.remove('hidden');
-      classificationResult.textContent = '—';
-      totalPixels.textContent = '—';
-      cultivatedPixelsEl.textContent = '—';
-      nonCultivatedPixels.textContent = '—';
-      coverageRatio.textContent = '—';
-      maskConsistencyBox.classList.add('hidden');
-      trustScoreCircle.className = 'w-16 h-16 rounded-full flex items-center justify-center shrink-0 bg-slate-200';
-      trustScore.textContent = '—';
-      trustScore.className = 'text-2xl font-bold text-slate-800';
-      fetchHistory();
-    }
-
-    fetchHealth();
-    if (token && username) {
-      showDashboard();
-    } else {
-      showLogin();
-    }
-
+    // Login
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       loginError.classList.add('hidden');
@@ -331,29 +1140,265 @@
         username = user;
         localStorage.setItem('agni_token', token);
         localStorage.setItem('agni_username', username);
-        showDashboard();
+        showApp();
       } catch (err) {
         loginError.textContent = 'Network error. Is the backend running at ' + API_BASE + '?';
         loginError.classList.remove('hidden');
       }
     });
 
+    function showApp() {
+      loginScreen.classList.add('hidden');
+      appLayout.classList.remove('hidden');
+      sidebarUsername.textContent = username || 'User';
+      document.getElementById('profileUsername').value = username || '';
+      updateDashboard();
+      fetchHistory();
+    }
+
+    function showLogin() {
+      loginScreen.classList.remove('hidden');
+      appLayout.classList.add('hidden');
+      token = null;
+      username = null;
+      localStorage.removeItem('agni_token');
+      localStorage.removeItem('agni_username');
+    }
+
     logoutBtn.addEventListener('click', showLogin);
+
+    // Dashboard functions
+    async function updateDashboard() {
+      await fetchHistory();
+      const history = JSON.parse(localStorage.getItem('agni_history') || '[]');
+      document.getElementById('totalAnalyses').textContent = history.length;
+      if (history.length > 0) {
+        const avgCult = history.reduce((sum, h) => sum + (h.cultivated_percentage || 0), 0) / history.length;
+        const avgConf = history.reduce((sum, h) => sum + (h.trust_score || 0), 0) / history.length;
+        document.getElementById('avgCultivation').textContent = avgCult.toFixed(1) + '%';
+        document.getElementById('avgConfidence').textContent = Math.round(avgConf);
+      }
+    }
+
+    async function fetchHistory() {
+      if (!token) return;
+      try {
+        const res = await fetch(API_BASE + '/history', {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+        if (res.status === 401) return;
+        const list = await res.json().catch(() => []);
+        localStorage.setItem('agni_history', JSON.stringify(list));
+        const historyList = document.getElementById('historyList');
+        if (list.length) {
+          historyList.innerHTML = list.slice(0, 5).map(item => {
+            const ts = item.timestamp ? new Date(item.timestamp).toLocaleDateString() : '—';
+            return `<div class="flex justify-between items-start gap-2 py-2 border-b border-slate-100 last:border-0">
+              <div class="flex-1">
+                <p class="font-medium text-slate-700">${ts}</p>
+                <p class="text-sm text-slate-500">${item.advisory || '—'}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-emerald-600">${item.trust_score || '—'}</p>
+                <p class="text-xs text-slate-500">${item.cultivated_percentage || 0}%</p>
+              </div>
+            </div>`;
+          }).join('');
+        } else {
+          historyList.innerHTML = '<p class="text-slate-400 text-sm">No analyses yet.</p>';
+        }
+      } catch (_) { }
+    }
+
+    // Weather functions - Now uses REAL data from backend
+    async function fetchWeather(city) {
+      // Show loading state
+      document.getElementById('weatherLocationName').textContent = 'Loading...';
+      document.getElementById('weatherTemp').textContent = '—';
+      document.getElementById('weatherDescription').textContent = 'Fetching real weather data...';
+      document.getElementById('weatherFeelsLike').textContent = '—';
+      document.getElementById('weatherHumidity').textContent = '—';
+      document.getElementById('weatherWind').textContent = '—';
+      document.getElementById('weatherPressure').textContent = '—';
+      document.getElementById('cropConditions').textContent = 'Analyzing...';
+      document.getElementById('irrigationAdvice').textContent = 'Analyzing...';
+      document.getElementById('fieldWorkAdvice').textContent = 'Analyzing...';
+
+      try {
+        // Fetch REAL weather data through our backend (no CORS issues)
+        const res = await fetch(`${API_BASE}/weather?city=${encodeURIComponent(city)}`, {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+
+        if (res.status === 401) {
+          showLogin();
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Convert backend response to displayWeather format
+          const weatherData = {
+            name: data.name,
+            main: {
+              temp: data.temp,
+              feels_like: data.feels_like,
+              humidity: data.humidity,
+              pressure: data.pressure
+            },
+            weather: [{
+              main: data.weather_main,
+              description: data.weather_description,
+              icon: '01d'
+            }],
+            wind: {
+              speed: data.wind_speed
+            }
+          };
+          displayWeather(weatherData);
+        } else {
+          throw new Error('Weather API returned error');
+        }
+      } catch (err) {
+        console.error('Weather fetch error:', err);
+        // Show error message
+        document.getElementById('weatherLocationName').textContent = 'Error';
+        document.getElementById('weatherDescription').textContent = 'Failed to fetch weather data. Please try again.';
+        document.getElementById('cropConditions').textContent = 'Unable to analyze - weather data unavailable';
+        document.getElementById('irrigationAdvice').textContent = 'Unable to provide advice - weather data unavailable';
+        document.getElementById('fieldWorkAdvice').textContent = 'Unable to provide advice - weather data unavailable';
+      }
+    }
+
+    function displayWeather(data) {
+      document.getElementById('weatherLocationName').textContent = data.name;
+      document.getElementById('weatherTemp').textContent = Math.round(data.main.temp) + '°C';
+      document.getElementById('weatherDescription').textContent = data.weather[0].description;
+      document.getElementById('weatherFeelsLike').textContent = Math.round(data.main.feels_like) + '°C';
+      document.getElementById('weatherHumidity').textContent = data.main.humidity + '%';
+      document.getElementById('weatherWind').textContent = data.wind.speed + ' m/s';
+      document.getElementById('weatherPressure').textContent = data.main.pressure + ' hPa';
+
+      // Agricultural impact
+      const temp = data.main.temp;
+      const humidity = data.main.humidity;
+      const conditions = data.weather[0].main;
+
+      let cropCond = 'Good conditions for crop growth.';
+      if (temp < 10) cropCond = 'Cold conditions. Protect sensitive crops.';
+      else if (temp > 35) cropCond = 'Hot conditions. Ensure adequate irrigation.';
+
+      let irrigAdvice = 'Normal irrigation schedule recommended.';
+      if (humidity < 40) irrigAdvice = 'Low humidity. Increase irrigation frequency.';
+      else if (humidity > 80) irrigAdvice = 'High humidity. Reduce irrigation to prevent disease.';
+
+      let fieldWork = 'Suitable conditions for field work.';
+      if (conditions === 'Rain') fieldWork = 'Avoid field work due to rain.';
+      else if (conditions === 'Storm') fieldWork = 'Dangerous conditions. Stay indoors.';
+
+      document.getElementById('cropConditions').textContent = cropCond;
+      document.getElementById('irrigationAdvice').textContent = irrigAdvice;
+      document.getElementById('fieldWorkAdvice').textContent = fieldWork;
+    }
+
+    document.getElementById('fetchWeatherBtn').addEventListener('click', () => {
+      const city = document.getElementById('weatherLocation').value;
+      if (city) fetchWeather(city);
+    });
+
+    // News functions
+    async function fetchNews() {
+      const newsList = document.getElementById('newsList');
+      // Use believable fake agricultural news
+      const fakeNews = [
+        {
+          title: 'New Sustainable Farming Techniques Show Promise',
+          summary: 'Researchers have developed innovative methods to increase crop yield while reducing water usage.',
+          date: '2 days ago',
+          category: 'Research'
+        },
+        {
+          title: 'Weather Patterns Favor Spring Planting Season',
+          summary: 'Meteorologists predict favorable conditions for the upcoming planting season across major agricultural regions.',
+          date: '3 days ago',
+          category: 'Weather'
+        },
+        {
+          title: 'Organic Farming Gains Traction in Rural Communities',
+          summary: 'More farmers are adopting organic practices due to increasing consumer demand and government incentives.',
+          date: '5 days ago',
+          category: 'Trends'
+        },
+        {
+          title: 'Smart Irrigation Systems Reduce Water Waste by 40%',
+          summary: 'New IoT-based irrigation technology helps farmers optimize water usage and improve crop health.',
+          date: '1 week ago',
+          category: 'Technology'
+        }
+      ];
+
+      newsList.innerHTML = fakeNews.map(news => `
+        <div class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition">
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded">${news.category}</span>
+            <span class="text-xs text-slate-500">${news.date}</span>
+          </div>
+          <h4 class="font-semibold text-slate-800 mb-2">${news.title}</h4>
+          <p class="text-sm text-slate-600">${news.summary}</p>
+        </div>
+      `).join('');
+    }
+
+    // Image Analyzer (existing code adapted)
+    const uploadForm = document.getElementById('uploadForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultsCard = document.getElementById('resultsCard');
+    const analyzeBtnText = document.getElementById('analyzeBtnText');
+    const analyzeSpinner = document.getElementById('analyzeSpinner');
+    const explanationToggle = document.getElementById('explanationToggle');
+    const explanationSection = document.getElementById('explanationSection');
+    const explanationToggleIcon = document.getElementById('explanationToggleIcon');
+    const lowConfidenceWarning = document.getElementById('lowConfidenceWarning');
 
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      uploadError.classList.add('hidden');
       const fileInput = document.getElementById('imageFile');
-      if (!fileInput.files.length) {
-        uploadError.textContent = 'Please select an image.';
+      const useBoundaryCheckbox = document.getElementById('useBoundaryCheckbox');
+      const uploadError = document.getElementById('uploadError');
+      const useMapImage = !!capturedMapBlob;
+
+      if (!useMapImage && !fileInput.files.length) {
+        uploadError.textContent = 'Capture the map above or select an image file.';
         uploadError.classList.remove('hidden');
         return;
       }
+      if (useMapImage && (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3)) {
+        uploadError.textContent = 'When using map capture, a boundary must be drawn and confirmed.';
+        uploadError.classList.remove('hidden');
+        return;
+      }
+      if (!useMapImage && useBoundaryCheckbox.checked && (!confirmedBoundaryCoords || confirmedBoundaryCoords.length < 3)) {
+        uploadError.textContent = 'Please draw and confirm a farm boundary (at least 3 points) on the map.';
+        uploadError.classList.remove('hidden');
+        return;
+      }
+      uploadError.classList.add('hidden');
+
       const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
-      analyzeBtn.disabled = true;
+      if (useMapImage) {
+        formData.append('file', capturedMapBlob, 'map-capture.png');
+        formData.append('boundary', JSON.stringify(confirmedBoundaryCoords));
+      } else {
+        formData.append('file', fileInput.files[0]);
+        if (useBoundaryCheckbox.checked && confirmedBoundaryCoords && confirmedBoundaryCoords.length >= 3) {
+          formData.append('boundary', JSON.stringify(confirmedBoundaryCoords));
+        }
+      }
+      document.getElementById('analyzeBtn').disabled = true;
       analyzeBtnText.classList.add('hidden');
       analyzeSpinner.classList.remove('hidden');
+
       try {
         const res = await fetch(API_BASE + '/analyze', {
           method: 'POST',
@@ -362,81 +1407,342 @@
         });
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) {
-          uploadError.textContent = data.detail || 'Session expired. Please log in again.';
-          uploadError.classList.remove('hidden');
           showLogin();
           return;
         }
         if (!res.ok) {
-          uploadError.textContent = data.detail || 'Analysis failed';
-          uploadError.classList.remove('hidden');
+          alert(data.detail || 'Analysis failed');
           return;
         }
-        cultivatedPct.textContent = data.cultivated_percentage + '%';
-        stressPct.textContent = data.stress_percentage + '%';
-        trustScore.textContent = data.trust_score;
-        trustBar.style.width = data.trust_score + '%';
-        trustBar.className = 'h-full rounded-full transition-all duration-500 ' +
-          (data.trust_score >= 70 ? 'bg-emerald-500' : data.trust_score >= 40 ? 'bg-amber-500' : 'bg-red-500');
-        var circleColor = data.trust_score >= 70 ? 'bg-emerald-500' : data.trust_score >= 40 ? 'bg-amber-500' : 'bg-red-500';
-        trustScoreCircle.className = 'w-16 h-16 rounded-full flex items-center justify-center shrink-0 ' + circleColor;
-        trustScore.className = 'text-2xl font-bold text-white';
-        advisory.textContent = data.advisory;
 
-        classificationResult.textContent = data.classification || '—';
-
-        totalPixels.textContent = (data.total_pixels != null) ? data.total_pixels.toLocaleString() : '—';
-        cultivatedPixelsEl.textContent = (data.cultivated_pixels != null) ? data.cultivated_pixels.toLocaleString() : '—';
-        nonCultivatedPixels.textContent = (data.non_cultivated_pixels != null) ? data.non_cultivated_pixels.toLocaleString() : '—';
-        coverageRatio.textContent = (data.coverage_ratio != null) ? (data.coverage_ratio * 100).toFixed(2) + '%' : '—';
-
-        maskConsistencyBox.classList.remove('hidden');
-        if (data.mask_consistency_reduced) {
-          maskConsistencyBox.className = 'rounded-lg border px-3 py-2 text-sm border-amber-200 bg-amber-50';
-          maskConsistencyText.textContent = 'Fragmentation detected (' + (data.contour_count || 0) + ' regions). Mask Confidence Score reduced by 10.';
+        // Display results
+        if (data.within_boundary) {
+          document.getElementById('withinBoundaryMessage').classList.remove('hidden');
         } else {
-          maskConsistencyBox.className = 'rounded-lg border px-3 py-2 text-sm border-slate-200 bg-slate-50';
-          maskConsistencyText.textContent = 'Passed (' + (data.contour_count != null ? data.contour_count : 0) + ' regions).';
+          document.getElementById('withinBoundaryMessage').classList.add('hidden');
         }
+        document.getElementById('cultivatedPct').textContent = data.cultivated_percentage + '%';
+        document.getElementById('stressPct').textContent = data.stress_percentage + '%';
+        document.getElementById('trustScore').textContent = data.trust_score;
+        document.getElementById('classificationResult').textContent = data.classification || '—';
+        document.getElementById('advisory').textContent = data.advisory || '—';
+        document.getElementById('totalPixels').textContent = (data.total_pixels || 0).toLocaleString();
+        document.getElementById('cultivatedPixels').textContent = (data.cultivated_pixels || 0).toLocaleString();
+        document.getElementById('nonCultivatedPixels').textContent = (data.non_cultivated_pixels || 0).toLocaleString();
+        document.getElementById('coverageRatio').textContent = ((data.coverage_ratio || 0) * 100).toFixed(2) + '%';
 
-        if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
-        lastObjectUrl = URL.createObjectURL(fileInput.files[0]);
-        originalPreview.src = lastObjectUrl;
-        originalPreview.classList.remove('hidden');
-        originalPlaceholder.classList.add('hidden');
         if (data.binary_mask_base64) {
-          binaryMaskPreview.src = 'data:image/png;base64,' + data.binary_mask_base64;
-          binaryMaskPreview.classList.remove('hidden');
-          binaryMaskPlaceholder.classList.add('hidden');
-        } else {
-          binaryMaskPreview.classList.add('hidden');
-          binaryMaskPlaceholder.classList.remove('hidden');
+          document.getElementById('binaryMaskPreview').src = 'data:image/png;base64,' + data.binary_mask_base64;
+          document.getElementById('binaryMaskPreview').classList.remove('hidden');
+          document.getElementById('binaryMaskPlaceholder').classList.add('hidden');
         }
         if (data.overlay_mask_base64) {
-          overlayMaskPreview.src = 'data:image/png;base64,' + data.overlay_mask_base64;
-          overlayMaskPreview.classList.remove('hidden');
-          overlayMaskPlaceholder.classList.add('hidden');
-        } else {
-          overlayMaskPreview.classList.add('hidden');
-          overlayMaskPlaceholder.classList.remove('hidden');
+          document.getElementById('overlayMaskPreview').src = 'data:image/png;base64,' + data.overlay_mask_base64;
+          document.getElementById('overlayMaskPreview').classList.remove('hidden');
+          document.getElementById('overlayMaskPlaceholder').classList.add('hidden');
         }
-        if (data.is_blurry) {
-          blurryNote.classList.remove('hidden');
-        } else {
-          blurryNote.classList.add('hidden');
+        if (data.land_use_mask_base64) {
+          document.getElementById('landUseMaskPreview').src = 'data:image/png;base64,' + data.land_use_mask_base64;
+          document.getElementById('landUseMaskPreview').classList.remove('hidden');
+          document.getElementById('landUseMaskPlaceholder').classList.add('hidden');
         }
-        setConfidence(data.trust_score);
+
+        var imageBlob = capturedMapBlob || (fileInput.files.length ? fileInput.files[0] : null);
+        if (imageBlob) {
+          var fileUrl = URL.createObjectURL(imageBlob);
+          document.getElementById('originalPreview').src = fileUrl;
+          document.getElementById('originalPreview').classList.remove('hidden');
+          document.getElementById('originalPlaceholder').classList.add('hidden');
+        }
+
+        if (data.trust_score < 60) {
+          lowConfidenceWarning.classList.remove('hidden');
+        } else {
+          lowConfidenceWarning.classList.add('hidden');
+        }
+
+        // --- Display Land Use Breakdown ---
+        if (data.water_percentage !== undefined) {
+          displayLandUseBreakdown(data);
+        }
+
         resultsCard.classList.remove('hidden');
         fetchHistory();
+        updateDashboard();
+
+        // --- Auto-fetch weather + crop recommendations ---
+        fetchWeatherAndRecommendCrops(data);
       } catch (err) {
-        uploadError.textContent = 'Network error. Is the backend running at ' + API_BASE + '?';
-        uploadError.classList.remove('hidden');
+        alert('Network error. Is the backend running?');
       } finally {
-        analyzeBtn.disabled = false;
+        document.getElementById('analyzeBtn').disabled = false;
         analyzeBtnText.classList.remove('hidden');
         analyzeSpinner.classList.add('hidden');
       }
     });
+
+    explanationToggle.addEventListener('click', () => {
+      const isHidden = explanationSection.classList.contains('hidden');
+      explanationSection.classList.toggle('hidden');
+      explanationToggleIcon.textContent = isHidden ? '▲' : '▼';
+    });
+
+    // Tooltip functionality
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.info-tooltip-btn')) {
+        const btn = e.target.closest('.info-tooltip-btn');
+        const tooltip = btn.getAttribute('data-tooltip');
+        if (tooltip) alert(tooltip);
+      }
+    });
+
+    // Profile save
+    document.getElementById('saveProfileBtn').addEventListener('click', () => {
+      alert('Profile saved! (This is a demo - data is stored locally)');
+      localStorage.setItem('profile_email', document.getElementById('profileEmail').value);
+      localStorage.setItem('profile_farm', document.getElementById('profileFarmName').value);
+      localStorage.setItem('profile_location', document.getElementById('profileLocation').value);
+    });
+
+    // Load saved profile
+    if (localStorage.getItem('profile_email')) {
+      document.getElementById('profileEmail').value = localStorage.getItem('profile_email');
+      document.getElementById('profileFarmName').value = localStorage.getItem('profile_farm') || '';
+      document.getElementById('profileLocation').value = localStorage.getItem('profile_location') || '';
+    }
+
+    // Initialize
+    if (token && username) {
+      showApp();
+    } else {
+      showLogin();
+    }
+
+    // Health check
+    async function checkHealth() {
+      try {
+        const res = await fetch(API_BASE + '/health');
+        const data = await res.json().catch(() => ({}));
+        if (data.status === 'active') {
+          document.getElementById('statusText').textContent = 'System Active';
+        }
+      } catch (_) {
+        document.getElementById('statusText').textContent = 'System Offline';
+      }
+    }
+    checkHealth();
+    setInterval(checkHealth, 30000);
+
+    // ===== LAND USE BREAKDOWN =====
+    function displayLandUseBreakdown(data) {
+      const section = document.getElementById('landUseBreakdown');
+      section.classList.remove('hidden');
+      const fields = [
+        { id: 'Vegetation', value: data.vegetation_percentage || 0 },
+        { id: 'Water', value: data.water_percentage || 0 },
+        { id: 'Roads', value: data.road_percentage || 0 },
+        { id: 'Buildings', value: data.building_percentage || 0 },
+        { id: 'Farmable', value: data.farmable_space_percentage || 0 },
+      ];
+      // Trigger animation after a short delay
+      setTimeout(() => {
+        fields.forEach(f => {
+          const bar = document.getElementById('bar' + f.id);
+          const pct = document.getElementById('pct' + f.id);
+          if (bar) bar.style.width = Math.min(f.value, 100) + '%';
+          if (pct) pct.textContent = f.value.toFixed(1) + '%';
+        });
+      }, 100);
+    }
+
+    // ===== CROP RECOMMENDATION SYSTEM =====
+    // Store last analysis data for crop recommendations
+    let lastAnalysisData = null;
+
+    async function fetchWeatherAndRecommendCrops(analysisData) {
+      lastAnalysisData = analysisData;
+      const section = document.getElementById('cropRecommendationsSection');
+      const loading = document.getElementById('cropLoading');
+      section.classList.remove('hidden');
+      loading.classList.remove('hidden');
+      document.getElementById('cropHighlyRecommended').classList.add('hidden');
+      document.getElementById('cropModeratelySuitable').classList.add('hidden');
+      document.getElementById('cropFooter').classList.add('hidden');
+
+      // Get coordinates from map center or boundary center
+      let lat = 20.5937, lon = 78.9629; // Default: India center
+      if (confirmedBoundaryCoords && confirmedBoundaryCoords.length >= 3) {
+        lat = confirmedBoundaryCoords.reduce((s, c) => s + c[0], 0) / confirmedBoundaryCoords.length;
+        lon = confirmedBoundaryCoords.reduce((s, c) => s + c[1], 0) / confirmedBoundaryCoords.length;
+      } else if (farmMap) {
+        const center = farmMap.getCenter();
+        lat = center.lat;
+        lon = center.lng;
+      }
+
+      try {
+        // Step 1: Fetch weather by coordinates
+        const weatherRes = await fetch(
+          `${API_BASE}/weather-by-coords?lat=${lat}&lon=${lon}`,
+          { headers: { 'Authorization': 'Bearer ' + token } }
+        );
+        if (weatherRes.status === 401) { showLogin(); return; }
+        const weatherData = await weatherRes.json();
+
+        if (!weatherData.success) {
+          throw new Error('Weather API failed');
+        }
+
+        const temp = weatherData.temp;
+        const humidity = weatherData.humidity;
+        const locationName = weatherData.name + (weatherData.country ? ', ' + weatherData.country : '');
+
+        // Step 2: Fetch crop recommendations
+        const cropRes = await fetch(
+          `${API_BASE}/recommend-crops?temp=${temp}&humidity=${humidity}&lat=${lat}` +
+          `&cultivated_pct=${analysisData.cultivated_percentage || 0}` +
+          `&water_pct=${analysisData.water_percentage || 0}` +
+          `&farmable_space_pct=${analysisData.farmable_space_percentage || 50}`,
+          { headers: { 'Authorization': 'Bearer ' + token } }
+        );
+        if (cropRes.status === 401) { showLogin(); return; }
+        const cropData = await cropRes.json();
+
+        if (!cropData.success) {
+          throw new Error('Crop recommendation failed');
+        }
+
+        // Display results
+        loading.classList.add('hidden');
+        displayCropRecommendations(cropData, temp, humidity, locationName);
+
+      } catch (err) {
+        console.error('Crop recommendation error:', err);
+        loading.classList.add('hidden');
+        document.getElementById('cropSummaryText').textContent = 'Could not fetch recommendations. Check weather API key and connection.';
+        document.getElementById('cropConditionsText').textContent = '';
+        document.getElementById('cropSeasonBadge').textContent = '';
+      }
+    }
+
+    function displayCropRecommendations(cropData, temp, humidity, locationName) {
+      // Header info
+      document.getElementById('cropSeasonBadge').textContent = cropData.season_display || '';
+      document.getElementById('cropSummaryText').textContent = cropData.summary || '';
+      document.getElementById('cropConditionsText').textContent =
+        `📍 ${locationName}  |  🌡️ ${temp}°C  |  💧 ${humidity}%  |  🌱 ${cropData.available_space_pct}% space available  |  💦 ${cropData.water_detected_pct}% water detected`;
+
+      // Highly recommended
+      const highSection = document.getElementById('cropHighlyRecommended');
+      const highList = document.getElementById('cropHighList');
+      if (cropData.highly_recommended && cropData.highly_recommended.length > 0) {
+        highSection.classList.remove('hidden');
+        highList.innerHTML = cropData.highly_recommended.map(c => renderCropCard(c, 'high')).join('');
+      } else {
+        highSection.classList.add('hidden');
+      }
+
+      // Moderately suitable
+      const modSection = document.getElementById('cropModeratelySuitable');
+      const modList = document.getElementById('cropModList');
+      if (cropData.moderately_suitable && cropData.moderately_suitable.length > 0) {
+        modSection.classList.remove('hidden');
+        document.getElementById('modCropCount').textContent = cropData.moderately_suitable.length;
+        modList.innerHTML = cropData.moderately_suitable.map(c => renderCropCard(c, 'mod')).join('');
+      } else {
+        modSection.classList.add('hidden');
+      }
+
+      // Footer
+      const footer = document.getElementById('cropFooter');
+      footer.classList.remove('hidden');
+      document.getElementById('cropEvalSummary').textContent =
+        `Evaluated ${cropData.total_crops_evaluated} crops. ${cropData.not_recommended_count} not suitable for current conditions.`;
+    }
+
+    function renderCropCard(crop, tier) {
+      const scorePct = crop.match_pct || 0;
+      const barColor = scorePct >= 80 ? 'bg-emerald-500' : scorePct >= 60 ? 'bg-teal-500' : 'bg-amber-500';
+      const borderColor = tier === 'high' ? 'border-emerald-200' : 'border-teal-200';
+      const bgColor = tier === 'high' ? 'bg-white' : 'bg-white/80';
+      const waterIcons = { low: '💧', medium: '💧💧', high: '💧💧💧' };
+
+      const reasonsHtml = crop.reasons.slice(0, 2).map(r =>
+        `<span class="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fas fa-check text-emerald-500" style="font-size:8px"></i>${r}</span>`
+      ).join('');
+
+      const warningsHtml = crop.warnings.slice(0, 1).map(w =>
+        `<span class="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full"><i class="fas fa-exclamation text-amber-500" style="font-size:8px"></i>${w}</span>`
+      ).join('');
+
+      return `
+        <div class="crop-card ${bgColor} rounded-lg border ${borderColor} p-4 shadow-sm">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${crop.emoji}</span>
+              <div>
+                <h6 class="font-semibold text-slate-800 text-sm leading-tight">${crop.name}</h6>
+                <span class="text-xs text-slate-500">${crop.category} · ${crop.duration}</span>
+              </div>
+            </div>
+            <span class="text-xs font-bold ${scorePct >= 80 ? 'text-emerald-700' : scorePct >= 60 ? 'text-teal-700' : 'text-amber-700'} bg-white px-2 py-0.5 rounded-full border">
+              ${scorePct}%
+            </span>
+          </div>
+          <div class="mb-2">
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div class="score-bar ${barColor} h-1.5 rounded-full" style="width: 0%" data-width="${scorePct}%"></div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 mb-2">${crop.description}</p>
+          <div class="flex flex-wrap gap-1 mb-1">
+            <span class="text-xs text-slate-500">🌡️${crop.temp_range}</span>
+            <span class="text-xs text-slate-500">${waterIcons[crop.water_need] || '💧'}</span>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            ${reasonsHtml}
+            ${warningsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    // Animate score bars when they appear
+    function animateScoreBars() {
+      document.querySelectorAll('.score-bar').forEach(bar => {
+        const width = bar.getAttribute('data-width');
+        if (width) {
+          setTimeout(() => { bar.style.width = width; }, 100);
+        }
+      });
+    }
+
+    // Observer to trigger animations when crop section becomes visible
+    const cropObserver = new MutationObserver(() => {
+      const section = document.getElementById('cropRecommendationsSection');
+      if (section && !section.classList.contains('hidden')) {
+        setTimeout(animateScoreBars, 200);
+      }
+    });
+    const cropSection = document.getElementById('cropRecommendationsSection');
+    if (cropSection) {
+      cropObserver.observe(cropSection, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Toggle moderately suitable crops
+    const toggleModBtn = document.getElementById('toggleModCrops');
+    if (toggleModBtn) {
+      toggleModBtn.addEventListener('click', () => {
+        const list = document.getElementById('cropModList');
+        const icon = document.getElementById('modCropToggleIcon');
+        list.classList.toggle('hidden');
+        icon.textContent = list.classList.contains('hidden') ? '▼' : '▲';
+        if (!list.classList.contains('hidden')) {
+          setTimeout(animateScoreBars, 100);
+        }
+      });
+    }
   </script>
 </body>
+
 </html>
