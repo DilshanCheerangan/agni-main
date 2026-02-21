@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AGNI – Adaptive Geo-secured Network for Intelligent Agriculture</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'DM Sans', system-ui, sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800">
+  <div class="max-w-2xl mx-auto px-4 py-8">
+    <!-- System status indicator -->
+    <div id="statusBadge" class="mb-6 flex items-center justify-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm text-emerald-800">
+      <span class="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="statusText">AGNI Engine Status: Active</span>
+    </div>
+    <header class="text-center mb-10">
+      <h1 class="text-3xl font-bold text-emerald-800 tracking-tight">AGNI</h1>
+      <p class="text-slate-600 mt-1">Adaptive Geo-secured Network for Intelligent Agriculture</p>
+      <p class="text-slate-500 text-sm mt-2 max-w-lg mx-auto">Cultivated land masking from multi-source imagery using multi-layer vegetation segmentation and refinement operations.</p>
+    </header>
+
+    <!-- Login section (shown when not logged in) -->
+    <section id="loginSection" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+      <h2 class="text-lg font-semibold text-slate-800 mb-4">Sign in</h2>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="username" class="block text-sm font-medium text-slate-600 mb-1">Username</label>
+          <input type="text" id="username" name="username" required
+                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="agni" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-slate-600 mb-1">Password</label>
+          <input type="password" id="password" name="password" required
+                 class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                 placeholder="farm2025" />
+        </div>
+        <p id="loginError" class="text-sm text-red-600 hidden"></p>
+        <button type="submit" class="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+          Log in
+        </button>
+      </form>
+    </section>
+
+    <!-- Dashboard (upload + results, shown when logged in) -->
+    <section id="dashboardSection" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-slate-600">Logged in as <strong id="loggedInUser">—</strong></span>
+        <button type="button" id="logoutBtn" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">Log out</button>
+      </div>
+
+      <!-- Recent Field Analyses -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-3">Recent Field Analyses</h2>
+        <div id="historyList" class="space-y-2 text-sm text-slate-600">
+          <p class="text-slate-400">No analyses yet.</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">Upload field image</h2>
+        <form id="uploadForm" class="space-y-4">
+          <div>
+            <input type="file" id="imageFile" name="file" accept="image/*" required
+                   class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+          </div>
+          <p id="uploadError" class="text-sm text-red-600 hidden"></p>
+          <button type="submit" id="analyzeBtn" class="w-full py-2.5 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 flex items-center justify-center gap-2">
+            <span id="analyzeBtnText">Analyze image</span>
+            <span id="analyzeSpinner" class="hidden">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <div id="resultsCard" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-800 mb-4">Analysis results</h2>
+
+        <!-- Comparison: Original | Binary mask | Overlay mask -->
+        <div class="grid grid-cols-3 gap-2 mb-6">
+          <div class="text-center">
+            <p class="text-xs font-medium text-slate-500 mb-1">Original image</p>
+            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden" />
+              <span id="originalPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="text-xs font-medium text-slate-500 mb-1">Binary mask</p>
+            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden" />
+              <span id="binaryMaskPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="text-xs font-medium text-slate-500 mb-1">Overlay mask</p>
+            <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+              <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden" />
+              <span id="overlayMaskPlaceholder" class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Classification result -->
+        <div class="mb-4 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 text-center">
+          <p class="text-slate-600 text-sm mb-0.5">Classification result</p>
+          <p id="classificationResult" class="font-semibold text-lg text-slate-800">—</p>
+        </div>
+
+        <!-- Area Statistics (remote sensing style) -->
+        <div class="mb-4 rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+          <p class="text-slate-600 text-sm font-medium mb-2">Area statistics</p>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+            <span class="text-slate-500">Total pixels</span>
+            <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
+            <span class="text-slate-500">Cultivated pixels</span>
+            <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+            <span class="text-slate-500">Non-cultivated pixels</span>
+            <span id="nonCultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+            <span class="text-slate-500">Coverage ratio</span>
+            <span id="coverageRatio" class="font-mono text-slate-800 text-right">—</span>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-600">Cultivated %</span>
+            <span id="cultivatedPct" class="font-semibold text-slate-800">—</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-600">Stress %</span>
+            <span id="stressPct" class="font-semibold text-slate-800">—</span>
+          </div>
+
+          <!-- Mask Confidence Score: large bold number + color-coded circle -->
+          <div class="flex items-center gap-4 py-2">
+            <span class="text-slate-600 shrink-0">Mask Confidence Score</span>
+            <div id="trustScoreCircle" class="w-16 h-16 rounded-full flex items-center justify-center shrink-0 bg-slate-200">
+              <span id="trustScore" class="text-2xl font-bold text-slate-800">—</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="h-3 bg-slate-200 rounded-full overflow-hidden">
+                <div id="trustBar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mask Consistency Check -->
+          <div id="maskConsistencyBox" class="rounded-lg border px-3 py-2 text-sm hidden">
+            <p class="font-medium text-slate-700 mb-0.5">Mask consistency check</p>
+            <p id="maskConsistencyText" class="text-slate-600">—</p>
+            <p class="text-slate-500 text-xs mt-1">Fragmented vegetation patterns may indicate unreliable segmentation.</p>
+          </div>
+
+          <!-- Advisory: larger and centered -->
+          <div class="pt-4 border-t border-slate-200 text-center">
+            <p class="text-slate-600 text-sm mb-1">Advisory</p>
+            <p id="advisory" class="font-semibold text-xl text-slate-800">—</p>
+            <p class="text-slate-500 text-xs mt-2">AGNI performs cultivated land masking using multi-layer vegetation segmentation and refinement operations.</p>
+          </div>
+          <div id="confidenceBox" class="rounded-lg p-3 text-sm hidden border border-slate-200 bg-slate-50">
+            <p id="confidenceText"></p>
+          </div>
+          <p id="blurryNote" class="text-sm text-amber-600 hidden">Image may be blurry; confidence reduced.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="max-w-2xl mx-auto px-4 py-6 mt-8 text-center text-sm text-slate-500 border-t border-slate-200">
+    AGNI v1.0 | Trust-Aware Crop Intelligence System
+  </footer>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+    let token = localStorage.getItem('agni_token');
+    let username = localStorage.getItem('agni_username');
+
+    const loginSection = document.getElementById('loginSection');
+    const dashboardSection = document.getElementById('dashboardSection');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loggedInUser = document.getElementById('loggedInUser');
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadError = document.getElementById('uploadError');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const resultsCard = document.getElementById('resultsCard');
+    const cultivatedPct = document.getElementById('cultivatedPct');
+    const stressPct = document.getElementById('stressPct');
+    const trustScore = document.getElementById('trustScore');
+    const trustBar = document.getElementById('trustBar');
+    const advisory = document.getElementById('advisory');
+    const blurryNote = document.getElementById('blurryNote');
+    const analyzeBtnText = document.getElementById('analyzeBtnText');
+    const analyzeSpinner = document.getElementById('analyzeSpinner');
+    const confidenceBox = document.getElementById('confidenceBox');
+    const confidenceText = document.getElementById('confidenceText');
+    const historyList = document.getElementById('historyList');
+    const statusText = document.getElementById('statusText');
+    const originalPreview = document.getElementById('originalPreview');
+    const originalPlaceholder = document.getElementById('originalPlaceholder');
+    const binaryMaskPreview = document.getElementById('binaryMaskPreview');
+    const binaryMaskPlaceholder = document.getElementById('binaryMaskPlaceholder');
+    const overlayMaskPreview = document.getElementById('overlayMaskPreview');
+    const overlayMaskPlaceholder = document.getElementById('overlayMaskPlaceholder');
+    const classificationResult = document.getElementById('classificationResult');
+    const trustScoreCircle = document.getElementById('trustScoreCircle');
+    const totalPixels = document.getElementById('totalPixels');
+    const cultivatedPixelsEl = document.getElementById('cultivatedPixels');
+    const nonCultivatedPixels = document.getElementById('nonCultivatedPixels');
+    const coverageRatio = document.getElementById('coverageRatio');
+    const maskConsistencyBox = document.getElementById('maskConsistencyBox');
+    const maskConsistencyText = document.getElementById('maskConsistencyText');
+    let lastObjectUrl = null;
+
+    async function fetchHealth() {
+      try {
+        const res = await fetch(API_BASE + '/health');
+        const data = await res.json().catch(() => ({}));
+        if (data.status === 'active') {
+          statusText.textContent = 'AGNI Engine Status: Active';
+          const extra = [data.model_version, data.security_layer].filter(Boolean).join(' · ');
+          if (extra) statusText.title = extra;
+        }
+      } catch (_) {
+        statusText.textContent = 'AGNI Engine Status: Offline';
+      }
+    }
+
+    async function fetchHistory() {
+      if (!token) return;
+      try {
+        const res = await fetch(API_BASE + '/history', {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+        if (res.status === 401) return;
+        const list = await res.json().catch(() => []);
+        historyList.innerHTML = list.length ? list.map(function (item) {
+          const ts = item.timestamp ? new Date(item.timestamp).toLocaleString() : '—';
+          return '<div class="flex justify-between items-start gap-2 py-2 border-b border-slate-100 last:border-0">' +
+            '<span class="text-slate-500 shrink-0">' + ts + '</span>' +
+            '<span class="font-medium text-slate-700">' + (item.trust_score ?? '—') + '</span>' +
+            '<span class="text-slate-600 truncate">' + (item.advisory || '—') + '</span>' +
+            '</div>';
+        }).join('') : '<p class="text-slate-400">No analyses yet.</p>';
+      } catch (_) {}
+    }
+
+    function setConfidence(trustScoreVal) {
+      confidenceBox.classList.remove('hidden');
+      if (trustScoreVal > 80) {
+        confidenceText.textContent = 'This analysis is highly reliable.';
+        confidenceBox.className = 'rounded-lg p-3 text-sm border border-emerald-200 bg-emerald-50 text-emerald-800';
+      } else if (trustScoreVal >= 50) {
+        confidenceText.textContent = 'Moderate confidence. Field verification recommended.';
+        confidenceBox.className = 'rounded-lg p-3 text-sm border border-amber-200 bg-amber-50 text-amber-800';
+      } else {
+        confidenceText.textContent = 'Low reliability. Re-upload clearer image.';
+        confidenceBox.className = 'rounded-lg p-3 text-sm border border-red-200 bg-red-50 text-red-800';
+      }
+    }
+
+    function showLogin() {
+      loginSection.classList.remove('hidden');
+      dashboardSection.classList.add('hidden');
+      token = null;
+      username = null;
+      localStorage.removeItem('agni_token');
+      localStorage.removeItem('agni_username');
+    }
+
+    function showDashboard() {
+      loginSection.classList.add('hidden');
+      dashboardSection.classList.remove('hidden');
+      loggedInUser.textContent = username || '—';
+      resultsCard.classList.add('hidden');
+      originalPreview.classList.add('hidden');
+      originalPlaceholder.classList.remove('hidden');
+      binaryMaskPreview.classList.add('hidden');
+      binaryMaskPlaceholder.classList.remove('hidden');
+      overlayMaskPreview.classList.add('hidden');
+      overlayMaskPlaceholder.classList.remove('hidden');
+      classificationResult.textContent = '—';
+      totalPixels.textContent = '—';
+      cultivatedPixelsEl.textContent = '—';
+      nonCultivatedPixels.textContent = '—';
+      coverageRatio.textContent = '—';
+      maskConsistencyBox.classList.add('hidden');
+      trustScoreCircle.className = 'w-16 h-16 rounded-full flex items-center justify-center shrink-0 bg-slate-200';
+      trustScore.textContent = '—';
+      trustScore.className = 'text-2xl font-bold text-slate-800';
+      fetchHistory();
+    }
+
+    fetchHealth();
+    if (token && username) {
+      showDashboard();
+    } else {
+      showLogin();
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginError.classList.add('hidden');
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value;
+      try {
+        const res = await fetch(API_BASE + '/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, password: pass }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          loginError.textContent = data.detail || 'Login failed';
+          loginError.classList.remove('hidden');
+          return;
+        }
+        token = data.access_token;
+        username = user;
+        localStorage.setItem('agni_token', token);
+        localStorage.setItem('agni_username', username);
+        showDashboard();
+      } catch (err) {
+        loginError.textContent = 'Network error. Is the backend running at ' + API_BASE + '?';
+        loginError.classList.remove('hidden');
+      }
+    });
+
+    logoutBtn.addEventListener('click', showLogin);
+
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      uploadError.classList.add('hidden');
+      const fileInput = document.getElementById('imageFile');
+      if (!fileInput.files.length) {
+        uploadError.textContent = 'Please select an image.';
+        uploadError.classList.remove('hidden');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      analyzeBtn.disabled = true;
+      analyzeBtnText.classList.add('hidden');
+      analyzeSpinner.classList.remove('hidden');
+      try {
+        const res = await fetch(API_BASE + '/analyze', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token },
+          body: formData,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          uploadError.textContent = data.detail || 'Session expired. Please log in again.';
+          uploadError.classList.remove('hidden');
+          showLogin();
+          return;
+        }
+        if (!res.ok) {
+          uploadError.textContent = data.detail || 'Analysis failed';
+          uploadError.classList.remove('hidden');
+          return;
+        }
+        cultivatedPct.textContent = data.cultivated_percentage + '%';
+        stressPct.textContent = data.stress_percentage + '%';
+        trustScore.textContent = data.trust_score;
+        trustBar.style.width = data.trust_score + '%';
+        trustBar.className = 'h-full rounded-full transition-all duration-500 ' +
+          (data.trust_score >= 70 ? 'bg-emerald-500' : data.trust_score >= 40 ? 'bg-amber-500' : 'bg-red-500');
+        var circleColor = data.trust_score >= 70 ? 'bg-emerald-500' : data.trust_score >= 40 ? 'bg-amber-500' : 'bg-red-500';
+        trustScoreCircle.className = 'w-16 h-16 rounded-full flex items-center justify-center shrink-0 ' + circleColor;
+        trustScore.className = 'text-2xl font-bold text-white';
+        advisory.textContent = data.advisory;
+
+        classificationResult.textContent = data.classification || '—';
+
+        totalPixels.textContent = (data.total_pixels != null) ? data.total_pixels.toLocaleString() : '—';
+        cultivatedPixelsEl.textContent = (data.cultivated_pixels != null) ? data.cultivated_pixels.toLocaleString() : '—';
+        nonCultivatedPixels.textContent = (data.non_cultivated_pixels != null) ? data.non_cultivated_pixels.toLocaleString() : '—';
+        coverageRatio.textContent = (data.coverage_ratio != null) ? (data.coverage_ratio * 100).toFixed(2) + '%' : '—';
+
+        maskConsistencyBox.classList.remove('hidden');
+        if (data.mask_consistency_reduced) {
+          maskConsistencyBox.className = 'rounded-lg border px-3 py-2 text-sm border-amber-200 bg-amber-50';
+          maskConsistencyText.textContent = 'Fragmentation detected (' + (data.contour_count || 0) + ' regions). Mask Confidence Score reduced by 10.';
+        } else {
+          maskConsistencyBox.className = 'rounded-lg border px-3 py-2 text-sm border-slate-200 bg-slate-50';
+          maskConsistencyText.textContent = 'Passed (' + (data.contour_count != null ? data.contour_count : 0) + ' regions).';
+        }
+
+        if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+        lastObjectUrl = URL.createObjectURL(fileInput.files[0]);
+        originalPreview.src = lastObjectUrl;
+        originalPreview.classList.remove('hidden');
+        originalPlaceholder.classList.add('hidden');
+        if (data.binary_mask_base64) {
+          binaryMaskPreview.src = 'data:image/png;base64,' + data.binary_mask_base64;
+          binaryMaskPreview.classList.remove('hidden');
+          binaryMaskPlaceholder.classList.add('hidden');
+        } else {
+          binaryMaskPreview.classList.add('hidden');
+          binaryMaskPlaceholder.classList.remove('hidden');
+        }
+        if (data.overlay_mask_base64) {
+          overlayMaskPreview.src = 'data:image/png;base64,' + data.overlay_mask_base64;
+          overlayMaskPreview.classList.remove('hidden');
+          overlayMaskPlaceholder.classList.add('hidden');
+        } else {
+          overlayMaskPreview.classList.add('hidden');
+          overlayMaskPlaceholder.classList.remove('hidden');
+        }
+        if (data.is_blurry) {
+          blurryNote.classList.remove('hidden');
+        } else {
+          blurryNote.classList.add('hidden');
+        }
+        setConfidence(data.trust_score);
+        resultsCard.classList.remove('hidden');
+        fetchHistory();
+      } catch (err) {
+        uploadError.textContent = 'Network error. Is the backend running at ' + API_BASE + '?';
+        uploadError.classList.remove('hidden');
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtnText.classList.remove('hidden');
+        analyzeSpinner.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+opencv-python
+numpy
+python-multipart
+python-jose[cryptography]
