@@ -2,7 +2,11 @@
 AGNI - Real OpenCV image analysis (vegetation and stress detection).
 No mock data; all values from actual image processing.
 Resolution-agnostic vegetation detection via Excess Green (ExG) index.
-Optional: Hugging Face Inference API for building segmentation (set HF_TOKEN or BUILDING_SEGMENTATION_HF_TOKEN).
+
+Best masking (for judges): set HF_TOKEN (or BUILDING_SEGMENTATION_HF_TOKEN) to enable
+AI semantic segmentation via Hugging Face Inference API (SegFormer ADE20k, free tier).
+One API call per image returns accurate masks for: road, building, water, clear_land,
+greenery, forest. Without token, rule-based (OpenCV) masking is used as fallback.
 """
 import base64
 import os
@@ -77,6 +81,40 @@ HF_SEGMENTATION_MODEL = "nvidia/segformer-b1-finetuned-cityscapes-512-512"
 HF_SEGMENTATION_SIZE = 512
 HF_BUILDING_LABELS = ("building", "house", "wall")  # accept any of these
 
+# ---- Best masking: ADE20k semantic segmentation (roads, buildings, water, greenery, forest, clear land) ----
+# Default: b1 at 512 (better accuracy than b0). Set env HF_ADE20K_640=1 for b5 640x640 (smoother edges, slower).
+HF_ADE20K_MODEL = "nvidia/segformer-b1-finetuned-ade-512-512"
+HF_ADE20K_MODEL_640 = "nvidia/segformer-b5-finetuned-ade-640-640"
+HF_ADE20K_SIZE = 512
+HF_ADE20K_SIZE_640 = 640
+SEMANTIC_CLASS_ORDER = ("road", "building", "water", "clear_land", "greenery", "forest")
+# Boundary smoothing: blur kernel size for mask edges (larger = smoother, less detail)
+MASK_SMOOTH_KERNEL = 5
+
+
+def _ade20k_label_to_class(label: str) -> Optional[str]:
+    s = (label or "").lower().strip()
+    if not s:
+        return None
+    # ADE20k uses "building;edifice" etc.; take first token for matching
+    first = s.split(";")[0].split(",")[0].strip()
+    if first:
+        s = first
+    # Check each class keywords
+    if any(k in s or s in k for k in ("road", "route", "sidewalk", "pavement", "path", "runway", "dirt", "track", "bridge", "span")):
+        return "road"
+    if any(k in s or s in k for k in ("building", "edifice", "house", "wall", "skyscraper", "tower", "ceiling", "floor", "flooring", "hovel", "hut")):
+        return "building"
+    if any(k in s or s in k for k in ("water", "sea", "river", "lake", "waterfall", "falls", "swimming", "pool", "fountain", "pier", "wharf")):
+        return "water"
+    if any(k in s or s in k for k in ("earth", "ground", "field", "sand", "land", "soil", "mountain", "mount", "hill", "rock", "stone")):
+        return "clear_land"
+    if any(k in s or s in k for k in ("grass", "plant", "flora", "flower")):
+        return "greenery"
+    if any(k in s or s in k for k in ("tree", "palm")):
+        return "forest"
+    return None
+
 # Asphalt / paved roads: brown-gray (H 0-25), low saturation, mid value
 ASPHALT_H_LOWER, ASPHALT_H_UPPER = 0, 25
 ASPHALT_S_UPPER = 80
@@ -106,6 +144,28 @@ def _resize_max_dimension(img: np.ndarray, max_dim: int) -> Tuple[np.ndarray, fl
     new_h = max(1, int(round(h * scale)))
     resized = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
     return resized, scale, orig_shape
+
+
+def _smooth_mask_boundaries(mask: np.ndarray, kernel_size: int = 5, preserve_thin: bool = False) -> np.ndarray:
+    """
+    Smooth jagged/blocky mask edges without making thin lines thicker.
+    - preserve_thin=True: use strict threshold (200) after blur so mask does not expand; smaller kernel.
+    - preserve_thin=False: original behavior for larger regions.
+    """
+    if mask is None or mask.size == 0:
+        return mask
+    k = kernel_size if kernel_size % 2 == 1 else kernel_size + 1
+    if preserve_thin:
+        k = min(k, 3)  # less blur = less expansion of thin features
+    blurred = cv2.GaussianBlur(mask.astype(np.uint8), (k, k), 0)
+    # Strict threshold (200) avoids including blurred halo so thin lines don't become thick
+    thresh = 200 if preserve_thin else 127
+    _, binary = cv2.threshold(blurred, thresh, 255, cv2.THRESH_BINARY)
+    kernel = np.ones((3, 3), np.uint8)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
+    if not preserve_thin:
+        binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+    return binary
 
 
 def _get_building_mask_hf(img: np.ndarray, token: str) -> Optional[np.ndarray]:
@@ -158,6 +218,77 @@ def _get_building_mask_hf(img: np.ndarray, token: str) -> Optional[np.ndarray]:
     if building_mask_small is None:
         return None
     out = cv2.resize(building_mask_small, (w, h), interpolation=cv2.INTER_NEAREST)
+    return out
+
+
+def get_semantic_masks_ade20k(img: np.ndarray, token: str) -> Optional[Dict[str, np.ndarray]]:
+    """
+    Best masking: call Hugging Face Inference API with SegFormer ADE20k (150 classes).
+    Returns a dict of binary masks (255 = class present) for: road, building, water,
+    clear_land, greenery, forest. Free tier, single API call per image.
+    Uses linear upscale + boundary smoothing for less blocky edges.
+    Set env HF_ADE20K_640=1 for 640x640 model (smoother, may be slower).
+    Returns None on failure or missing token; then use rule-based fallback.
+    """
+    try:
+        import requests
+    except ImportError:
+        return None
+    use_640 = os.environ.get("HF_ADE20K_640", "").strip().lower() in ("1", "true", "yes")
+    model_size = HF_ADE20K_SIZE_640 if use_640 else HF_ADE20K_SIZE
+    model_id = HF_ADE20K_MODEL_640 if use_640 else HF_ADE20K_MODEL
+    h, w = img.shape[:2]
+    small = cv2.resize(img, (model_size, model_size), interpolation=cv2.INTER_AREA)
+    _, buf = cv2.imencode(".jpg", small)
+    b64 = base64.b64encode(buf.tobytes()).decode("ascii")
+    url = f"https://api-inference.huggingface.co/models/{model_id}"
+    headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    payload = {"inputs": b64}
+    try:
+        r = requests.post(url, json=payload, timeout=90)
+        if r.status_code != 200:
+            return None
+        data = r.json()
+    except Exception:
+        return None
+    if not isinstance(data, list):
+        return None
+    masks_small = {c: np.zeros((model_size, model_size), dtype=np.uint8) for c in SEMANTIC_CLASS_ORDER}
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        label = (item.get("label") or "").strip()
+        our_class = _ade20k_label_to_class(label)
+        if our_class is None or our_class not in masks_small:
+            continue
+        mask_b64 = item.get("mask")
+        if not mask_b64:
+            continue
+        try:
+            raw = base64.b64decode(mask_b64)
+            nparr = np.frombuffer(raw, np.uint8)
+            mask_img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
+            if mask_img is None or mask_img.shape[0] <= 0:
+                continue
+            if mask_img.shape[:2] != (model_size, model_size):
+                mask_img = cv2.resize(
+                    mask_img, (model_size, model_size), interpolation=cv2.INTER_NEAREST
+                )
+            _, binary = cv2.threshold(mask_img, 127, 255, cv2.THRESH_BINARY)
+            masks_small[our_class] = cv2.bitwise_or(masks_small[our_class], binary)
+        except Exception:
+            continue
+    # Upscale to original size with INTER_LINEAR then re-threshold for smoother edges (less blocky)
+    out = {}
+    for c in SEMANTIC_CLASS_ORDER:
+        m = masks_small[c]
+        if (h, w) != (model_size, model_size):
+            m = cv2.resize(m, (w, h), interpolation=cv2.INTER_LINEAR)
+            _, m = cv2.threshold(m, 127, 255, cv2.THRESH_BINARY)
+        # Roads: smooth without expanding (preserve_thin so thin paths stay thin)
+        preserve_thin = c == "road"
+        m = _smooth_mask_boundaries(m, MASK_SMOOTH_KERNEL, preserve_thin=preserve_thin)
+        out[c] = m
     return out
 
 
@@ -217,10 +348,12 @@ def detect_roads(img: np.ndarray) -> np.ndarray:
     if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line[0]
-            thickness = max(3, min(h, w) // 150)
+            # Keep lines thin: thickness 1 so small paths don't become thick bands
+            thickness = 1
             cv2.line(road_lines, (x1, y1), (x2, y2), 255, thickness)
-        kernel = np.ones((7, 7), np.uint8)
-        road_lines = cv2.dilate(road_lines, kernel, iterations=2)
+        # No dilation: avoid making thin roads/paths appear as wide strips
+        # kernel = np.ones((3, 3), np.uint8)
+        # road_lines = cv2.dilate(road_lines, kernel, iterations=1)  # optional: 1 iter if needed
     # 2) Gray/concrete (already defined)
     gray_surfaces = detect_gray_surfaces(img)
     # 3) Asphalt: brown-gray low-saturation mid-value
@@ -743,37 +876,75 @@ def clip_cultivated_mask_by_boundary(
     return clipped, cultivated_inside, total_inside
 
 
+def get_landuse_mask_image_semantic(
+    img: np.ndarray,
+    semantic_masks: Dict[str, np.ndarray],
+) -> np.ndarray:
+    """
+    Land-use overlay from AI semantic masks (road, building, water, clear_land, greenery, forest).
+    Distinct colors per class for judge-friendly, accurate masking visualization.
+    """
+    h, w = img.shape[:2]
+    out = np.zeros((h, w, 3), dtype=np.uint8)
+    out[:] = (30, 30, 30)  # dark background
+    # BGR colors: road (gray), building (brown), water (blue), clear_land (tan), greenery (green), forest (dark green)
+    colors_bgr = {
+        "road": (100, 100, 100),
+        "building": (42, 42, 139),
+        "water": (255, 120, 0),
+        "clear_land": (42, 165, 200),
+        "greenery": (0, 200, 0),
+        "forest": (0, 140, 0),
+    }
+    # Draw in fixed order so overlapping regions have consistent priority (water on top, then building, road, then land/veg)
+    for cls in ("clear_land", "forest", "greenery", "road", "building", "water"):
+        mask = semantic_masks.get(cls)
+        if mask is not None and mask.shape[:2] == (h, w):
+            bgr = colors_bgr.get(cls, (128, 128, 128))
+            out[mask > 0] = bgr
+    return out
+
+
 def get_landuse_mask_image(
     img: np.ndarray,
     vegetation_mask: np.ndarray,
     farmable_mask: np.ndarray,
+    semantic_masks: Optional[Dict[str, np.ndarray]] = None,
 ) -> np.ndarray:
     """
-    Land use: water/rivers (blue), roads (gray), buildings (brown), vegetation (green),
-    bare soil (tan), stressed (amber). Detection uses color + shape for roads, rivers, buildings.
+    Land use: when semantic_masks (ADE20k) is provided, use AI masking for best accuracy.
+    Otherwise: water/rivers (blue), roads (gray), buildings (brown), vegetation (green),
+    bare soil (tan), stressed (amber) via rule-based detection.
     """
+    if semantic_masks is not None and len(semantic_masks) > 0:
+        return get_landuse_mask_image_semantic(img, semantic_masks)
     h, w = img.shape[:2]
     out = np.zeros((h, w, 3), dtype=np.uint8)
     out[:] = (35, 35, 35)  # dark background
     water_mask = detect_water(img)
-    road_mask = detect_roads(img)   # already includes gray + asphalt + lines
+    road_mask = detect_roads(img)
     building_mask = detect_buildings(img, vegetation_mask)
+    # Smoother boundaries; for roads use preserve_thin so thin paths don't become thick lines
+    water_mask = _smooth_mask_boundaries(water_mask)
+    road_mask = _smooth_mask_boundaries(road_mask, preserve_thin=True)
+    building_mask = _smooth_mask_boundaries(building_mask)
     yellow_mask = detect_yellow_stress(img)
     bare_only = (farmable_mask > 0) & (vegetation_mask == 0)
-    # Vegetation but also yellow (stressed) -> show as amber; pure green otherwise
     vegetation_green_only = vegetation_mask > 0
     vegetation_green_only = vegetation_green_only & (yellow_mask == 0)
     vegetation_stressed = (vegetation_mask > 0) & (yellow_mask > 0)
-    building_bgr = (42, 42, 139)   # brown in BGR (buildings)
-    road_bgr = (100, 100, 100)     # gray (roads)
-    vegetation_bgr = (0, 200, 0)   # green
-    stressed_bgr = (0, 165, 255)   # amber/yellow in BGR
-    bare_soil_bgr = (42, 165, 200) # tan in BGR
-    water_bgr = (255, 120, 0)      # blue in BGR (rivers, water)
-    # Draw order: base layers first, then road, then building, then water on top
-    out[bare_only] = bare_soil_bgr
-    out[vegetation_green_only] = vegetation_bgr
-    out[vegetation_stressed] = stressed_bgr
+    # Smooth vegetation/bare for cleaner overlay edges
+    veg_display = _smooth_mask_boundaries((vegetation_green_only | vegetation_stressed).astype(np.uint8) * 255)
+    bare_display = _smooth_mask_boundaries((bare_only.astype(np.uint8) * 255))
+    building_bgr = (42, 42, 139)
+    road_bgr = (100, 100, 100)
+    vegetation_bgr = (0, 200, 0)
+    stressed_bgr = (0, 165, 255)
+    bare_soil_bgr = (42, 165, 200)
+    water_bgr = (255, 120, 0)
+    out[bare_display > 0] = bare_soil_bgr
+    out[veg_display > 0] = vegetation_bgr
+    out[(vegetation_mask > 0) & (yellow_mask > 0)] = stressed_bgr  # keep stressed precise
     out[road_mask > 0] = road_bgr
     out[building_mask > 0] = building_bgr
     out[water_mask > 0] = water_bgr
@@ -784,9 +955,10 @@ def get_landuse_mask_png(
     img: np.ndarray,
     vegetation_mask: np.ndarray,
     farmable_mask: np.ndarray,
+    semantic_masks: Optional[Dict[str, np.ndarray]] = None,
 ) -> bytes:
-    """Encode land-use mask image as PNG bytes."""
-    bgr = get_landuse_mask_image(img, vegetation_mask, farmable_mask)
+    """Encode land-use mask image as PNG bytes. Uses AI semantic masks when provided."""
+    bgr = get_landuse_mask_image(img, vegetation_mask, farmable_mask, semantic_masks)
     _, buf = cv2.imencode(".png", bgr)
     return buf.tobytes()
 

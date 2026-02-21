@@ -1,11 +1,47 @@
 """
 AGNI - Crop Recommendation Engine
-Rule-based crop suggestion system using temperature, humidity, season, water availability,
-and available farming space. No external AI API required.
+Real rule-based crop suggestion using temperature, humidity, season, water availability,
+soil (moisture, type, pH), and farmable space. Data from agronomic ranges and regional
+practices (India/subtropical/temperate). No mock data; no external AI API required.
 """
 
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+
+# --- Soil & environment: crop-specific preferences (crop name -> preferences) ---
+# soil_types: clay, loam, sandy, silt, black_alluvial, red_laterite
+# soil_ph: acidic (pH < 6.5), neutral (6.5–7.5), alkaline (> 7.5), any
+# Crops not listed default to loam + any pH
+CROP_SOIL_PREFERENCES: Dict[str, Dict[str, Any]] = {
+    "Rice (Paddy)": {"soil_types": ["clay", "clay_loam", "silt", "black_alluvial"], "soil_ph": "acidic"},
+    "Wheat": {"soil_types": ["loam", "clay_loam", "silt"], "soil_ph": "neutral"},
+    "Maize (Corn)": {"soil_types": ["loam", "sandy_loam", "black_alluvial"], "soil_ph": "neutral"},
+    "Barley": {"soil_types": ["loam", "sandy_loam", "silt"], "soil_ph": "neutral"},
+    "Millet (Bajra)": {"soil_types": ["sandy", "sandy_loam", "loam"], "soil_ph": "any"},
+    "Sorghum (Jowar)": {"soil_types": ["loam", "sandy_loam", "black_alluvial"], "soil_ph": "any"},
+    "Chickpea (Chana)": {"soil_types": ["loam", "sandy_loam", "black_alluvial"], "soil_ph": "neutral"},
+    "Lentil (Masoor)": {"soil_types": ["loam", "silt"], "soil_ph": "neutral"},
+    "Groundnut (Peanut)": {"soil_types": ["sandy_loam", "loam", "sandy"], "soil_ph": "neutral"},
+    "Potato": {"soil_types": ["loam", "sandy_loam"], "soil_ph": "acidic"},
+    "Carrot": {"soil_types": ["sandy", "sandy_loam", "loam"], "soil_ph": "neutral"},
+    "Sugarcane": {"soil_types": ["clay", "clay_loam", "black_alluvial"], "soil_ph": "neutral"},
+    "Cotton": {"soil_types": ["black_alluvial", "loam", "clay_loam"], "soil_ph": "neutral"},
+    "Jute": {"soil_types": ["alluvial", "clay", "silt"], "soil_ph": "neutral"},
+    "Tea": {"soil_types": ["loam", "sandy_loam"], "soil_ph": "acidic"},
+    "Coffee": {"soil_types": ["loam", "sandy_loam"], "soil_ph": "acidic"},
+    "Turmeric": {"soil_types": ["loam", "clay_loam", "red_laterite"], "soil_ph": "acidic"},
+    "Ginger": {"soil_types": ["loam", "sandy_loam", "red_laterite"], "soil_ph": "acidic"},
+    "Mustard": {"soil_types": ["loam", "clay_loam", "silt"], "soil_ph": "neutral"},
+    "Sunflower": {"soil_types": ["loam", "sandy_loam", "black_alluvial"], "soil_ph": "neutral"},
+    "Sesame (Til)": {"soil_types": ["sandy_loam", "loam", "sandy"], "soil_ph": "any"},
+}
+# Normalize soil_type input to match keys (allow clay_loam, sandy_loam, etc.)
+SOIL_TYPE_ALIASES = {
+    "clay": "clay", "loam": "loam", "sandy": "sandy", "silt": "silt",
+    "black": "black_alluvial", "black alluvial": "black_alluvial", "alluvial": "black_alluvial",
+    "red": "red_laterite", "laterite": "red_laterite", "red laterite": "red_laterite",
+    "clay_loam": "clay_loam", "sandy_loam": "sandy_loam",
+}
 
 
 # --- Season Detection ---
@@ -788,6 +824,76 @@ def _water_need_score(water_need: str, humidity: float, water_pct: float) -> flo
         return 0.2
 
 
+def _soil_moisture_level(value: Optional[Any]) -> Optional[int]:
+    """Map user soil moisture input to 0=low, 1=medium, 2=high. None if not provided."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        v = float(value)
+        if v < 30:
+            return 0
+        if v < 60:
+            return 1
+        return 2
+    s = str(value).strip().lower()
+    if s in ("low", "dry", "l"):
+        return 0
+    if s in ("medium", "moderate", "m", "mid"):
+        return 1
+    if s in ("high", "wet", "h", "moist"):
+        return 2
+    return None
+
+
+def _soil_type_score(crop_name: str, user_soil_type: str) -> float:
+    """Score 0.0–1.0: how well user soil type matches crop preference."""
+    prefs = CROP_SOIL_PREFERENCES.get(crop_name)
+    if not prefs:
+        preferred = ["loam"]
+    else:
+        preferred = prefs.get("soil_types", ["loam"])
+    raw = user_soil_type.strip().lower().replace(" ", "_")
+    user_normalized = SOIL_TYPE_ALIASES.get(raw, raw)
+    if user_normalized in preferred:
+        return 1.0
+    if user_normalized == "black_alluvial" and "alluvial" in preferred:
+        return 1.0
+    for p in preferred:
+        if user_normalized in p or p in user_normalized:
+            return 0.8
+    return 0.3
+
+
+def _soil_ph_score(crop_name: str, user_ph: str) -> float:
+    """Score 0.0–1.0: how well user soil pH matches crop preference."""
+    prefs = CROP_SOIL_PREFERENCES.get(crop_name)
+    crop_ph = (prefs.get("soil_ph", "any") if prefs else "any")
+    if crop_ph == "any":
+        return 1.0
+    u = str(user_ph).strip().lower()
+    if u not in ("acidic", "neutral", "alkaline"):
+        return 0.7
+    if u == crop_ph:
+        return 1.0
+    if (crop_ph == "neutral" and u in ("acidic", "alkaline")) or (u == "neutral" and crop_ph != "neutral"):
+        return 0.6
+    return 0.3
+
+
+def _rainfall_level(value: Optional[str]) -> Optional[int]:
+    """Map rainfall_expected to 0=low, 1=medium, 2=high."""
+    if not value:
+        return None
+    s = str(value).strip().lower()
+    if s in ("low", "dry", "scanty", "l"):
+        return 0
+    if s in ("medium", "moderate", "normal", "m"):
+        return 1
+    if s in ("high", "heavy", "good", "h"):
+        return 2
+    return None
+
+
 def recommend_crops(
     temperature: float,
     humidity: float,
@@ -796,9 +902,13 @@ def recommend_crops(
     cultivated_pct: float = 50.0,
     water_pct: float = 5.0,
     farmable_space_pct: float = 50.0,
+    soil_moisture: Optional[Any] = None,
+    soil_type: Optional[str] = None,
+    soil_ph: Optional[str] = None,
+    rainfall_expected: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
-    Recommend crops based on environmental conditions.
+    Recommend crops based on environmental and soil conditions (real agronomic data).
 
     Args:
         temperature: Current temperature in Celsius
@@ -808,6 +918,10 @@ def recommend_crops(
         cultivated_pct: Percentage already cultivated
         water_pct: Percentage of water detected
         farmable_space_pct: Percentage of land available for farming
+        soil_moisture: Optional - "low"/"medium"/"high" or 0-100 (region's typical soil moisture)
+        soil_type: Optional - e.g. "clay", "loam", "sandy", "black alluvial", "red laterite"
+        soil_ph: Optional - "acidic", "neutral", "alkaline"
+        rainfall_expected: Optional - "low", "medium", "high" (expected rainfall for the season)
 
     Returns:
         Dict with season info, recommended crops (sorted by match score), and summary.
@@ -816,6 +930,21 @@ def recommend_crops(
     season_display = get_season_display_name(season)
     available_space = max(0.0, farmable_space_pct - cultivated_pct)
 
+    use_soil = soil_moisture is not None or (soil_type and soil_type.strip()) or (soil_ph and soil_ph.strip())
+    use_rainfall = rainfall_expected and str(rainfall_expected).strip()
+    # Weights: base 40+25+20+15; with soil 35+22+18+12+10; with rainfall extra +5 from temp/season
+    if use_soil and use_rainfall:
+        w_temp, w_season, w_water, w_space, w_soil, w_rain = 0.32, 0.18, 0.18, 0.12, 0.10, 0.10
+    elif use_soil:
+        w_temp, w_season, w_water, w_space, w_soil, w_rain = 0.35, 0.20, 0.18, 0.12, 0.15, 0.0
+    elif use_rainfall:
+        w_temp, w_season, w_water, w_space, w_soil, w_rain = 0.35, 0.20, 0.18, 0.12, 0.0, 0.15
+    else:
+        w_temp, w_season, w_water, w_space, w_soil, w_rain = 0.40, 0.25, 0.20, 0.15, 0.0, 0.0
+
+    user_moisture_level = _soil_moisture_level(soil_moisture)
+    user_rainfall_level = _rainfall_level(rainfall_expected) if use_rainfall else None
+
     scored_crops = []
 
     for crop in CROP_DATABASE:
@@ -823,58 +952,82 @@ def recommend_crops(
         reasons = []
         warnings = []
 
-        # 1. Temperature match (40% weight)
+        # 1. Temperature match
         temp_mid = (crop["temp_min"] + crop["temp_max"]) / 2
         temp_range = crop["temp_max"] - crop["temp_min"]
         if crop["temp_min"] <= temperature <= crop["temp_max"]:
-            # How close to ideal center?
             temp_closeness = 1.0 - abs(temperature - temp_mid) / (temp_range / 2)
             temp_score = 0.6 + 0.4 * temp_closeness
             reasons.append(f"Temperature {temperature}°C is ideal ({crop['temp_min']}–{crop['temp_max']}°C)")
         elif temperature < crop["temp_min"]:
             gap = crop["temp_min"] - temperature
-            if gap <= 5:
-                temp_score = 0.3
-                warnings.append(f"Slightly cold ({temperature}°C vs min {crop['temp_min']}°C)")
-            else:
-                temp_score = 0.0
-                warnings.append(f"Too cold ({temperature}°C, needs {crop['temp_min']}°C+)")
+            temp_score = 0.3 if gap <= 5 else 0.0
+            warnings.append(f"Slightly cold" if gap <= 5 else f"Too cold ({temperature}°C, needs {crop['temp_min']}°C+)")
         else:
             gap = temperature - crop["temp_max"]
-            if gap <= 5:
-                temp_score = 0.3
-                warnings.append(f"Slightly hot ({temperature}°C vs max {crop['temp_max']}°C)")
-            else:
-                temp_score = 0.0
-                warnings.append(f"Too hot ({temperature}°C, max {crop['temp_max']}°C)")
-        score += temp_score * 0.4
+            temp_score = 0.3 if gap <= 5 else 0.0
+            warnings.append(f"Slightly hot" if gap <= 5 else f"Too hot ({temperature}°C, max {crop['temp_max']}°C)")
+        score += temp_score * w_temp
 
-        # 2. Season match (25% weight)
+        # 2. Season match
         if season in crop["seasons"]:
-            score += 0.25
+            score += 1.0 * w_season
             reasons.append(f"Suitable for {season_display}")
         else:
-            score += 0.05
+            score += 0.2 * w_season
             warnings.append(f"Not typical for {season_display}")
 
-        # 3. Water match (20% weight)
+        # 3. Water match
         water_score = _water_need_score(crop["water_need"], humidity, water_pct)
-        score += water_score * 0.20
+        score += water_score * w_water
         if water_score >= 0.8:
             reasons.append(f"Water availability matches ({crop['water_need']} need)")
         elif water_score <= 0.3:
             warnings.append(f"Water mismatch (crop needs {crop['water_need']})")
 
-        # 4. Space match (15% weight)
+        # 4. Space match
         if available_space >= crop["min_space_pct"]:
-            score += 0.15
+            score += 1.0 * w_space
             reasons.append(f"Enough space ({available_space:.0f}% available, needs {crop['min_space_pct']}%)")
         elif available_space >= crop["min_space_pct"] * 0.5:
-            score += 0.07
+            score += 0.5 * w_space
             warnings.append(f"Limited space ({available_space:.0f}% vs {crop['min_space_pct']}% ideal)")
         else:
-            score += 0.0
             warnings.append(f"Insufficient space ({available_space:.0f}%)")
+
+        # 5. Soil match (moisture, type, pH) when provided
+        if use_soil:
+            soil_scores = []
+            if user_moisture_level is not None:
+                crop_water = {"low": 0, "medium": 1, "high": 2}.get(crop["water_need"], 1)
+                diff = abs(user_moisture_level - crop_water)
+                sm = 1.0 if diff == 0 else (0.6 if diff == 1 else 0.2)
+                soil_scores.append(sm)
+                if sm >= 0.8:
+                    reasons.append("Soil moisture suits crop")
+                elif sm <= 0.3:
+                    warnings.append("Soil moisture may not suit crop")
+            if soil_type and soil_type.strip():
+                st = _soil_type_score(crop["name"], soil_type)
+                soil_scores.append(st)
+                if st >= 0.8:
+                    reasons.append("Soil type suitable for region")
+            if soil_ph and soil_ph.strip():
+                sp = _soil_ph_score(crop["name"], soil_ph)
+                soil_scores.append(sp)
+                if sp >= 0.8:
+                    reasons.append("Soil pH suitable")
+            soil_score = sum(soil_scores) / len(soil_scores) if soil_scores else 0.7
+            score += soil_score * w_soil
+
+        # 6. Rainfall expected (when provided)
+        if use_rainfall and user_rainfall_level is not None:
+            crop_rain = {"low": 0, "medium": 1, "high": 2}.get(crop["water_need"], 1)
+            diff = abs(user_rainfall_level - crop_rain)
+            rain_score = 1.0 if diff == 0 else (0.6 if diff == 1 else 0.2)
+            score += rain_score * w_rain
+            if rain_score >= 0.8:
+                reasons.append("Expected rainfall matches crop need")
 
         score = round(min(1.0, score), 3)
 
@@ -919,7 +1072,7 @@ def recommend_crops(
         sub_suggestions = moderately_suitable[1:6] if moderately_suitable else []
     sub_suggestions = sub_suggestions[:8]  # cap at 8 sub-suggestions
 
-    return {
+    out = {
         "season": season,
         "season_display": season_display,
         "temperature": temperature,
@@ -934,4 +1087,19 @@ def recommend_crops(
         "moderately_suitable": moderately_suitable[:10],
         "not_recommended_count": len(not_recommended),
         "total_crops_evaluated": len(CROP_DATABASE),
+        "indicators_used": ["temperature", "humidity", "season", "water_availability", "space"],
     }
+    if use_soil:
+        if soil_moisture is not None:
+            out["indicators_used"].append("soil_moisture")
+        if soil_type and str(soil_type).strip():
+            out["indicators_used"].append("soil_type")
+        if soil_ph and str(soil_ph).strip():
+            out["indicators_used"].append("soil_ph")
+        out["soil_moisture"] = soil_moisture
+        out["soil_type"] = soil_type
+        out["soil_ph"] = soil_ph
+    if use_rainfall:
+        out["indicators_used"].append("rainfall_expected")
+        out["rainfall_expected"] = rainfall_expected
+    return out
