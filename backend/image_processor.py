@@ -8,15 +8,22 @@ import numpy as np
 from typing import Tuple, List, Dict, Any
 
 # Resolution-agnostic pipeline: max dimension for ExG processing
-EXG_MAX_DIMENSION = 512
-MIN_VEGETATION_COMPONENT_PIXELS = 500
-MORPH_KERNEL_SIZE = (5, 5)
+EXG_MAX_DIMENSION = 640  # Slightly higher for better detail
+MIN_VEGETATION_COMPONENT_PIXELS = 200  # Keep smaller green patches
+MORPH_KERNEL_SIZE = (7, 7)  # Larger kernel to fill gaps in vegetation
+MORPH_CLOSE_ITERATIONS = 2  # Extra closing to merge nearby green
 # Include dark green: pixels with normalized ExG >= this and green-dominant (G>R, G>B) are vegetation
-EXG_DARK_GREEN_MIN = 18
+EXG_DARK_GREEN_MIN = 8  # Lower threshold to capture more green
+EXG_PALE_GREEN_MIN = 5   # Very pale green still counts if G-dominant
+
+# HSV green range (OpenCV H 0-180): typical vegetation green
+HSV_GREEN_H_LOWER, HSV_GREEN_H_UPPER = 28, 85
+HSV_GREEN_S_LOWER, HSV_GREEN_S_UPPER = 40, 255
+HSV_GREEN_V_LOWER, HSV_GREEN_V_UPPER = 40, 255
 
 # Non-agricultural object detection parameters
 MIN_BUILDING_AREA = 1000  # Minimum area for building detection
-MIN_ROAD_LINE_LENGTH = 50  # Minimum line length for road detection
+MIN_ROAD_LINE_LENGTH = 80  # Stricter: longer lines only (reduces false roads)
 
 # Texture-based cultivated filtering (7x7 window)
 TEXTURE_WINDOW_SIZE = 7
@@ -34,6 +41,12 @@ AREA_PLAUSIBLE_HIGH = 0.80  # 80%
 # HSV ranges for stress (yellow) only (OpenCV: H 0-180, S 0-255, V 0-255)
 YELLOW_LOWER = np.array([20, 100, 100])
 YELLOW_UPPER = np.array([35, 255, 255])
+
+# HSV for bare soil / non-green land (brown, tan, beige): H 8-25, S 30-180, V 60-220
+BARE_SOIL_H_LOWER, BARE_SOIL_H_UPPER = 8, 25
+BARE_SOIL_S_LOWER, BARE_SOIL_S_UPPER = 30, 180
+BARE_SOIL_V_LOWER, BARE_SOIL_V_UPPER = 60, 220
+MIN_BARE_SOIL_COMPONENT_PIXELS = 300
 
 
 def _resize_max_dimension(img: np.ndarray, max_dim: int) -> Tuple[np.ndarray, float, Tuple[int, int]]:
@@ -131,6 +144,68 @@ def get_non_agricultural_mask(img: np.ndarray, vegetation_mask: np.ndarray) -> n
     non_agriculture_mask = cv2.bitwise_or(water_mask, road_mask)
     non_agriculture_mask = cv2.bitwise_or(non_agriculture_mask, building_mask)
     return non_agriculture_mask
+
+
+def get_non_agricultural_mask_no_roads(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray:
+    """
+    Water + buildings only (no roads). Use this when building vegetation/farmable masks
+    so that false road detections (Hough lines) do not create thick black line artifacts.
+    Roads are still shown on the land-use map via detect_roads() separately.
+    """
+    water_mask = detect_water(img)
+    building_mask = detect_buildings(img, vegetation_mask)
+    return cv2.bitwise_or(water_mask, building_mask)
+
+
+def detect_vegetation_hsv(img: np.ndarray) -> np.ndarray:
+    """
+    Detect green vegetation using HSV. Use alongside ExG for fuller coverage.
+    Returns binary mask (255 = green vegetation).
+    """
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower = np.array([HSV_GREEN_H_LOWER, HSV_GREEN_S_LOWER, HSV_GREEN_V_LOWER])
+    upper = np.array([HSV_GREEN_H_UPPER, HSV_GREEN_S_UPPER, HSV_GREEN_V_UPPER])
+    green = cv2.inRange(hsv, lower, upper)
+    kernel = np.ones((5, 5), np.uint8)
+    green = cv2.morphologyEx(green, cv2.MORPH_CLOSE, kernel)
+    green = cv2.morphologyEx(green, cv2.MORPH_OPEN, kernel)
+    return green
+
+
+def detect_bare_soil(img: np.ndarray) -> np.ndarray:
+    """
+    Detect bare soil / non-green cultivable land (brown, tan, beige) using HSV.
+    Excludes very dark (shadow) and very bright (sand/road). Returns binary mask (255 = bare soil).
+    """
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower = np.array([BARE_SOIL_H_LOWER, BARE_SOIL_S_LOWER, BARE_SOIL_V_LOWER])
+    upper = np.array([BARE_SOIL_H_UPPER, BARE_SOIL_S_UPPER, BARE_SOIL_V_UPPER])
+    bare = cv2.inRange(hsv, lower, upper)
+    kernel = np.ones((5, 5), np.uint8)
+    bare = cv2.morphologyEx(bare, cv2.MORPH_CLOSE, kernel)
+    bare = cv2.morphologyEx(bare, cv2.MORPH_OPEN, kernel)
+    contours, _ = cv2.findContours(bare, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    out = np.zeros_like(bare)
+    for c in contours:
+        if cv2.contourArea(c) >= MIN_BARE_SOIL_COMPONENT_PIXELS:
+            cv2.drawContours(out, [c], -1, 255, -1)
+    return out
+
+
+def get_farmable_mask(
+    img: np.ndarray,
+    vegetation_mask: np.ndarray,
+) -> np.ndarray:
+    """
+    Farmable = vegetation OR bare soil, excluding only water and buildings (not roads).
+    Avoids false road detections creating line artifacts. Returns binary mask (255 = farmable).
+    """
+    bare_soil_mask = detect_bare_soil(img)
+    combined = cv2.bitwise_or(vegetation_mask, bare_soil_mask)
+    non_ag = get_non_agricultural_mask_no_roads(img, vegetation_mask)
+    farmable = cv2.subtract(combined, non_ag)
+    farmable = np.clip(farmable, 0, 255).astype(np.uint8)
+    return farmable
 
 
 def _compute_local_variance_map(gray: np.ndarray, window_size: int) -> np.ndarray:
@@ -236,13 +311,21 @@ def exg_vegetation_pipeline(img: np.ndarray) -> Tuple[np.ndarray, int, int, int,
     blurred = cv2.GaussianBlur(exg_norm, (5, 5), 0)
     blurred_uint8 = blurred.astype(np.uint8)
     _, binary_uint8 = cv2.threshold(blurred_uint8, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    # Include dark green: green-dominant pixels (G>R, G>B) with ExG above low threshold
+    # Include dark and pale green: green-dominant pixels (G>R, G>B) with ExG above threshold
     green_dominant = (g > r) & (g > b)
     dark_green = (exg_norm >= EXG_DARK_GREEN_MIN) & green_dominant
+    pale_green = (exg_norm >= EXG_PALE_GREEN_MIN) & green_dominant
     dark_green_uint8 = (dark_green.astype(np.float32) * 255).astype(np.uint8)
+    pale_green_uint8 = (pale_green.astype(np.float32) * 255).astype(np.uint8)
     binary_uint8 = cv2.bitwise_or(binary_uint8, dark_green_uint8)
+    binary_uint8 = cv2.bitwise_or(binary_uint8, pale_green_uint8)
+    # Merge HSV green for fuller vegetation coverage (catches greens ExG can miss)
+    hsv_green_working = detect_vegetation_hsv(working)
+    binary_uint8 = cv2.bitwise_or(binary_uint8, hsv_green_working)
     kernel = np.ones(MORPH_KERNEL_SIZE, np.uint8)
     closed = cv2.morphologyEx(binary_uint8, cv2.MORPH_CLOSE, kernel)
+    for _ in range(MORPH_CLOSE_ITERATIONS - 1):
+        closed = cv2.morphologyEx(closed, cv2.MORPH_CLOSE, kernel)
     pixels_before_removal = int(cv2.countNonZero(closed))
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     mask_working = np.zeros_like(closed)
@@ -260,8 +343,8 @@ def exg_vegetation_pipeline(img: np.ndarray) -> Tuple[np.ndarray, int, int, int,
             mask_working, (orig_w, orig_h), interpolation=cv2.INTER_NEAREST
         )
     
-    # Detect and exclude non-agricultural objects (water, roads, buildings)
-    non_agriculture_mask = get_non_agricultural_mask(img, vegetation_mask_full)
+    # Exclude only water and buildings (NOT roads) to avoid Hough line artifacts in mask
+    non_agriculture_mask = get_non_agricultural_mask_no_roads(img, vegetation_mask_full)
     non_ag_pixels = int(cv2.countNonZero(non_agriculture_mask))
     veg_pixels_before = int(cv2.countNonZero(vegetation_mask_full))
     
@@ -440,10 +523,13 @@ def clip_cultivated_mask_by_boundary(
     return clipped, cultivated_inside, total_inside
 
 
-def get_landuse_mask_image(img: np.ndarray, vegetation_mask: np.ndarray) -> np.ndarray:
+def get_landuse_mask_image(
+    img: np.ndarray,
+    vegetation_mask: np.ndarray,
+    farmable_mask: np.ndarray,
+) -> np.ndarray:
     """
-    Build a single mask image showing land use: vegetation (green), water (blue), roads (gray), buildings (brown).
-    Uses existing OpenCV detectors only (no AI/API). Returns BGR image.
+    Land use: vegetation (green), bare soil (tan), water (blue), roads (gray), buildings (brown).
     """
     h, w = img.shape[:2]
     out = np.zeros((h, w, 3), dtype=np.uint8)
@@ -451,31 +537,44 @@ def get_landuse_mask_image(img: np.ndarray, vegetation_mask: np.ndarray) -> np.n
     water_mask = detect_water(img)
     road_mask = detect_roads(img)
     building_mask = detect_buildings(img, vegetation_mask)
-    # Priority (later overwrites): background < buildings < roads < vegetation < water
+    bare_only = (farmable_mask > 0) & (vegetation_mask == 0)
     building_bgr = (42, 42, 139)   # brown in BGR
-    road_bgr = (100, 100, 100)    # gray
+    road_bgr = (100, 100, 100)     # gray
     vegetation_bgr = (0, 200, 0)   # green
+    bare_soil_bgr = (42, 165, 200) # tan in BGR
     water_bgr = (255, 120, 0)      # blue in BGR
     out[building_mask > 0] = building_bgr
     out[road_mask > 0] = road_bgr
+    out[bare_only] = bare_soil_bgr
     out[vegetation_mask > 0] = vegetation_bgr
     out[water_mask > 0] = water_bgr
     return out
 
 
-def get_landuse_mask_png(img: np.ndarray, vegetation_mask: np.ndarray) -> bytes:
+def get_landuse_mask_png(
+    img: np.ndarray,
+    vegetation_mask: np.ndarray,
+    farmable_mask: np.ndarray,
+) -> bytes:
     """Encode land-use mask image as PNG bytes."""
-    bgr = get_landuse_mask_image(img, vegetation_mask)
+    bgr = get_landuse_mask_image(img, vegetation_mask, farmable_mask)
     _, buf = cv2.imencode(".png", bgr)
     return buf.tobytes()
 
 
-def get_overlay_mask(img: np.ndarray, binary_mask: np.ndarray) -> np.ndarray:
-    """Overlay green tint on original where cultivated (binary mask white). Returns BGR."""
+def get_overlay_mask(
+    img: np.ndarray,
+    vegetation_mask: np.ndarray,
+    farmable_mask: np.ndarray,
+) -> np.ndarray:
+    """
+    Overlay farmable land: tint ALL farmable pixels in green.
+    This means both vegetated and non-green cultivable areas appear uniformly green.
+    """
     overlay = img.copy().astype(np.float32)
     alpha = 0.35
     green_bgr = np.array([0, 180, 0], dtype=np.float32)
-    overlay[binary_mask > 0] = overlay[binary_mask > 0] * (1 - alpha) + green_bgr * alpha
+    overlay[farmable_mask > 0] = overlay[farmable_mask > 0] * (1 - alpha) + green_bgr * alpha
     return overlay.astype(np.uint8)
 
 
@@ -524,11 +623,11 @@ def get_overlay_mask_png(overlay_bgr: np.ndarray) -> bytes:
     return png.tobytes()
 
 
-def analyze_image(image_bytes: bytes) -> Tuple[float, float, np.ndarray, np.ndarray, int, Tuple[int, int], Tuple[int, int]]:
+def analyze_image(image_bytes: bytes) -> Tuple[float, float, np.ndarray, np.ndarray, np.ndarray, int, Tuple[int, int], Tuple[int, int]]:
     """
-    Real OpenCV analysis: read image, ExG vegetation pipeline, optional stress from HSV yellow.
+    Real OpenCV analysis: read image, ExG vegetation pipeline, farmable = vegetation + bare soil.
     Returns: (cultivated_percentage, stress_percentage, original_bgr_image, vegetation_mask,
-             removed_pixel_count, original_resolution, processing_resolution)
+             farmable_mask, removed_pixel_count, original_resolution, processing_resolution)
     """
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
@@ -537,6 +636,8 @@ def analyze_image(image_bytes: bytes) -> Tuple[float, float, np.ndarray, np.ndar
 
     vegetation_mask, vegetation_pixel_count, total_pixel_count, removed_pixel_count, original_resolution, processing_resolution = exg_vegetation_pipeline(img)
     cultivated_percentage = (vegetation_pixel_count / total_pixel_count) * 100.0 if total_pixel_count else 0.0
+
+    farmable_mask = get_farmable_mask(img, vegetation_mask)
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     yellow_mask = cv2.inRange(hsv, YELLOW_LOWER, YELLOW_UPPER)
@@ -549,4 +650,4 @@ def analyze_image(image_bytes: bytes) -> Tuple[float, float, np.ndarray, np.ndar
 
     cultivated_percentage = round(cultivated_percentage, 2)
     stress_percentage = round(stress_percentage, 2)
-    return cultivated_percentage, stress_percentage, img, vegetation_mask, removed_pixel_count, original_resolution, processing_resolution
+    return cultivated_percentage, stress_percentage, img, vegetation_mask, farmable_mask, removed_pixel_count, original_resolution, processing_resolution

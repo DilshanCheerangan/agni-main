@@ -41,6 +41,17 @@
     .leaflet-draw-toolbar a {
       background-color: #059669 !important;
     }
+
+    .location-method-btn.active {
+      border-color: #059669 !important;
+      background-color: #d1fae5 !important;
+      color: #047857 !important;
+    }
+
+    .location-pin {
+      background: none !important;
+      border: none !important;
+    }
   </style>
 </head>
 
@@ -120,6 +131,11 @@
           class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
           <i class="fas fa-cloud-sun w-5"></i>
           <span>Weather & Climate</span>
+        </a>
+        <a href="#" data-page="my-lands"
+          class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
+          <i class="fas fa-map-marked-alt w-5"></i>
+          <span>My Lands</span>
         </a>
         <a href="#" data-page="news"
           class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition">
@@ -241,30 +257,78 @@
 
         <!-- Image Analyzer Page -->
         <div id="page-analyzer" class="page-content hidden">
-          <!-- Farm Boundary Selection (Leaflet Map) -->
+          <!-- Location Selection Method -->
           <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
               <i class="fas fa-map-marked-alt text-emerald-600"></i>
-              Select Farm Boundary
+              Select Farm Location
             </h3>
-            <p class="text-sm text-slate-600 mb-2">Draw a polygon on the map to define your farm area. Use the layer
-              control (top-right) to switch to <strong>Satellite</strong> view for easier selection.</p>
-            <p class="text-xs text-slate-500 mb-4">Step 1: Draw polygon (click corners, double-click to finish) → Step
-              2: Click &quot;Confirm Farm Boundary&quot; → Step 3: Upload image below and click Analyze.</p>
-            <div id="farmMap"></div>
-            <div class="mt-4 flex flex-wrap items-center gap-3">
-              <button type="button" id="confirmBoundaryBtn"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled>
-                <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
+            <div class="flex gap-4 mb-4">
+              <button type="button" id="locationMethodMap" class="location-method-btn px-4 py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-medium transition">
+                <i class="fas fa-map mr-2"></i>Map Selection
               </button>
-              <button type="button" id="clearBoundaryBtn"
-                class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
-                <i class="fas fa-eraser mr-2"></i>Clear Boundary
+              <button type="button" id="locationMethodPincode" class="location-method-btn px-4 py-2 rounded-lg border-2 border-slate-300 bg-white text-slate-700 font-medium transition">
+                <i class="fas fa-map-pin mr-2"></i>Pincode / Place
               </button>
-              <span id="boundarySummary" class="text-sm text-slate-500"></span>
             </div>
-            <p id="boundaryError" class="text-sm text-red-600 mt-2 hidden"></p>
+            
+            <!-- Map Selection Method -->
+            <div id="locationMethodMapPanel" class="location-panel">
+              <p class="text-sm text-slate-600 mb-2">Draw a polygon on the map to define your farm area. Use the layer
+                control (top-right) to switch to <strong>Satellite</strong> view for easier selection.</p>
+              <p class="text-xs text-slate-500 mb-4">Step 1: Draw polygon (click corners, double-click to finish) → Step
+                2: Click &quot;Confirm Farm Boundary&quot; → Step 3: Upload image below and click Analyze.</p>
+              <div id="farmMap"></div>
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <button type="button" id="confirmBoundaryBtn"
+                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled>
+                  <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
+                </button>
+                <button type="button" id="clearBoundaryBtn"
+                  class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
+                  <i class="fas fa-eraser mr-2"></i>Clear Boundary
+                </button>
+                <span id="boundarySummary" class="text-sm text-slate-500"></span>
+              </div>
+              <p id="boundaryError" class="text-sm text-red-600 mt-2 hidden"></p>
+            </div>
+            
+            <!-- Pincode/Place Selection Method -->
+            <div id="locationMethodPincodePanel" class="location-panel hidden">
+              <p class="text-sm text-slate-600 mb-4">Enter pincode or place name. The map will show that location so you can then draw your farm boundary on the map.</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
+                  </label>
+                  <input type="text" id="farmPincode" placeholder="e.g., 110001"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-city mr-2 text-emerald-600"></i>Place Name
+                  </label>
+                  <input type="text" id="farmPlace" placeholder="e.g., Delhi, New Delhi"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <button type="button" id="confirmLocationBtn"
+                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+                  <i class="fas fa-check mr-2"></i>Show on Map
+                </button>
+                <button type="button" id="useCurrentLocationBtn"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                  <i class="fas fa-crosshairs mr-2"></i>Use Current Location
+                </button>
+                <span id="locationSummary" class="text-sm text-slate-500"></span>
+              </div>
+              <p id="locationError" class="text-sm text-red-600 mt-2 hidden"></p>
+              <p id="locationMapHint" class="text-sm text-emerald-700 mt-2 hidden">
+                <i class="fas fa-map mr-1"></i>Map below is centered on your location. Switch to &quot;Map Selection&quot; to draw your farm boundary.
+              </p>
+            </div>
           </div>
 
           <!-- Use map as image -->
@@ -365,39 +429,39 @@
             </div>
             <h3 class="text-lg font-semibold text-slate-800 mb-6">Analysis Results</h3>
 
-            <!-- Image Previews -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Image Previews (larger map windows) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
               <div class="text-center">
                 <p class="text-xs font-medium text-slate-500 mb-2">Original</p>
-                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-                  <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden" />
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="originalPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
               <div class="text-center">
                 <p class="text-xs font-medium text-slate-500 mb-2">Binary Mask</p>
-                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-                  <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden" />
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="binaryMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
               <div class="text-center">
                 <p class="text-xs font-medium text-slate-500 mb-2">Overlay</p>
-                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-                  <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden" />
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="overlayMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
               <div class="text-center">
                 <p class="text-xs font-medium text-slate-500 mb-2">Land use</p>
-                <p class="text-xs text-slate-400 mb-1">Water · Roads · Buildings · Vegetation</p>
-                <div class="aspect-[4/3] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
-                  <img id="landUseMaskPreview" src="" alt="Land use mask" class="w-full h-full object-cover hidden" />
+                <p class="text-xs text-slate-400 mb-1">Water · Roads · Buildings · Vegetation · Bare soil</p>
+                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200">
+                  <img id="landUseMaskPreview" src="" alt="Land use mask" class="w-full h-full object-cover hidden min-h-[220px]" />
                   <span id="landUseMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center h-full">—</span>
+                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
                 </div>
               </div>
             </div>
@@ -538,7 +602,19 @@
                   <span class="text-emerald-700">Analyzing conditions &amp; finding best crops...</span>
                 </div>
 
-                <!-- Highly Recommended -->
+                <!-- Primary recommendation + sub-suggestions -->
+                <div id="cropPrimarySection" class="hidden mb-4">
+                  <h5 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
+                    <i class="fas fa-star text-yellow-500"></i> Top recommendation
+                  </h5>
+                  <div id="cropPrimaryCard" class="mb-4"></div>
+                  <h6 class="font-medium text-teal-800 mb-2 flex items-center gap-2 text-sm">
+                    <i class="fas fa-list-ul text-teal-500"></i> Also consider
+                  </h6>
+                  <div id="cropSubSuggestions" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
+                </div>
+
+                <!-- Highly Recommended (fallback) -->
                 <div id="cropHighlyRecommended" class="hidden">
                   <h5 class="font-semibold text-emerald-800 mb-3 flex items-center gap-2">
                     <i class="fas fa-star text-yellow-500"></i> Highly Recommended
@@ -641,15 +717,25 @@
               <i class="fas fa-map-marker-alt text-emerald-600"></i>
               Location
             </h3>
+            <div class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+              <div class="flex items-center gap-2 text-sm text-emerald-700">
+                <i class="fas fa-info-circle"></i>
+                <span>Using your current location by default. You can search for other locations if needed.</span>
+              </div>
+            </div>
             <div class="flex gap-3">
-              <input type="text" id="weatherLocation" placeholder="Enter city name"
-                class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                value="Delhi">
+              <input type="text" id="weatherLocation" placeholder="Search city name (optional)"
+                class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
               <button id="fetchWeatherBtn"
                 class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
                 <i class="fas fa-search mr-2"></i>Get Weather
               </button>
+              <button id="useMyLocationBtn"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-crosshairs mr-2"></i>My Location
+              </button>
             </div>
+            <p id="weatherLocationStatus" class="text-sm text-slate-500 mt-2"></p>
           </div>
 
           <div id="weatherContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -725,6 +811,89 @@
                 <i class="fas fa-spinner fa-spin text-slate-400 text-2xl"></i>
                 <span class="ml-3 text-slate-600">Loading news...</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Lands Page -->
+        <div id="page-my-lands" class="page-content hidden">
+          <div class="bg-white rounded-xl shadow-md border border-slate-200 p-6 mb-6">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <i class="fas fa-map-marked-alt text-emerald-600"></i>
+                My Lands
+              </h3>
+              <button type="button" id="addLandBtn"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+                <i class="fas fa-plus mr-2"></i>Add New Land
+              </button>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">Manage your multiple farm locations. Each land can be secured with fingerprint authentication.</p>
+            <div id="landsList" class="space-y-4">
+              <p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" to get started.</p>
+            </div>
+          </div>
+          
+          <!-- Add/Edit Land Modal -->
+          <div id="landModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xl font-semibold text-slate-800" id="landModalTitle">Add New Land</h4>
+                <button type="button" id="closeLandModal" class="text-slate-400 hover:text-slate-600">
+                  <i class="fas fa-times text-xl"></i>
+                </button>
+              </div>
+              <form id="landForm" class="space-y-4">
+                <input type="hidden" id="landId" />
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-tag mr-2 text-emerald-600"></i>Land Name
+                  </label>
+                  <input type="text" id="landName" required
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="e.g., North Field, Main Farm" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
+                  </label>
+                  <input type="text" id="landPincode"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="e.g., 110001" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-city mr-2 text-emerald-600"></i>Place / City
+                  </label>
+                  <input type="text" id="landPlace" required
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="e.g., Delhi, New Delhi" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2">
+                    <i class="fas fa-info-circle mr-2 text-emerald-600"></i>Notes (optional)
+                  </label>
+                  <textarea id="landNotes" rows="3"
+                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Additional details about this land..."></textarea>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="landUseFingerprint" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                  <label for="landUseFingerprint" class="text-sm text-slate-700">
+                    <i class="fas fa-fingerprint mr-1"></i>Require fingerprint to access this land
+                  </label>
+                </div>
+                <div class="flex gap-3 pt-2">
+                  <button type="submit"
+                    class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+                    <i class="fas fa-save mr-2"></i>Save
+                  </button>
+                  <button type="button" id="cancelLandForm"
+                    class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -880,7 +1049,7 @@
 
       // Load page-specific data
       if (pageName === 'weather') {
-        fetchWeather('Delhi');
+        fetchWeatherByLocation();
       } else if (pageName === 'news') {
         fetchNews();
       } else if (pageName === 'dashboard') {
@@ -888,6 +1057,8 @@
       } else if (pageName === 'analyzer') {
         initFarmMapIfNeeded();
         if (typeof updateAnalyzeButtonState === 'function') updateAnalyzeButtonState();
+      } else if (pageName === 'my-lands') {
+        loadMyLands();
       }
     }
 
@@ -899,6 +1070,11 @@
     let osmLayer = null;
     let satelliteLayer = null;
     let capturedMapBlob = null; // when "Use map as image" is used
+    let locationMarker = null; // marker for pincode/place or current location
+
+    const DEFAULT_MAP_CENTER = [20.5937, 78.9629];
+    const DEFAULT_MAP_ZOOM = 5;
+    const LOCATION_MAP_ZOOM = 14;
 
     function initFarmMapIfNeeded() {
       if (document.getElementById('farmMap').offsetParent === null) return;
@@ -906,7 +1082,7 @@
         farmMap.invalidateSize();
         return;
       }
-      farmMap = L.map('farmMap', { center: [20.5937, 78.9629], zoom: 5 });
+      farmMap = L.map('farmMap', { center: DEFAULT_MAP_CENTER, zoom: DEFAULT_MAP_ZOOM });
 
       osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -923,6 +1099,19 @@
 
       drawnItems = new L.FeatureGroup();
       farmMap.addLayer(drawnItems);
+
+      // Default: center map on user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            farmMap.setView([lat, lng], LOCATION_MAP_ZOOM);
+            setLocationMarker(lat, lng);
+          },
+          function () { /* keep default center */ }
+        );
+      }
 
       drawControl = new L.Control.Draw({
         draw: {
@@ -964,6 +1153,55 @@
         document.getElementById('boundarySummary').textContent = '';
         document.getElementById('clearBoundaryBtn').classList.add('hidden');
       });
+    }
+
+    function setLocationMarker(lat, lng) {
+      if (locationMarker) {
+        farmMap.removeLayer(locationMarker);
+        locationMarker = null;
+      }
+      locationMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'location-pin',
+          html: '<i class="fas fa-map-marker-alt text-2xl text-emerald-600" style="margin-left:-12px; margin-top:-24px;"></i>',
+          iconSize: [24, 24]
+        })
+      }).addTo(farmMap);
+    }
+
+    async function geocodePincodeOrPlace(query) {
+      if (!query || !query.trim()) return null;
+      const q = encodeURIComponent(query.trim());
+      const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+      try {
+        const res = await fetch(url, {
+          headers: { 'Accept': 'application/json', 'User-Agent': 'AGNI-Agriculture-App/1.0' }
+        });
+        const data = await res.json();
+        if (data && data[0]) {
+          return {
+            lat: parseFloat(data[0].lat),
+            lon: parseFloat(data[0].lon),
+            display_name: data[0].display_name || ''
+          };
+        }
+      } catch (e) { console.warn('Geocoding failed', e); }
+      return null;
+    }
+
+    function centerMapOnLocation(lat, lng, showMapPanel) {
+      initFarmMapIfNeeded();
+      if (!farmMap) return;
+      farmMap.setView([lat, lng], LOCATION_MAP_ZOOM);
+      setLocationMarker(lat, lng);
+      if (showMapPanel) {
+        document.getElementById('locationMethodMap').click();
+        document.getElementById('locationSummary').textContent = 'Map centered. Draw your farm boundary on the map above.';
+        document.getElementById('locationMapHint').classList.remove('hidden');
+        setTimeout(function () {
+          if (farmMap) farmMap.invalidateSize();
+        }, 100);
+      }
     }
 
     document.getElementById('confirmBoundaryBtn').addEventListener('click', function () {
@@ -1302,9 +1540,268 @@
       document.getElementById('fieldWorkAdvice').textContent = fieldWork;
     }
 
+    // Location method toggle (Map vs Pincode/Place)
+    let currentLocationMethod = 'map';
+    let selectedLocationData = null;
+    
+    document.getElementById('locationMethodMap').addEventListener('click', () => {
+      currentLocationMethod = 'map';
+      document.getElementById('locationMethodMap').classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+      document.getElementById('locationMethodMap').classList.remove('border-slate-300', 'bg-white', 'text-slate-700');
+      document.getElementById('locationMethodPincode').classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+      document.getElementById('locationMethodPincode').classList.add('border-slate-300', 'bg-white', 'text-slate-700');
+      document.getElementById('locationMethodMapPanel').classList.remove('hidden');
+      document.getElementById('locationMethodPincodePanel').classList.add('hidden');
+      document.getElementById('locationMapHint').classList.add('hidden');
+      initFarmMapIfNeeded();
+    });
+    
+    document.getElementById('locationMethodPincode').addEventListener('click', () => {
+      currentLocationMethod = 'pincode';
+      document.getElementById('locationMethodPincode').classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+      document.getElementById('locationMethodPincode').classList.remove('border-slate-300', 'bg-white', 'text-slate-700');
+      document.getElementById('locationMethodMap').classList.remove('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
+      document.getElementById('locationMethodMap').classList.add('border-slate-300', 'bg-white', 'text-slate-700');
+      document.getElementById('locationMethodPincodePanel').classList.remove('hidden');
+      document.getElementById('locationMethodMapPanel').classList.add('hidden');
+    });
+    
+    document.getElementById('confirmLocationBtn').addEventListener('click', async () => {
+      const pincode = document.getElementById('farmPincode').value.trim();
+      const place = document.getElementById('farmPlace').value.trim();
+      const query = place || pincode;
+      if (!query) {
+        document.getElementById('locationError').textContent = 'Please enter pincode or place name.';
+        document.getElementById('locationError').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('locationError').classList.add('hidden');
+      document.getElementById('locationSummary').textContent = 'Finding location...';
+      const result = await geocodePincodeOrPlace(query);
+      if (!result) {
+        document.getElementById('locationError').textContent = 'Could not find that place. Try a different pincode or name.';
+        document.getElementById('locationError').classList.remove('hidden');
+        document.getElementById('locationSummary').textContent = '';
+        return;
+      }
+      selectedLocationData = { pincode, place, method: 'pincode', lat: result.lat, lon: result.lon };
+      document.getElementById('locationSummary').textContent = result.display_name ? `Found: ${result.display_name}` : '';
+      centerMapOnLocation(result.lat, result.lon, true);
+    });
+
+    document.getElementById('useCurrentLocationBtn').addEventListener('click', () => {
+      document.getElementById('locationError').classList.add('hidden');
+      if (!navigator.geolocation) {
+        document.getElementById('locationError').textContent = 'Geolocation is not supported by your browser.';
+        document.getElementById('locationError').classList.remove('hidden');
+        return;
+      }
+      document.getElementById('locationSummary').textContent = 'Getting your location...';
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          selectedLocationData = { method: 'current', lat, lon: lng };
+          document.getElementById('locationSummary').textContent = 'Current location set.';
+          centerMapOnLocation(lat, lng, true);
+        },
+        function () {
+          document.getElementById('locationError').textContent = 'Could not get your location. Check permissions or try pincode/place.';
+          document.getElementById('locationError').classList.remove('hidden');
+          document.getElementById('locationSummary').textContent = '';
+        }
+      );
+    });
+
+    // Weather: Use geolocation by default
+    let userLocation = null;
+    
+    async function fetchWeatherByLocation() {
+      if (!userLocation) {
+        if (navigator.geolocation) {
+          document.getElementById('weatherLocationStatus').textContent = 'Getting your location...';
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              userLocation = {
+                lat: position.coords.latitude,
+                lon: position.coords.longitude
+              };
+              try {
+                const res = await fetch(`${API_BASE}/weather-by-coords?lat=${userLocation.lat}&lon=${userLocation.lon}`, {
+                  headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (res.status === 401) { showLogin(); return; }
+                const data = await res.json();
+                if (data.success) {
+                  const weatherData = {
+                    name: data.name + (data.country ? ', ' + data.country : ''),
+                    main: {
+                      temp: data.temp,
+                      feels_like: data.feels_like,
+                      humidity: data.humidity,
+                      pressure: data.pressure
+                    },
+                    weather: [{
+                      main: data.weather_main,
+                      description: data.weather_description,
+                      icon: '01d'
+                    }],
+                    wind: {
+                      speed: data.wind_speed
+                    }
+                  };
+                  displayWeather(weatherData);
+                  document.getElementById('weatherLocationStatus').textContent = `Showing weather for: ${data.name || 'Your location'}`;
+                }
+              } catch (err) {
+                document.getElementById('weatherLocationStatus').textContent = 'Could not fetch weather. Try searching for a city.';
+                fetchWeather('Delhi');
+              }
+            },
+            () => {
+              document.getElementById('weatherLocationStatus').textContent = 'Location access denied. Using default location.';
+              fetchWeather('Delhi');
+            }
+          );
+        } else {
+          fetchWeather('Delhi');
+        }
+      } else {
+        try {
+          const res = await fetch(`${API_BASE}/weather-by-coords?lat=${userLocation.lat}&lon=${userLocation.lon}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          if (res.status === 401) { showLogin(); return; }
+          const data = await res.json();
+          if (data.success) {
+            const weatherData = {
+              name: data.name + (data.country ? ', ' + data.country : ''),
+              main: {
+                temp: data.temp,
+                feels_like: data.feels_like,
+                humidity: data.humidity,
+                pressure: data.pressure
+              },
+              weather: [{
+                main: data.weather_main,
+                description: data.weather_description,
+                icon: '01d'
+              }],
+              wind: {
+                speed: data.wind_speed
+              }
+            };
+            displayWeather(weatherData);
+            document.getElementById('weatherLocationStatus').textContent = `Showing weather for: ${data.name || 'Your location'}`;
+          }
+        } catch (err) {
+          fetchWeather('Delhi');
+        }
+      }
+    }
+    
+    document.getElementById('useMyLocationBtn').addEventListener('click', () => {
+      userLocation = null;
+      fetchWeatherByLocation();
+    });
+    
     document.getElementById('fetchWeatherBtn').addEventListener('click', () => {
-      const city = document.getElementById('weatherLocation').value;
-      if (city) fetchWeather(city);
+      const city = document.getElementById('weatherLocation').value.trim();
+      if (city) {
+        fetchWeather(city);
+        document.getElementById('weatherLocationStatus').textContent = '';
+      }
+    });
+
+    // My Lands Management
+    let myLands = JSON.parse(localStorage.getItem('agni_lands') || '[]');
+    
+    function loadMyLands() {
+      const landsList = document.getElementById('landsList');
+      if (myLands.length === 0) {
+        landsList.innerHTML = '<p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" to get started.</p>';
+        return;
+      }
+      landsList.innerHTML = myLands.map((land, idx) => `
+        <div class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h4 class="font-semibold text-slate-800 flex items-center gap-2">
+                ${land.name}
+                ${land.useFingerprint ? '<i class="fas fa-fingerprint text-emerald-600 text-sm" title="Fingerprint protected"></i>' : ''}
+              </h4>
+              <p class="text-sm text-slate-600 mt-1">
+                <i class="fas fa-map-pin mr-1"></i>${land.place}${land.pincode ? ` (${land.pincode})` : ''}
+              </p>
+              ${land.notes ? `<p class="text-sm text-slate-500 mt-2">${land.notes}</p>` : ''}
+            </div>
+            <div class="flex gap-2">
+              <button onclick="editLand(${idx})" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button onclick="deleteLand(${idx})" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    window.editLand = function(idx) {
+      const land = myLands[idx];
+      document.getElementById('landId').value = idx;
+      document.getElementById('landName').value = land.name;
+      document.getElementById('landPincode').value = land.pincode || '';
+      document.getElementById('landPlace').value = land.place || '';
+      document.getElementById('landNotes').value = land.notes || '';
+      document.getElementById('landUseFingerprint').checked = land.useFingerprint || false;
+      document.getElementById('landModalTitle').textContent = 'Edit Land';
+      document.getElementById('landModal').classList.remove('hidden');
+    };
+    
+    window.deleteLand = function(idx) {
+      if (confirm('Are you sure you want to delete this land?')) {
+        myLands.splice(idx, 1);
+        localStorage.setItem('agni_lands', JSON.stringify(myLands));
+        loadMyLands();
+      }
+    };
+    
+    document.getElementById('addLandBtn').addEventListener('click', () => {
+      document.getElementById('landId').value = '';
+      document.getElementById('landForm').reset();
+      document.getElementById('landModalTitle').textContent = 'Add New Land';
+      document.getElementById('landModal').classList.remove('hidden');
+    });
+    
+    document.getElementById('closeLandModal').addEventListener('click', () => {
+      document.getElementById('landModal').classList.add('hidden');
+    });
+    
+    document.getElementById('cancelLandForm').addEventListener('click', () => {
+      document.getElementById('landModal').classList.add('hidden');
+    });
+    
+    document.getElementById('landForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const idx = document.getElementById('landId').value;
+      const land = {
+        name: document.getElementById('landName').value,
+        pincode: document.getElementById('landPincode').value.trim(),
+        place: document.getElementById('landPlace').value.trim(),
+        notes: document.getElementById('landNotes').value.trim(),
+        useFingerprint: document.getElementById('landUseFingerprint').checked,
+        createdAt: new Date().toISOString()
+      };
+      if (idx === '') {
+        myLands.push(land);
+      } else {
+        myLands[parseInt(idx)] = land;
+      }
+      localStorage.setItem('agni_lands', JSON.stringify(myLands));
+      loadMyLands();
+      document.getElementById('landModal').classList.add('hidden');
     });
 
     // News functions
@@ -1538,19 +2035,23 @@
       const section = document.getElementById('landUseBreakdown');
       section.classList.remove('hidden');
       const fields = [
-        { id: 'Vegetation', value: data.vegetation_percentage || 0 },
-        { id: 'Water', value: data.water_percentage || 0 },
-        { id: 'Roads', value: data.road_percentage || 0 },
-        { id: 'Buildings', value: data.building_percentage || 0 },
-        { id: 'Farmable', value: data.farmable_space_percentage || 0 },
+        { id: 'Vegetation', value: data.vegetation_percentage ?? 0 },
+        { id: 'Water', value: data.water_percentage ?? 0 },
+        { id: 'Roads', value: data.road_percentage ?? 0 },
+        { id: 'Buildings', value: data.building_percentage ?? 0 },
+        { id: 'Farmable', value: data.farmable_space_percentage ?? 0 },
       ];
       // Trigger animation after a short delay
       setTimeout(() => {
         fields.forEach(f => {
+          const val = Number.isFinite(f.value) ? f.value : parseFloat(f.value) || 0;
           const bar = document.getElementById('bar' + f.id);
           const pct = document.getElementById('pct' + f.id);
-          if (bar) bar.style.width = Math.min(f.value, 100) + '%';
-          if (pct) pct.textContent = f.value.toFixed(1) + '%';
+          if (bar) {
+            const clamped = Math.max(0, Math.min(val, 100));
+            bar.style.width = clamped + '%';
+          }
+          if (pct) pct.textContent = val.toFixed(1) + '%';
         });
       }, 100);
     }
@@ -1565,6 +2066,7 @@
       const loading = document.getElementById('cropLoading');
       section.classList.remove('hidden');
       loading.classList.remove('hidden');
+      document.getElementById('cropPrimarySection').classList.add('hidden');
       document.getElementById('cropHighlyRecommended').classList.add('hidden');
       document.getElementById('cropModeratelySuitable').classList.add('hidden');
       document.getElementById('cropFooter').classList.add('hidden');
@@ -1574,6 +2076,9 @@
       if (confirmedBoundaryCoords && confirmedBoundaryCoords.length >= 3) {
         lat = confirmedBoundaryCoords.reduce((s, c) => s + c[0], 0) / confirmedBoundaryCoords.length;
         lon = confirmedBoundaryCoords.reduce((s, c) => s + c[1], 0) / confirmedBoundaryCoords.length;
+      } else if (selectedLocationData && selectedLocationData.lat != null && selectedLocationData.lon != null) {
+        lat = selectedLocationData.lat;
+        lon = selectedLocationData.lon;
       } else if (farmMap) {
         const center = farmMap.getCenter();
         lat = center.lat;
@@ -1632,32 +2137,85 @@
       document.getElementById('cropConditionsText').textContent =
         `📍 ${locationName}  |  🌡️ ${temp}°C  |  💧 ${humidity}%  |  🌱 ${cropData.available_space_pct}% space available  |  💦 ${cropData.water_detected_pct}% water detected`;
 
-      // Highly recommended
+      const primarySection = document.getElementById('cropPrimarySection');
       const highSection = document.getElementById('cropHighlyRecommended');
-      const highList = document.getElementById('cropHighList');
-      if (cropData.highly_recommended && cropData.highly_recommended.length > 0) {
-        highSection.classList.remove('hidden');
-        highList.innerHTML = cropData.highly_recommended.map(c => renderCropCard(c, 'high')).join('');
-      } else {
-        highSection.classList.add('hidden');
-      }
-
-      // Moderately suitable
       const modSection = document.getElementById('cropModeratelySuitable');
-      const modList = document.getElementById('cropModList');
-      if (cropData.moderately_suitable && cropData.moderately_suitable.length > 0) {
-        modSection.classList.remove('hidden');
-        document.getElementById('modCropCount').textContent = cropData.moderately_suitable.length;
-        modList.innerHTML = cropData.moderately_suitable.map(c => renderCropCard(c, 'mod')).join('');
-      } else {
+
+      // One primary + sub-suggestions
+      if (cropData.primary_crop) {
+        primarySection.classList.remove('hidden');
+        highSection.classList.add('hidden');
         modSection.classList.add('hidden');
+        document.getElementById('cropPrimaryCard').innerHTML = renderPrimaryCropCard(cropData.primary_crop);
+        document.getElementById('cropSubSuggestions').innerHTML =
+          (cropData.sub_suggestions || []).map(c => renderSubCropItem(c)).join('');
+      } else {
+        primarySection.classList.add('hidden');
+        const highList = document.getElementById('cropHighList');
+        if (cropData.highly_recommended && cropData.highly_recommended.length > 0) {
+          highSection.classList.remove('hidden');
+          highList.innerHTML = cropData.highly_recommended.map(c => renderCropCard(c, 'high')).join('');
+        } else {
+          highSection.classList.add('hidden');
+        }
+        const modList = document.getElementById('cropModList');
+        if (cropData.moderately_suitable && cropData.moderately_suitable.length > 0) {
+          modSection.classList.remove('hidden');
+          document.getElementById('modCropCount').textContent = cropData.moderately_suitable.length;
+          modList.innerHTML = cropData.moderately_suitable.map(c => renderCropCard(c, 'mod')).join('');
+        } else {
+          modSection.classList.add('hidden');
+        }
       }
 
-      // Footer
       const footer = document.getElementById('cropFooter');
       footer.classList.remove('hidden');
       document.getElementById('cropEvalSummary').textContent =
         `Evaluated ${cropData.total_crops_evaluated} crops. ${cropData.not_recommended_count} not suitable for current conditions.`;
+    }
+
+    function renderPrimaryCropCard(crop) {
+      const scorePct = crop.match_pct || 0;
+      const barColor = scorePct >= 80 ? 'bg-emerald-500' : scorePct >= 60 ? 'bg-teal-500' : 'bg-amber-500';
+      const reasonsHtml = (crop.reasons || []).slice(0, 3).map(r =>
+        `<span class="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded-full"><i class="fas fa-check text-emerald-500" style="font-size:8px"></i>${r}</span>`
+      ).join('');
+      const waterIcons = { low: '💧', medium: '💧💧', high: '💧💧💧' };
+      return `
+        <div class="crop-card bg-white rounded-xl border-2 border-emerald-200 p-5 shadow-md">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="text-4xl">${crop.emoji}</span>
+              <div>
+                <h6 class="font-bold text-slate-800 text-lg leading-tight">${crop.name}</h6>
+                <span class="text-sm text-slate-500">${crop.category} · ${crop.duration}</span>
+              </div>
+            </div>
+            <span class="text-sm font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">${scorePct}% match</span>
+          </div>
+          <p class="text-sm text-slate-600 mb-3">${crop.description}</p>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="text-xs text-slate-500">🌡️ ${crop.temp_range}</span>
+            <span class="text-xs text-slate-500">${waterIcons[crop.water_need] || '💧'} ${(crop.water_need || '').toLowerCase()}</span>
+          </div>
+          <div class="flex flex-wrap gap-2">${reasonsHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderSubCropItem(crop) {
+      const scorePct = crop.match_pct || 0;
+      const waterIcons = { low: '💧', medium: '💧💧', high: '💧💧💧' };
+      return `
+        <div class="bg-white/80 rounded-lg border border-teal-200 px-3 py-2 text-sm">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-lg">${crop.emoji}</span>
+            <span class="font-semibold text-slate-800 truncate">${crop.name}</span>
+            <span class="text-xs font-medium text-teal-700 shrink-0">${scorePct}%</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">${crop.category} · ${crop.duration} · ${waterIcons[crop.water_need] || '💧'}</p>
+        </div>
+      `;
     }
 
     function renderCropCard(crop, tier) {

@@ -911,6 +911,14 @@ def recommend_crops(
     else:
         summary = "Challenging conditions. Consider protected cultivation (greenhouse/polyhouse)."
 
+    # One primary recommendation + sub-suggestions (alternatives)
+    primary = highly_recommended[0] if highly_recommended else (moderately_suitable[0] if moderately_suitable else None)
+    if highly_recommended:
+        sub_suggestions = highly_recommended[1:6] + moderately_suitable[:3]
+    else:
+        sub_suggestions = moderately_suitable[1:6] if moderately_suitable else []
+    sub_suggestions = sub_suggestions[:8]  # cap at 8 sub-suggestions
+
     return {
         "season": season,
         "season_display": season_display,
@@ -920,7 +928,9 @@ def recommend_crops(
         "available_space_pct": round(available_space, 1),
         "water_detected_pct": round(water_pct, 1),
         "summary": summary,
-        "highly_recommended": highly_recommended[:10],  # Top 10
+        "primary_crop": primary,
+        "sub_suggestions": sub_suggestions,
+        "highly_recommended": highly_recommended[:10],
         "moderately_suitable": moderately_suitable[:10],
         "not_recommended_count": len(not_recommended),
         "total_crops_evaluated": len(CROP_DATABASE),

@@ -157,7 +157,7 @@ def analyze(
         raise HTTPException(status_code=400, detail="Invalid image: empty file")
 
     try:
-        cultivated_percentage, stress_percentage, image, binary_mask, removed_pixels, original_resolution, processing_resolution = analyze_image(contents)
+        cultivated_percentage, stress_percentage, image, vegetation_mask, farmable_mask, removed_pixels, original_resolution, processing_resolution = analyze_image(contents)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -165,7 +165,7 @@ def analyze(
 
     h, w = image.shape[:2]
     total_pixels = h * w
-    cultivated_pixels = int(cv2.countNonZero(binary_mask))
+    cultivated_pixels = int(cv2.countNonZero(vegetation_mask))
     use_boundary = False
     polygon_lat_lng = None
 
@@ -173,10 +173,14 @@ def analyze(
         try:
             polygon_lat_lng = json.loads(boundary)
             if isinstance(polygon_lat_lng, list) and len(polygon_lat_lng) >= 3:
-                clipped_mask, cultivated_pixels, total_pixels = clip_cultivated_mask_by_boundary(
-                    binary_mask, polygon_lat_lng
+                clipped_veg, cultivated_pixels, total_pixels = clip_cultivated_mask_by_boundary(
+                    vegetation_mask, polygon_lat_lng
                 )
-                binary_mask = clipped_mask
+                vegetation_mask = clipped_veg
+                clipped_farmable, _, _ = clip_cultivated_mask_by_boundary(
+                    farmable_mask, polygon_lat_lng
+                )
+                farmable_mask = clipped_farmable
                 cultivated_percentage = (cultivated_pixels / total_pixels * 100.0) if total_pixels else 0.0
                 cultivated_percentage = round(cultivated_percentage, 2)
                 use_boundary = True
@@ -190,11 +194,11 @@ def analyze(
     non_cultivated_pixels = total_pixels - cultivated_pixels
     coverage_ratio = round(cultivated_pixels / total_pixels, 4) if total_pixels else 0.0
 
-    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(vegetation_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contour_count = len(contours)
 
     conf = compute_deterministic_confidence(
-        image, binary_mask, contour_count, total_pixels, cultivated_pixels
+        image, vegetation_mask, contour_count, total_pixels, cultivated_pixels
     )
     mask_confidence = conf["confidence"]
     clarity_score = conf["clarity_score"]
@@ -224,19 +228,19 @@ def analyze(
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
-    seg_bytes = get_segmentation_preview(image, binary_mask)
+    seg_bytes = get_segmentation_preview(image, vegetation_mask)
     seg_b64 = base64.b64encode(seg_bytes).decode("ascii")
-    overlay_bgr = get_overlay_mask(image, binary_mask)
-    binary_b64 = base64.b64encode(get_binary_mask_png(binary_mask)).decode("ascii")
+    overlay_bgr = get_overlay_mask(image, vegetation_mask, farmable_mask)
+    binary_b64 = base64.b64encode(get_binary_mask_png(farmable_mask)).decode("ascii")
     overlay_b64 = base64.b64encode(get_overlay_mask_png(overlay_bgr)).decode("ascii")
-    land_use_bytes = get_landuse_mask_png(image, binary_mask)
+    land_use_bytes = get_landuse_mask_png(image, vegetation_mask, farmable_mask)
     land_use_b64 = base64.b64encode(land_use_bytes).decode("ascii")
 
     # --- Land-use breakdown percentages ---
     from image_processor import detect_water, detect_roads, detect_buildings
     water_mask = detect_water(image)
     road_mask = detect_roads(image)
-    building_mask = detect_buildings(image, binary_mask)
+    building_mask = detect_buildings(image, vegetation_mask)
     water_pixels = int(cv2.countNonZero(water_mask))
     road_pixels = int(cv2.countNonZero(road_mask))
     building_pixels = int(cv2.countNonZero(building_mask))
@@ -247,7 +251,7 @@ def analyze(
     farmable_space_pct = round(max(0, 100 - water_pct - road_pct - building_pct), 2)
 
     # Polygon mask from cultivated area (findContours + approxPolyDP), JSON-serializable
-    polygon_coordinates = get_polygons_from_cultivated_mask(binary_mask)
+    polygon_coordinates = get_polygons_from_cultivated_mask(vegetation_mask)
     polygon_overlay_bgr = overlay_polygons_on_image(image.copy(), polygon_coordinates)
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     overlay_filename = f"cultivated_{ts}.png"
