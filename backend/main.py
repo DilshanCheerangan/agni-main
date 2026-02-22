@@ -381,55 +381,89 @@ def history(token: str = Depends(get_token)) -> List[dict]:
 @app.get("/weather")
 def get_weather(city: str, token: str = Depends(get_token)):
     """Get weather data for a city using OpenWeatherMap API."""
-    try:
-        import requests
-    except ImportError:
-        raise HTTPException(status_code=500, detail="requests library not installed. Run: pip install requests")
-    
+    import requests
     WEATHER_API_KEY = "42a28b0639a88def3bb8150c4d61f466"
-    if not WEATHER_API_KEY:
-        raise HTTPException(status_code=500, detail="Weather API key not configured")
-    
     try:
         url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={WEATHER_API_KEY}&units=metric"
         response = requests.get(url, timeout=10)
-        
-        # Check if request was successful
         if response.status_code != 200:
             error_data = response.json() if response.text else {}
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Weather API error: {error_data.get('message', f'HTTP {response.status_code}')}"
-            )
-        
+            raise HTTPException(status_code=400, detail=f"Weather API error: {error_data.get('message', 'Unknown error')}")
         data = response.json()
-        
-        # Check API response code
-        if data.get("cod") == 200:
-            return {
-                "success": True,
-                "name": data.get("name"),
-                "temp": data.get("main", {}).get("temp"),
-                "feels_like": data.get("main", {}).get("feels_like"),
-                "humidity": data.get("main", {}).get("humidity"),
-                "pressure": data.get("main", {}).get("pressure"),
-                "wind_speed": data.get("wind", {}).get("speed"),
-                "weather_main": data.get("weather", [{}])[0].get("main") if data.get("weather") else "Unknown",
-                "weather_description": data.get("weather", [{}])[0].get("description") if data.get("weather") else "unknown",
-            }
-        else:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Weather API error: {data.get('message', 'Unknown error')}"
-            )
-    except HTTPException:
-        raise
-    except requests.exceptions.Timeout:
-        raise HTTPException(status_code=500, detail="Weather API request timed out")
-    except requests.exceptions.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch weather: {str(e)}")
+        return {
+            "success": True,
+            "name": data.get("name"),
+            "temp": data.get("main", {}).get("temp"),
+            "feels_like": data.get("main", {}).get("feels_like"),
+            "humidity": data.get("main", {}).get("humidity"),
+            "pressure": data.get("main", {}).get("pressure"),
+            "wind_speed": data.get("wind", {}).get("speed"),
+            "weather_main": data.get("weather", [{}])[0].get("main") if data.get("weather") else "Unknown",
+            "weather_description": data.get("weather", [{}])[0].get("description") if data.get("weather") else "unknown",
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/forecast")
+def get_forecast(city: str, token: str = Depends(get_token)):
+    """Get 5-day forecast for a city."""
+    import requests
+    WEATHER_API_KEY = "42a28b0639a88def3bb8150c4d61f466"
+    try:
+        url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={WEATHER_API_KEY}&units=metric"
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return {"success": False, "detail": "Forecast unavailable"}
+        data = response.json()
+        # Process data to get daily forecasts (one per day)
+        daily = []
+        seen_dates = set()
+        for item in data.get("list", []):
+            date = item.get("dt_txt").split(" ")[0]
+            if date not in seen_dates:
+                seen_dates.add(date)
+                daily.append({
+                    "date": date,
+                    "temp": item.get("main", {}).get("temp"),
+                    "weather_main": item.get("weather", [{}])[0].get("main"),
+                    "weather_description": item.get("weather", [{}])[0].get("description"),
+                    "humidity": item.get("main", {}).get("humidity"),
+                })
+                if len(daily) >= 5: break
+        return {"success": True, "city": data.get("city", {}).get("name"), "forecast": daily}
+    except Exception as e:
+        return {"success": False, "detail": str(e)}
+
+
+@app.get("/forecast-by-coords")
+def get_forecast_by_coords(lat: float, lon: float, token: str = Depends(get_token)):
+    """Get 5-day forecast by coordinates."""
+    import requests
+    WEATHER_API_KEY = "42a28b0639a88def3bb8150c4d61f466"
+    try:
+        url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={WEATHER_API_KEY}&units=metric"
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return {"success": False, "detail": "Forecast unavailable"}
+        data = response.json()
+        daily = []
+        seen_dates = set()
+        for item in data.get("list", []):
+            date = item.get("dt_txt").split(" ")[0]
+            if date not in seen_dates:
+                seen_dates.add(date)
+                daily.append({
+                    "date": date,
+                    "temp": item.get("main", {}).get("temp"),
+                    "weather_main": item.get("weather", [{}])[0].get("main"),
+                    "weather_description": item.get("weather", [{}])[0].get("description"),
+                    "humidity": item.get("main", {}).get("humidity"),
+                })
+                if len(daily) >= 5: break
+        return {"success": True, "city": data.get("city", {}).get("name"), "forecast": daily}
+    except Exception as e:
+        return {"success": False, "detail": str(e)}
 
 
 @app.get("/weather-by-coords")

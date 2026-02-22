@@ -21,6 +21,47 @@
       --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
       --accent: #059669;
       --accent-light: rgba(5, 150, 105, 0.12);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    .dark {
+      --glass-bg: rgba(15, 23, 42, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    body.dark .app-bg {
+      background: linear-gradient(160deg, #020617 0%, #0f172a 50%, #1e1b4b 100%);
+    }
+
+    body.dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f1f5f9;
+    }
+
+    body.dark h1,
+    body.dark h2,
+    body.dark h3,
+    body.dark h4,
+    body.dark .text-slate-800 {
+      color: #f1f5f9 !important;
+    }
+
+    body.dark .text-slate-700,
+    body.dark .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+
+    body.dark .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+
+    body.dark .bg-white {
+      background-color: rgba(30, 41, 59, 0.9) !important;
     }
 
     body {
@@ -44,12 +85,13 @@
       position: relative;
       overflow: hidden;
     }
+
     .login-bg::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,255,255,0.15), transparent),
-                  radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255,255,255,0.08), transparent);
+      background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 255, 255, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(255, 255, 255, 0.08), transparent);
       pointer-events: none;
     }
 
@@ -61,6 +103,7 @@
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-shadow);
     }
+
     .glass-dark {
       background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(20px);
@@ -68,25 +111,30 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
+
     .glass-card {
       background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255,255,255,0.5) inset;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .glass-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255,255,255,0.6) inset;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
     }
+
     .glass-nav-item {
       transition: all 0.2s ease;
     }
+
     .glass-nav-item:hover {
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(8px);
     }
+
     .glass-nav-item.active {
       background: rgba(5, 150, 105, 0.15);
       color: #047857;
@@ -94,8 +142,13 @@
       border-left: 3px solid var(--accent);
     }
 
-    .sidebar-transition { transition: transform 0.3s ease-in-out; }
-    .page-transition { transition: opacity 0.2s ease-in-out; }
+    .sidebar-transition {
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .page-transition {
+      transition: opacity 0.2s ease-in-out;
+    }
 
     .gradient-bg {
       background: linear-gradient(135deg, #10b981 0%, #059669 50%, #0d9488 100%);
@@ -106,43 +159,57 @@
       height: 320px;
       width: 100%;
       border-radius: 0.75rem;
-      border: 1px solid rgba(255,255,255,0.5);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
 
-    .leaflet-draw-toolbar a { background-color: #059669 !important; }
+    .leaflet-draw-toolbar a {
+      background-color: #059669 !important;
+    }
+
     .location-method-btn.active {
       border-color: #059669 !important;
       background-color: rgba(5, 150, 105, 0.15) !important;
       color: #047857 !important;
     }
-    .location-pin { background: none !important; border: none !important; }
+
+    .location-pin {
+      background: none !important;
+      border: none !important;
+    }
+
     .analysis-panel-caption {
       min-height: 3rem;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
     }
-    .landuse-bar-fill { flex-shrink: 0; }
+
+    .landuse-bar-fill {
+      flex-shrink: 0;
+    }
 
     /* Buttons: subtle glass / lift */
     .btn-glass {
       background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
       transition: all 0.2s ease;
     }
+
     .btn-glass:hover {
       background: rgba(255, 255, 255, 1);
       transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
+
     .btn-primary {
       background: linear-gradient(135deg, #059669 0%, #047857 100%);
       box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
       transition: all 0.2s ease;
     }
+
     .btn-primary:hover {
       transform: translateY(-1px);
       box-shadow: 0 6px 20px rgba(5, 150, 105, 0.45);
@@ -155,6 +222,7 @@
       border: 1px solid rgba(226, 232, 240, 0.9);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
+
     .input-glass:focus {
       border-color: rgba(5, 150, 105, 0.5);
       box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
@@ -166,15 +234,64 @@
       background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(5, 150, 105, 0.25);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
     }
 
     /* Judge card: glass over gradient */
     .judge-card {
       background: linear-gradient(135deg, rgba(5, 150, 105, 0.9) 0%, rgba(13, 148, 136, 0.9) 100%);
       backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.25);
+      border: 1px solid rgba(255, 255, 255, 0.25);
       box-shadow: 0 8px 32px rgba(5, 150, 105, 0.3);
+    }
+
+    /* Toggle switches */
+    .toggle-checkbox {
+      appearance: none;
+      width: 44px;
+      height: 24px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .toggle-checkbox:checked {
+      background: #10b981;
+    }
+
+    .toggle-checkbox::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-checkbox:checked::before {
+      transform: translateX(20px);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out forwards;
     }
   </style>
 </head>
@@ -199,16 +316,14 @@
               <i class="fas fa-user mr-2 text-emerald-600"></i>Username
             </label>
             <input type="text" id="username" name="username" required
-              class="input-glass w-full px-4 py-3 rounded-xl placeholder-slate-400"
-              placeholder="Enter your username" />
+              class="input-glass w-full px-4 py-3 rounded-xl placeholder-slate-400" placeholder="Enter your username" />
           </div>
           <div>
             <label for="password" class="block text-sm font-medium text-slate-700 mb-2">
               <i class="fas fa-lock mr-2 text-emerald-600"></i>Password
             </label>
             <input type="password" id="password" name="password" required
-              class="input-glass w-full px-4 py-3 rounded-xl placeholder-slate-400"
-              placeholder="Enter your password" />
+              class="input-glass w-full px-4 py-3 rounded-xl placeholder-slate-400" placeholder="Enter your password" />
           </div>
           <p id="loginError" class="text-sm text-red-600 hidden"></p>
           <button type="submit"
@@ -221,9 +336,10 @@
   </div>
 
   <!-- Main App Layout -->
-  <div id="appLayout" class="app-bg hidden min-h-screen flex">
+  <div id="appLayout" class="app-bg hidden h-screen flex overflow-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="glass w-64 border-r border-white/30 flex flex-col sidebar-transition shadow-xl">
+    <aside id="sidebar"
+      class="glass w-64 h-full border-r border-white/30 flex flex-col sidebar-transition shadow-xl flex-shrink-0">
       <div class="p-6 border-b border-white/30">
         <div class="flex items-center gap-3 mb-2">
           <div class="p-2 rounded-lg gradient-bg">
@@ -243,42 +359,62 @@
       <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
         <a href="#" data-page="dashboard"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700 active">
-          <i class="fas fa-home w-5"></i>
+          <i class="fas fa-th-large w-5"></i>
           <span>Dashboard</span>
         </a>
         <a href="#" data-page="analyzer"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
-          <i class="fas fa-image w-5"></i>
+          <i class="fas fa-camera-retro w-5"></i>
           <span>Image Analyzer</span>
         </a>
         <a href="#" data-page="ai-suggestion"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
-          <i class="fas fa-lightbulb w-5"></i>
-          <span>AI Suggestion</span>
+          <i class="fas fa-robot w-5"></i>
+          <span>AI Crop Advice</span>
+        </a>
+        <a href="#" data-page="animal-suggestion"
+          class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
+          <i class="fas fa-paw w-5"></i>
+          <span>Animal Farm Advice</span>
+        </a>
+        <a href="#" data-page="geo-context"
+          class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
+          <i class="fas fa-globe-asia w-5"></i>
+          <span>Geo Context</span>
+        </a>
+        <a href="#" data-page="farm-intel"
+          class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
+          <i class="fas fa-brain w-5"></i>
+          <span>Farm Intelligence</span>
         </a>
         <a href="#" data-page="weather"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
-          <i class="fas fa-cloud-sun w-5"></i>
-          <span>Weather & Climate</span>
+          <i class="fas fa-cloud-sun-rain w-5"></i>
+          <span>Weather Insights</span>
         </a>
         <a href="#" data-page="my-lands"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
           <i class="fas fa-map-marked-alt w-5"></i>
-          <span>My Lands</span>
+          <span>My Fields</span>
+        </a>
+        <a href="#" data-page="student-equations"
+          class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
+          <i class="fas fa-graduation-cap w-5"></i>
+          <span>Science & Equations</span>
         </a>
         <a href="#" data-page="news"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
           <i class="fas fa-newspaper w-5"></i>
-          <span>Agricultural News</span>
+          <span>Agri-News</span>
         </a>
         <a href="#" data-page="profile"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
-          <i class="fas fa-user w-5"></i>
+          <i class="fas fa-user-circle w-5"></i>
           <span>Profile</span>
         </a>
         <a href="#" data-page="settings"
           class="nav-item glass-nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-slate-700">
-          <i class="fas fa-cog w-5"></i>
+          <i class="fas fa-sliders-h w-5"></i>
           <span>Settings</span>
         </a>
       </nav>
@@ -302,8 +438,7 @@
             <p id="pageSubtitle" class="text-sm text-slate-500">Welcome back! Here's your overview</p>
           </div>
           <div class="flex items-center gap-4">
-            <div id="statusBadge"
-              class="badge-glass flex items-center gap-2 px-4 py-2 rounded-xl">
+            <div id="statusBadge" class="badge-glass flex items-center gap-2 px-4 py-2 rounded-xl">
               <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span id="statusText" class="text-sm text-emerald-800 font-medium">System Active</span>
             </div>
@@ -351,13 +486,15 @@
           </div>
 
           <!-- Judge / pitch summary (one-line takeaway) -->
-          <div id="judgeSummaryCard" class="judge-card hidden mb-6 rounded-2xl shadow-xl p-6 text-white border border-white/20">
+          <div id="judgeSummaryCard"
+            class="judge-card hidden mb-6 rounded-2xl shadow-xl p-6 text-white border border-white/20">
             <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
               <i class="fas fa-trophy"></i>
               Your latest plot at a glance
             </h3>
             <p id="judgeSummaryText" class="text-xl font-medium mb-1">—</p>
-            <p id="judgeSummarySub" class="text-emerald-100 text-sm">Run an analysis and get a suggestion to see your one-line summary here.</p>
+            <p id="judgeSummarySub" class="text-emerald-100 text-sm">Run an analysis and get a suggestion to see your
+              one-line summary here.</p>
           </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -373,980 +510,1390 @@
 
             <div class="glass-card rounded-2xl p-6">
               <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-info-circle text-blue-600"></i>
-                Quick Tips
+                <i class="fas fa-newspaper text-indigo-600"></i>
+                Most Important News
               </h3>
-              <div class="space-y-3 text-sm text-slate-600">
-                <div class="flex items-start gap-3">
-                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                  <p>Upload clear, daylight images for best results</p>
-                </div>
-                <div class="flex items-start gap-3">
-                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                  <p>Check weather conditions before field work</p>
-                </div>
-                <div class="flex items-start gap-3">
-                  <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                  <p>Review agricultural news for latest trends</p>
-                </div>
+              <div id="featuredNewsList" class="space-y-4">
+                <!-- News items will be loaded here -->
+                <p class="text-slate-400 text-sm">Fetching agricultural news...</p>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Image Analyzer Page -->
-        <div id="page-analyzer" class="page-content hidden">
-          <!-- Location Selection Method -->
-          <div class="glass-card rounded-2xl p-6 mb-6">
+          <!-- Field Comparison Section -->
+          <div class="mt-6 glass-card rounded-2xl p-6">
             <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <i class="fas fa-map-marked-alt text-emerald-600"></i>
-              Select Farm Location
+              <i class="fas fa-columns text-emerald-600"></i>
+              Manage & Compare Fields
             </h3>
-            <div class="flex flex-wrap items-center gap-4 mb-4">
-              <div class="flex gap-4">
-                <button type="button" id="locationMethodMap" class="location-method-btn px-4 py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-medium transition">
-                  <i class="fas fa-map mr-2"></i>Map Selection
-                </button>
-                <button type="button" id="locationMethodPincode" class="location-method-btn px-4 py-2 rounded-lg border-2 border-slate-300 bg-white text-slate-700 font-medium transition">
-                  <i class="fas fa-map-pin mr-2"></i>Pincode / Place
-                </button>
-              </div>
-              <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
-                <span class="text-sm text-slate-600">Load saved place:</span>
-                <select id="loadSavedPlaceSelect" class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 max-w-[200px]">
-                  <option value="">— Choose one —</option>
-                </select>
-                <button type="button" id="loadSavedPlaceBtn" class="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50" disabled>
-                  <i class="fas fa-map-marker-alt mr-1"></i>Load
-                </button>
-              </div>
-            </div>
-            
-            <!-- Map Selection Method -->
-            <div id="locationMethodMapPanel" class="location-panel">
-              <p class="text-sm text-slate-600 mb-2">Draw a polygon on the map to define your farm area. Use the layer
-                control (top-right) to switch to <strong>Satellite</strong> view for easier selection.</p>
-              <p class="text-xs text-slate-500 mb-4">Step 1: Draw polygon (click corners, double-click to finish) → Step
-                2: Click &quot;Confirm Farm Boundary&quot; → Step 3: Upload image below and click Analyze.</p>
-              <div id="farmMap"></div>
-              <div class="mt-4 flex flex-wrap items-center gap-3">
-                <button type="button" id="confirmBoundaryBtn"
-                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled>
-                  <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
-                </button>
-                <button type="button" id="savePlaceBtn"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled title="Save this place so you don't need to select the map every time">
-                  <i class="fas fa-save mr-2"></i>Save this place
-                </button>
-                <button type="button" id="clearBoundaryBtn"
-                  class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
-                  <i class="fas fa-eraser mr-2"></i>Clear Boundary
-                </button>
-                <span id="boundarySummary" class="text-sm text-slate-500"></span>
-              </div>
-              <p id="boundaryError" class="text-sm text-red-600 mt-2 hidden"></p>
-            </div>
-            
-            <!-- Pincode/Place Selection Method -->
-            <div id="locationMethodPincodePanel" class="location-panel hidden">
-              <p class="text-sm text-slate-600 mb-4">Enter pincode or place name. The map will show that location so you can then draw your farm boundary on the map.</p>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
-                  </label>
-                  <input type="text" id="farmPincode" placeholder="e.g., 110001"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-city mr-2 text-emerald-600"></i>Place Name
-                  </label>
-                  <input type="text" id="farmPlace" placeholder="e.g., Delhi, New Delhi"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
-                </div>
-              </div>
-              <div class="mt-4 flex flex-wrap items-center gap-3">
-                <button type="button" id="confirmLocationBtn"
-                  class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
-                  <i class="fas fa-check mr-2"></i>Show on Map
-                </button>
-                <button type="button" id="useCurrentLocationBtn"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                  <i class="fas fa-crosshairs mr-2"></i>Use Current Location
-                </button>
-                <span id="locationSummary" class="text-sm text-slate-500"></span>
-              </div>
-              <p id="locationError" class="text-sm text-red-600 mt-2 hidden"></p>
-              <p id="locationMapHint" class="text-sm text-emerald-700 mt-2 hidden">
-                <i class="fas fa-map mr-1"></i>Map below is centered on your location. Switch to &quot;Map Selection&quot; to draw your farm boundary.
-              </p>
-            </div>
-          </div>
-
-          <!-- Use map as image -->
-          <div class="bg-emerald-50 rounded-xl shadow-md border border-emerald-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-              <i class="fas fa-map-pin text-emerald-600"></i>
-              Use map as image
-            </h3>
-            <p class="text-sm text-emerald-700 mb-4">Capture the current map view (including satellite) as the image to
-              analyze. Your drawn boundary will be used so the analysis matches exactly what you see.</p>
-            <div class="flex flex-wrap items-center gap-3">
-              <button type="button" id="captureMapBtn"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-camera mr-2"></i>Capture map for analysis
-              </button>
-              <button type="button" id="clearMapCaptureBtn"
-                class="hidden px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
-                <i class="fas fa-times mr-2"></i>Clear and use file instead
-              </button>
-              <span id="mapCaptureStatus" class="text-sm text-emerald-700"></span>
-            </div>
-            <p id="mapCaptureError" class="text-sm text-red-600 mt-2 hidden"></p>
-            <div id="mapCapturePreview" class="mt-3 hidden">
-              <p class="text-xs text-slate-500 mb-1">Preview (boundary area only — this will be sent for analysis):</p>
-              <img id="mapCapturePreviewImg" alt="Map capture" class="max-h-32 rounded border border-slate-300" />
-              <button type="button" id="analyzeMapCaptureBtn"
-                class="mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium inline-flex items-center gap-2">
-                <i class="fas fa-chart-line"></i>Analyze this image
-              </button>
-            </div>
-          </div>
-
-          <div class="glass-card rounded-2xl p-6 mb-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <i class="fas fa-upload text-emerald-600"></i>
-              Or upload your own image
-            </h3>
-            <div class="flex items-center gap-2 mb-4">
-              <input type="checkbox" id="useBoundaryCheckbox"
-                class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-              <label for="useBoundaryCheckbox" class="text-sm text-slate-700">Analyze within selected farm boundary
-                only</label>
-            </div>
-            <p class="text-sm text-slate-600 mb-2">Or try instantly with a sample field image (great for demos &amp; judges):</p>
-            <button type="button" id="trySampleImageBtn"
-              class="btn-glass mb-4 px-4 py-2 text-amber-700 rounded-xl font-medium border-amber-200/80">
-              <i class="fas fa-magic mr-2"></i>Try with sample image
-            </button>
-            <form id="uploadForm" class="space-y-4">
-              <div
-                class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-emerald-400 transition">
-                <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4"></i>
-                <p class="text-slate-600 mb-2">Choose an image file (optional if you used &quot;Capture map&quot; above)
-                </p>
-                <input type="file" id="imageFile" name="file" accept="image/*"
-                  class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-              </div>
-              <p id="uploadError" class="text-sm text-red-600 hidden"></p>
-              <p id="analyzeHint" class="text-sm text-slate-500">Draw boundary and capture map, or upload an image to
-                enable Analyze.</p>
-              <button type="submit" id="analyzeBtn"
-                class="btn-primary w-full py-3 text-white font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled>
-                <span id="analyzeBtnText">Analyze Image</span>
-                <span id="analyzeSpinner" class="hidden">
-                  <i class="fas fa-spinner fa-spin"></i>
-                </span>
-              </button>
-            </form>
-          </div>
-
-          <!-- How to Capture Good Images -->
-          <div class="bg-blue-50 rounded-xl shadow-md border border-blue-200 p-6 mb-6">
-            <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
-              <i class="fas fa-camera text-blue-600"></i>
-              How to Capture Good Images
-            </h3>
-            <ul class="space-y-2 text-sm text-blue-700">
-              <li class="flex items-start gap-2">
-                <i class="fas fa-check text-blue-500 mt-0.5"></i>
-                <span>Capture during daylight hours for best visibility</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <i class="fas fa-check text-blue-500 mt-0.5"></i>
-                <span>Avoid heavy shadows that can hide crop areas</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <i class="fas fa-check text-blue-500 mt-0.5"></i>
-                <span>Keep camera steady to avoid motion blur</span>
-              </li>
-              <li class="flex items-start gap-2">
-                <i class="fas fa-check text-blue-500 mt-0.5"></i>
-                <span>Ensure the full field is visible in the image</span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Save place modal -->
-          <div id="savePlaceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
-              <h4 class="text-lg font-semibold text-slate-800 mb-4">
-                <i class="fas fa-save text-emerald-600 mr-2"></i>Save this place
-              </h4>
-              <p class="text-sm text-slate-600 mb-4">Give it a name so you can load it next time without redrawing the map.</p>
-              <div class="space-y-3">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Place name *</label>
-                  <input type="text" id="savePlaceName" placeholder="e.g., North field, Main farm"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Place / city (optional)</label>
-                  <input type="text" id="savePlaceLocation" placeholder="e.g., Delhi"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1">Pincode (optional)</label>
-                  <input type="text" id="savePlacePincode" placeholder="e.g., 110001"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
-                </div>
-              </div>
-              <div class="flex gap-3 mt-4">
-                <button type="button" id="savePlaceConfirmBtn" class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">
-                  Save
-                </button>
-                <button type="button" id="savePlaceCancelBtn" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Results Card -->
-          <div id="resultsCard" class="hidden glass-card rounded-2xl p-6 border border-white/40">
-            <div id="withinBoundaryMessage"
-              class="hidden mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">
-              <i class="fas fa-info-circle mr-2"></i>Analysis performed within selected farm boundary.
-            </div>
-            <div id="savePlaceResultRow" class="hidden mb-4">
-              <button type="button" id="savePlaceFromResultsBtn"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
-                <i class="fas fa-save mr-2"></i>Save this place for next time
-              </button>
-            </div>
-            <h3 class="text-lg font-semibold text-slate-800 mb-6">Analysis Results</h3>
-
-            <!-- Image Previews (larger map windows) - aligned panels -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 items-start">
-              <div class="text-center flex flex-col">
-                <div class="analysis-panel-caption mb-2">
-                  <p class="text-xs font-medium text-slate-500">Original</p>
-                </div>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
-                  <img id="originalPreview" src="" alt="Original" class="w-full h-full object-cover hidden min-h-[220px]" />
-                  <span id="originalPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
-                </div>
-              </div>
-              <div class="text-center flex flex-col">
-                <div class="analysis-panel-caption mb-2">
-                  <p class="text-xs font-medium text-slate-500">Binary Mask</p>
-                </div>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
-                  <img id="binaryMaskPreview" src="" alt="Binary mask" class="w-full h-full object-cover hidden min-h-[220px]" />
-                  <span id="binaryMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
-                </div>
-              </div>
-              <div class="text-center flex flex-col">
-                <div class="analysis-panel-caption mb-2">
-                  <p class="text-xs font-medium text-slate-500">Overlay</p>
-                </div>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
-                  <img id="overlayMaskPreview" src="" alt="Overlay mask" class="w-full h-full object-cover hidden min-h-[220px]" />
-                  <span id="overlayMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
-                </div>
-              </div>
-              <div class="text-center flex flex-col">
-                <div class="analysis-panel-caption mb-2">
-                  <p class="text-xs font-medium text-slate-500">Land use</p>
-                  <p class="text-xs text-slate-400">Water · Roads · Buildings · Vegetation · Bare soil</p>
-                </div>
-                <div class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
-                  <img id="landUseMaskPreview" src="" alt="Land use mask" class="w-full h-full object-cover hidden min-h-[220px]" />
-                  <span id="landUseMaskPlaceholder"
-                    class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Key Metrics -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm text-emerald-700 font-medium">Cultivated %</span>
-                  <button type="button" class="info-tooltip-btn"
-                    data-tooltip="Percentage of your land currently under crop growth.">
-                    <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
-                  </button>
-                </div>
-                <p id="cultivatedPct" class="text-3xl font-bold text-emerald-800">—</p>
-              </div>
-
-              <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm text-amber-700 font-medium">Stress %</span>
-                </div>
-                <p id="stressPct" class="text-3xl font-bold text-amber-800">—</p>
-              </div>
-
-              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-sm text-blue-700 font-medium">Confidence</span>
-                  <button type="button" class="info-tooltip-btn"
-                    data-tooltip="Reliability score based on image quality and segmentation clarity.">
-                    <i class="fas fa-info-circle text-blue-600 text-xs"></i>
-                  </button>
-                </div>
-                <p id="trustScore" class="text-3xl font-bold text-blue-800">—</p>
-              </div>
-            </div>
-
-            <!-- Classification -->
-            <div class="mb-6 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 text-center">
-              <p class="text-slate-600 text-sm mb-1 flex items-center justify-center gap-2">
-                Classification
-                <button type="button" class="info-tooltip-btn" data-tooltip="Shows how well your field is cultivated.">
-                  <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
-                </button>
-              </p>
-              <p id="classificationResult" class="font-semibold text-xl text-slate-800">—</p>
-            </div>
-
-            <!-- Detailed Stats -->
-            <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-              <p class="text-slate-600 text-sm font-medium mb-3">Area Statistics</p>
-              <div id="boundaryPortionStats" class="hidden mb-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-sm">
-                <p class="font-medium text-emerald-800 mb-2">Selected region vs full image</p>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-700">
-                  <span>Full image</span>
-                  <span id="fullImagePixels" class="font-mono text-right">—</span>
-                  <span>Selected region (inside boundary)</span>
-                  <span id="insideBoundaryPct" class="font-mono text-right">—</span>
-                  <span>Remaining (outside boundary)</span>
-                  <span id="outsideBoundaryPct" class="font-mono text-right">—</span>
-                </div>
-              </div>
-              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                <span class="text-slate-500">Total pixels <span id="totalPixelsLabel" class="text-slate-400">(in selected region)</span></span>
-                <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
-                <span class="text-slate-500">Cultivated pixels</span>
-                <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
-                <span class="text-slate-500">Non-cultivated pixels</span>
-                <span id="nonCultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
-                <span class="text-slate-500">Coverage ratio</span>
-                <span id="coverageRatio" class="font-mono text-slate-800 text-right">—</span>
-              </div>
-            </div>
-
-            <!-- Advisory -->
-            <div class="pt-4 border-t border-slate-200 text-center mb-6">
-              <p class="text-slate-600 text-sm mb-2">Advisory</p>
-              <p id="advisory" class="font-semibold text-xl text-slate-800">—</p>
-            </div>
-            <div class="flex flex-wrap gap-3 justify-center mb-6">
-              <button type="button" id="downloadReportBtn"
-                class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition font-medium">
-                <i class="fas fa-file-pdf mr-2"></i>Download / Print report
-              </button>
-            </div>
-
-            <!-- Land Use Breakdown -->
-            <div id="landUseBreakdown"
-              class="hidden mb-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 p-6">
-              <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <i class="fas fa-map text-indigo-600"></i>
-                Detected Land Use Breakdown
-              </h4>
-              <div class="space-y-3">
-                <div class="flex items-center gap-3">
-                  <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span class="text-sm text-slate-600 w-24">Vegetation</span>
-                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
-                    <div id="barVegetation" class="landuse-bar-fill h-full rounded-full bg-emerald-500 transition-all duration-300" style="width:0%; min-width:0"></div>
-                  </div>
-                  <span id="pctVegetation" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
-                  <span class="text-sm text-slate-600 w-24">Water</span>
-                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
-                    <div id="barWater" class="landuse-bar-fill h-full rounded-full bg-blue-500 transition-all duration-300" style="width:0%; min-width:0"></div>
-                  </div>
-                  <span id="pctWater" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="w-3 h-3 rounded-full bg-gray-400 flex-shrink-0"></span>
-                  <span class="text-sm text-slate-600 w-24">Roads</span>
-                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
-                    <div id="barRoads" class="landuse-bar-fill h-full rounded-full bg-gray-400 transition-all duration-300" style="width:0%; min-width:0"></div>
-                  </div>
-                  <span id="pctRoads" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="w-3 h-3 rounded-full bg-amber-700 flex-shrink-0"></span>
-                  <span class="text-sm text-slate-600 w-24">Buildings</span>
-                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
-                    <div id="barBuildings" class="landuse-bar-fill h-full rounded-full bg-amber-700 transition-all duration-300" style="width:0%; min-width:0"></div>
-                  </div>
-                  <span id="pctBuildings" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
-                </div>
-                <div class="flex items-center gap-3 pt-2 border-t border-slate-200">
-                  <span class="w-3 h-3 rounded-full bg-lime-500 flex-shrink-0"></span>
-                  <span class="text-sm text-slate-700 font-medium w-24">Farmable</span>
-                  <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
-                    <div id="barFarmable" class="landuse-bar-fill h-full rounded-full bg-lime-500 transition-all duration-300" style="width:0%; min-width:0"></div>
-                  </div>
-                  <span id="pctFarmable" class="text-sm font-bold text-lime-700 w-14 text-right shrink-0">0%</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Crop Recommendations -->
-            <div id="cropRecommendationsSection" class="hidden mb-6">
-              <div
-                class="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-xl border border-emerald-200 p-6">
-                <div class="flex items-center justify-between mb-2">
-                  <h4 class="font-semibold text-emerald-900 text-lg flex items-center gap-2">
-                    <i class="fas fa-seedling text-emerald-600"></i>
-                    AI Crop Recommendations
-                  </h4>
-                  <span id="cropSeasonBadge"
-                    class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"></span>
-                </div>
-                <p id="cropSummaryText" class="text-sm text-emerald-700 mb-1"></p>
-                <p id="cropConditionsText" class="text-xs text-slate-500 mb-4"></p>
-
-                <!-- Loading state -->
-                <div id="cropLoading" class="hidden flex items-center justify-center py-8">
-                  <i class="fas fa-spinner fa-spin text-emerald-500 text-2xl mr-3"></i>
-                  <span class="text-emerald-700">Analyzing conditions &amp; finding best crops...</span>
-                </div>
-
-                <!-- Primary recommendation + sub-suggestions -->
-                <div id="cropPrimarySection" class="hidden mb-4">
-                  <h5 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
-                    <i class="fas fa-star text-yellow-500"></i> Top recommendation
-                  </h5>
-                  <div id="cropPrimaryCard" class="mb-4"></div>
-                  <h6 class="font-medium text-teal-800 mb-2 flex items-center gap-2 text-sm">
-                    <i class="fas fa-list-ul text-teal-500"></i> Also consider
-                  </h6>
-                  <div id="cropSubSuggestions" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
-                </div>
-
-                <!-- Highly Recommended (fallback) -->
-                <div id="cropHighlyRecommended" class="hidden">
-                  <h5 class="font-semibold text-emerald-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-star text-yellow-500"></i> Highly Recommended
-                  </h5>
-                  <div id="cropHighList" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
-                </div>
-
-                <!-- Moderately Suitable -->
-                <div id="cropModeratelySuitable" class="hidden">
-                  <button type="button" id="toggleModCrops"
-                    class="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-white/60 hover:bg-white/80 border border-emerald-200 mb-3 transition">
-                    <span class="text-sm font-semibold text-teal-800 flex items-center gap-2">
-                      <i class="fas fa-thumbs-up text-teal-500"></i> Moderately Suitable
-                      <span id="modCropCount" class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full"></span>
-                    </span>
-                    <span id="modCropToggleIcon" class="text-teal-600 text-sm">&#9660;</span>
-                  </button>
-                  <div id="cropModList" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
-                </div>
-
-                <!-- Summary footer -->
-                <div id="cropFooter" class="hidden pt-3 border-t border-emerald-200">
-                  <p class="text-xs text-slate-500">
-                    <i class="fas fa-info-circle mr-1"></i>
-                    <span id="cropEvalSummary"></span>
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Low Confidence Warning -->
-            <div id="lowConfidenceWarning" class="hidden rounded-lg border border-red-300 bg-red-50 p-4 mb-4">
-              <div class="flex items-start gap-3">
-                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                <div>
-                  <p class="font-semibold text-red-800 mb-1">Image Quality Warning</p>
-                  <p class="text-sm text-red-700">Image quality is low. Please capture a clearer aerial image for better
-                    accuracy.</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Explanation Section -->
-            <div class="border-t border-slate-200 pt-6">
-              <button type="button" id="explanationToggle"
-                class="w-full flex items-center justify-between text-left py-3 px-4 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
-                <span class="font-semibold text-emerald-800 flex items-center gap-2">
-                  <i class="fas fa-lightbulb"></i>
-                  <span>Learn How This Analysis Works</span>
-                </span>
-                <span id="explanationToggleIcon" class="text-emerald-600">▼</span>
-              </button>
-              <div id="explanationSection" class="hidden mt-4 space-y-4">
-                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                  <h4 class="font-semibold text-slate-800 mb-2">1️⃣ What is Vegetation Detection?</h4>
-                  <p class="text-sm text-slate-700 mb-2">AGNI detects green crop regions using a vegetation index that
-                    highlights plant growth areas.</p>
-                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This ensures only crop areas
-                    are counted, not soil or non-farm regions.</p>
-                </div>
-                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                  <h4 class="font-semibold text-slate-800 mb-2">2️⃣ Why Are Roads and Rivers Removed?</h4>
-                  <p class="text-sm text-slate-700 mb-2">AGNI automatically removes permanent features such as roads,
-                    water bodies, and buildings.</p>
-                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This improves accuracy by
-                    focusing only on farmable land.</p>
-                </div>
-                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                  <h4 class="font-semibold text-slate-800 mb-2">3️⃣ What Does Cultivated Area Percentage Mean?</h4>
-                  <p class="text-sm text-slate-700">This value shows how much of your field is actively cultivated.
-                    Higher percentages indicate more land under crop growth.</p>
-                </div>
-                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                  <h4 class="font-semibold text-slate-800 mb-2">4️⃣ What Is Mask Confidence Score?</h4>
-                  <p class="text-sm text-slate-700 mb-3">This score indicates how reliable the analysis is. It is
-                    calculated using image clarity, segmentation consistency, and area stability.</p>
-                  <div class="text-xs text-slate-600 space-y-1">
-                    <p><strong>Interpretation:</strong></p>
-                    <p>• <strong>80–100</strong> → Highly reliable</p>
-                    <p>• <strong>60–80</strong> → Moderately reliable</p>
-                    <p>• <strong>Below 60</strong> → Re-upload clearer image</p>
-                  </div>
-                </div>
-                <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                  <h4 class="font-semibold text-slate-800 mb-2">5️⃣ What Is the Polygon Boundary?</h4>
-                  <p class="text-sm text-slate-700 mb-2">The highlighted boundary shows the exact cultivated region
-                    detected within your field.</p>
-                  <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This helps measure actual
-                    cultivated area accurately.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Suggestion Page (plot-based advice for farmers) -->
-        <div id="page-ai-suggestion" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6 mb-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
-              <i class="fas fa-lightbulb text-amber-500"></i>
-              Get suggestions for your plot
-            </h3>
-            <p class="text-sm text-slate-600 mb-4">Select a plot (use your last analyzed image data or current location) to see whether it is suitable for agriculture and get crop and farming suggestions.</p>
-            <div class="flex flex-wrap gap-3">
-              <button type="button" id="aiSuggestionUseLastPlotBtn"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fas fa-image mr-2"></i>Use last analyzed plot
-              </button>
-              <button type="button" id="aiSuggestionUseLocationBtn"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                <i class="fas fa-map-marker-alt mr-2"></i>Use current location
-              </button>
-            </div>
-            <p id="aiSuggestionPlotHint" class="text-sm text-slate-500 mt-2">If you have not analyzed an image yet, use &quot;Use current location&quot; and optionally enter land-use estimates below.</p>
-          </div>
-          <div id="aiSuggestionFormCard" class="glass-card rounded-2xl p-6 mb-6">
-            <h4 class="font-semibold text-slate-800 mb-3">Plot location (required) and details</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Latitude</label>
-                <input type="number" id="aiSuggestionLat" step="any" placeholder="e.g. 20.59"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Longitude</label>
-                <input type="number" id="aiSuggestionLon" step="any" placeholder="e.g. 78.96"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Cultivated %</label>
-                <input type="number" id="aiSuggestionCultivatedPct" min="0" max="100" value="50" step="1"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Water %</label>
-                <input type="number" id="aiSuggestionWaterPct" min="0" max="100" value="5" step="0.5"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Farmable space %</label>
-                <input type="number" id="aiSuggestionFarmablePct" min="0" max="100" value="50" step="1"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-              <div>
-                <label class="block text-sm text-slate-600 mb-1">Building %</label>
-                <input type="number" id="aiSuggestionBuildingPct" min="0" max="100" value="0" step="1"
-                  class="input-glass w-full px-3 py-2 rounded-xl">
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <button type="button" id="aiSuggestionGetBtn"
-                class="btn-primary px-6 py-2 text-white rounded-xl font-medium">
-                <i class="fas fa-magic mr-2"></i>Get suggestion
-              </button>
-              <span id="aiSuggestionStatus" class="text-sm text-slate-500 self-center"></span>
-            </div>
-          </div>
-          <div id="aiSuggestionResult" class="hidden space-y-6">
-            <div id="aiSuggestionSuitabilityCard" class="glass-card rounded-2xl p-6">
-              <h4 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
-                <i class="fas fa-check-circle text-emerald-600" id="aiSuggestionSuitabilityIcon"></i>
-                <span id="aiSuggestionSuitabilityLabel">Suitability</span>
-              </h4>
-              <p id="aiSuggestionSuitabilityMessage" class="text-slate-700 mb-4"></p>
-              <ul id="aiSuggestionBullets" class="list-disc list-inside space-y-1 text-slate-600 text-sm"></ul>
-            </div>
-            <div id="aiSuggestionWeatherCropRow" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div id="aiSuggestionWeatherCard" class="glass-card rounded-2xl p-6 hidden">
-                <h4 class="font-semibold text-slate-800 mb-2"><i class="fas fa-cloud-sun text-blue-500 mr-2"></i>Weather at plot</h4>
-                <p id="aiSuggestionWeatherText" class="text-slate-600"></p>
-              </div>
-              <div id="aiSuggestionCropsCard" class="glass-card rounded-2xl p-6">
-                <h4 class="font-semibold text-slate-800 mb-2"><i class="fas fa-seedling text-emerald-600 mr-2"></i>Top crop suggestions</h4>
-                <p id="aiSuggestionSeason" class="text-sm text-slate-500 mb-3"></p>
-                <div id="aiSuggestionCropsList" class="space-y-2"></div>
-              </div>
-            </div>
-            <div class="flex justify-end">
-              <button type="button" id="aiSuggestionDownloadReportBtn"
-                class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition font-medium">
-                <i class="fas fa-file-pdf mr-2"></i>Download / Print suggestion report
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Weather Page -->
-        <div id="page-weather" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6 mb-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <i class="fas fa-map-marker-alt text-emerald-600"></i>
-              Location
-            </h3>
-            <div class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div class="flex items-center gap-2 text-sm text-emerald-700">
-                <i class="fas fa-info-circle"></i>
-                <span>Using your current location by default. You can search for other locations if needed.</span>
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <input type="text" id="weatherLocation" placeholder="Search city name (optional)"
-                class="input-glass flex-1 px-4 py-2 rounded-xl">
-              <button id="fetchWeatherBtn"
-                class="btn-primary px-6 py-2 text-white rounded-xl">
-                <i class="fas fa-search mr-2"></i>Get Weather
-              </button>
-              <button id="useMyLocationBtn"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-crosshairs mr-2"></i>My Location
-              </button>
-            </div>
-            <p id="weatherLocationStatus" class="text-sm text-slate-500 mt-2"></p>
-          </div>
-
-          <div id="weatherContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl text-white p-6 border border-white/20">
-              <div class="flex items-center justify-between mb-4">
-                <div>
-                  <p class="text-blue-100 text-sm mb-1" id="weatherLocationName">Loading...</p>
-                  <p class="text-2xl font-bold" id="weatherTemp">—</p>
-                </div>
-                <div class="text-6xl" id="weatherIcon">
-                  <i class="fas fa-sun"></i>
-                </div>
-              </div>
-              <p class="text-blue-100 mb-4" id="weatherDescription">—</p>
-              <div class="grid grid-cols-2 gap-4 pt-4 border-t border-blue-400">
-                <div>
-                  <p class="text-blue-100 text-xs mb-1">Feels Like</p>
-                  <p class="text-xl font-semibold" id="weatherFeelsLike">—</p>
-                </div>
-                <div>
-                  <p class="text-blue-100 text-xs mb-1">Humidity</p>
-                  <p class="text-xl font-semibold" id="weatherHumidity">—</p>
-                </div>
-                <div>
-                  <p class="text-blue-100 text-xs mb-1">Wind Speed</p>
-                  <p class="text-xl font-semibold" id="weatherWind">—</p>
-                </div>
-                <div>
-                  <p class="text-blue-100 text-xs mb-1">Pressure</p>
-                  <p class="text-xl font-semibold" id="weatherPressure">—</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-6">
-              <h3 class="text-lg font-semibold text-slate-800 mb-4">Agricultural Impact</h3>
-              <div id="weatherImpact" class="space-y-3">
-                <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
-                  <i class="fas fa-seedling text-emerald-600 mt-1"></i>
-                  <div>
-                    <p class="font-medium text-slate-800">Crop Conditions</p>
-                    <p class="text-sm text-slate-600" id="cropConditions">Analyzing...</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                  <i class="fas fa-tint text-blue-600 mt-1"></i>
-                  <div>
-                    <p class="font-medium text-slate-800">Irrigation Advice</p>
-                    <p class="text-sm text-slate-600" id="irrigationAdvice">Analyzing...</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg">
-                  <i class="fas fa-calendar-alt text-amber-600 mt-1"></i>
-                  <div>
-                    <p class="font-medium text-slate-800">Field Work Recommendation</p>
-                    <p class="text-sm text-slate-600" id="fieldWorkAdvice">Analyzing...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- News Page -->
-        <div id="page-news" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-              <i class="fas fa-newspaper text-emerald-600"></i>
-              Latest Agricultural News
-            </h3>
-            <div id="newsList" class="space-y-4">
-              <div class="flex items-center justify-center py-8">
-                <i class="fas fa-spinner fa-spin text-slate-400 text-2xl"></i>
-                <span class="ml-3 text-slate-600">Loading news...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- My Lands Page -->
-        <div id="page-my-lands" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6 mb-6">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                <i class="fas fa-map-marked-alt text-emerald-600"></i>
-                My Lands
-              </h3>
-              <button type="button" id="addLandBtn"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
-                <i class="fas fa-plus mr-2"></i>Add New Land
-              </button>
-            </div>
-            <p class="text-sm text-slate-600 mb-4">Manage your multiple farm locations. Click a place to see current weather and crop analysis.</p>
-            <div id="landsList" class="space-y-4">
-              <p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" or save a place from Image Analyzer.</p>
-            </div>
-          </div>
-
-          <!-- Land/Place detail modal (current weather + crops) -->
-          <div id="landDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
-              <div class="p-6 border-b border-slate-200 flex-shrink-0">
-                <div class="flex items-start justify-between">
-                  <div>
-                    <h4 id="landDetailName" class="text-xl font-semibold text-slate-800">—</h4>
-                    <p id="landDetailLocation" class="text-sm text-slate-600 mt-1">—</p>
-                  </div>
-                  <button type="button" id="closeLandDetailModal" class="text-slate-400 hover:text-slate-600">
-                    <i class="fas fa-times text-xl"></i>
-                  </button>
-                </div>
-              </div>
-              <div id="landDetailLoading" class="p-6 flex items-center justify-center gap-2 text-slate-500">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span>Loading current weather &amp; analysis...</span>
-              </div>
-              <div id="landDetailContent" class="hidden flex-1 overflow-y-auto p-6 space-y-4">
-                <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                  <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                    <i class="fas fa-cloud-sun"></i> Current weather
-                  </h5>
-                  <p id="landDetailWeatherTemp" class="text-2xl font-bold text-blue-800">—</p>
-                  <p id="landDetailWeatherDesc" class="text-sm text-blue-700">—</p>
-                  <p id="landDetailWeatherExtra" class="text-xs text-blue-600 mt-2">—</p>
-                </div>
-                <div id="landDetailCropsBox" class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
-                  <h5 class="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
-                    <i class="fas fa-seedling"></i> Crop recommendations (current conditions)
-                  </h5>
-                  <p id="landDetailCropsSummary" class="text-sm text-emerald-800">—</p>
-                  <div id="landDetailCropsPrimary" class="mt-2 p-3 bg-white rounded-lg border border-emerald-200"></div>
-                  <div id="landDetailCropsSub" class="mt-2 space-y-1 text-sm text-emerald-800"></div>
-                </div>
-              </div>
-              <div class="p-4 border-t border-slate-200 flex-shrink-0 flex gap-2">
-                <button type="button" id="landDetailOpenAnalyzerBtn" class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm hidden">
-                  <i class="fas fa-map mr-2"></i>Open in Image Analyzer
-                </button>
-                <button type="button" id="closeLandDetailModalBtn" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium text-sm">
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Add/Edit Land Modal -->
-          <div id="landModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-              <div class="flex items-center justify-between mb-4">
-                <h4 class="text-xl font-semibold text-slate-800" id="landModalTitle">Add New Land</h4>
-                <button type="button" id="closeLandModal" class="text-slate-400 hover:text-slate-600">
-                  <i class="fas fa-times text-xl"></i>
-                </button>
-              </div>
-              <form id="landForm" class="space-y-4">
-                <input type="hidden" id="landId" />
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-tag mr-2 text-emerald-600"></i>Land Name
-                  </label>
-                  <input type="text" id="landName" required
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g., North Field, Main Farm" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
-                  </label>
-                  <input type="text" id="landPincode"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g., 110001" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-city mr-2 text-emerald-600"></i>Place / City
-                  </label>
-                  <input type="text" id="landPlace" required
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="e.g., Delhi, New Delhi" />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fas fa-info-circle mr-2 text-emerald-600"></i>Notes (optional)
-                  </label>
-                  <textarea id="landNotes" rows="3"
-                    class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Additional details about this land..."></textarea>
-                </div>
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" id="landUseFingerprint" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
-                  <label for="landUseFingerprint" class="text-sm text-slate-700">
-                    <i class="fas fa-fingerprint mr-1"></i>Require fingerprint to access this land
-                  </label>
-                </div>
-                <div class="flex gap-3 pt-2">
-                  <button type="submit"
-                    class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
-                    <i class="fas fa-save mr-2"></i>Save
-                  </button>
-                  <button type="button" id="cancelLandForm"
-                    class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Profile Page -->
-        <div id="page-profile" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6 mb-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-6">Profile Information</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
-                <input type="text" id="profileUsername" readonly
-                  class="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-600">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                <input type="email" id="profileEmail"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  placeholder="your.email@example.com">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Farm Name</label>
-                <input type="text" id="profileFarmName"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  placeholder="Your Farm Name">
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">Location</label>
-                <input type="text" id="profileLocation"
-                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  placeholder="City, State">
-              </div>
-              <button id="saveProfileBtn"
-                class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
-                <i class="fas fa-save mr-2"></i>Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Settings Page -->
-        <div id="page-settings" class="page-content hidden">
-          <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-slate-800 mb-6">Settings</h3>
-            <div class="space-y-6">
-              <div>
-                <h4 class="font-medium text-slate-700 mb-3">Notifications</h4>
-                <div class="space-y-3">
-                  <label
-                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
-                    <span class="text-slate-700">Email notifications</span>
-                    <input type="checkbox" class="toggle-checkbox">
-                  </label>
-                  <label
-                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
-                    <span class="text-slate-700">Analysis alerts</span>
-                    <input type="checkbox" checked class="toggle-checkbox">
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-medium text-slate-700 mb-3">Display Preferences</h4>
-                <div class="space-y-3">
-                  <label
-                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
-                    <span class="text-slate-700">Dark mode</span>
-                    <input type="checkbox" class="toggle-checkbox">
-                  </label>
-                  <label
-                    class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
-                    <span class="text-slate-700">Compact view</span>
-                    <input type="checkbox" class="toggle-checkbox">
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="font-medium text-slate-700 mb-3">Units</h4>
-                <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
-                  <option>Metric (Celsius, km)</option>
-                  <option>Imperial (Fahrenheit, miles)</option>
-                </select>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left">
+                <thead>
+                  <tr class="text-xs uppercase text-slate-500 font-bold border-b border-slate-100">
+                    <th class="pb-3 pr-4">Field Name</th>
+                    <th class="pb-3 pr-4">Location</th>
+                    <th class="pb-3 pr-4">Health Score</th>
+                    <th class="pb-3 pr-4">Cultivation Area</th>
+                    <th class="pb-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="fieldComparisonBody" class="text-sm text-slate-700">
+                  <!-- Field rows will be injected here -->
+                </tbody>
+              </table>
+              <div id="noFieldsComparison" class="hidden py-8 text-center text-slate-400">
+                <p>No saved fields found. Save your first field in "My Fields" or "Image Analyzer".</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </main>
+
+      <!-- Image Analyzer Page -->
+      <div id="page-analyzer" class="page-content hidden">
+        <!-- Location Selection Method -->
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-map-marked-alt text-emerald-600"></i>
+            Select Farm Location
+          </h3>
+          <div class="flex flex-wrap items-center gap-4 mb-4">
+            <div class="flex gap-4">
+              <button type="button" id="locationMethodMap"
+                class="location-method-btn px-4 py-2 rounded-lg border-2 border-emerald-600 bg-emerald-50 text-emerald-700 font-medium transition">
+                <i class="fas fa-map mr-2"></i>Map Selection
+              </button>
+              <button type="button" id="locationMethodPincode"
+                class="location-method-btn px-4 py-2 rounded-lg border-2 border-slate-300 bg-white text-slate-700 font-medium transition">
+                <i class="fas fa-map-pin mr-2"></i>Pincode / Place
+              </button>
+            </div>
+            <div class="flex items-center gap-2 border-l border-slate-200 pl-4">
+              <span class="text-sm text-slate-600">Load saved place:</span>
+              <select id="loadSavedPlaceSelect"
+                class="text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 max-w-[200px]">
+                <option value="">— Choose one —</option>
+              </select>
+              <button type="button" id="loadSavedPlaceBtn"
+                class="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition text-sm font-medium disabled:opacity-50"
+                disabled>
+                <i class="fas fa-map-marker-alt mr-1"></i>Load
+              </button>
+            </div>
+          </div>
+
+          <!-- Map Selection Method -->
+          <div id="locationMethodMapPanel" class="location-panel">
+            <p class="text-sm text-slate-600 mb-2">Draw a polygon on the map to define your farm area. Use the layer
+              control (top-right) to switch to <strong>Satellite</strong> view for easier selection.</p>
+            <p class="text-xs text-slate-500 mb-4">Step 1: Draw polygon (click corners, double-click to finish) → Step
+              2: Click &quot;Confirm Farm Boundary&quot; → Step 3: Upload image below and click Analyze.</p>
+            <div id="farmMap"></div>
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" id="confirmBoundaryBtn"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+                <i class="fas fa-check mr-2"></i>Confirm Farm Boundary
+              </button>
+              <button type="button" id="savePlaceBtn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled title="Save this place so you don't need to select the map every time">
+                <i class="fas fa-save mr-2"></i>Save this place
+              </button>
+              <button type="button" id="clearBoundaryBtn"
+                class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium hidden">
+                <i class="fas fa-eraser mr-2"></i>Clear Boundary
+              </button>
+              <span id="boundarySummary" class="text-sm text-slate-500"></span>
+            </div>
+            <p id="boundaryError" class="text-sm text-red-600 mt-2 hidden"></p>
+          </div>
+
+          <!-- Pincode/Place Selection Method -->
+          <div id="locationMethodPincodePanel" class="location-panel hidden">
+            <p class="text-sm text-slate-600 mb-4">Enter pincode or place name. The map will show that location so you
+              can then draw your farm boundary on the map.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
+                </label>
+                <input type="text" id="farmPincode" placeholder="e.g., 110001"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-city mr-2 text-emerald-600"></i>Place Name
+                </label>
+                <input type="text" id="farmPlace" placeholder="e.g., Delhi, New Delhi"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button type="button" id="confirmLocationBtn"
+                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+                <i class="fas fa-check mr-2"></i>Show on Map
+              </button>
+              <button type="button" id="useCurrentLocationBtn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                <i class="fas fa-crosshairs mr-2"></i>Use Current Location
+              </button>
+              <span id="locationSummary" class="text-sm text-slate-500"></span>
+            </div>
+            <p id="locationError" class="text-sm text-red-600 mt-2 hidden"></p>
+            <p id="locationMapHint" class="text-sm text-emerald-700 mt-2 hidden">
+              <i class="fas fa-map mr-1"></i>Map below is centered on your location. Switch to &quot;Map
+              Selection&quot; to draw your farm boundary.
+            </p>
+          </div>
+        </div>
+
+        <!-- Use map as image -->
+        <div class="bg-emerald-50 rounded-xl shadow-md border border-emerald-200 p-6 mb-6">
+          <h3 class="text-lg font-semibold text-emerald-800 mb-2 flex items-center gap-2">
+            <i class="fas fa-map-pin text-emerald-600"></i>
+            Use map as image
+          </h3>
+          <p class="text-sm text-emerald-700 mb-4">Capture the current map view (including satellite) as the image to
+            analyze. Your drawn boundary will be used so the analysis matches exactly what you see.</p>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="button" id="captureMapBtn"
+              class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-camera mr-2"></i>Capture map for analysis
+            </button>
+            <button type="button" id="clearMapCaptureBtn"
+              class="hidden px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
+              <i class="fas fa-times mr-2"></i>Clear and use file instead
+            </button>
+            <span id="mapCaptureStatus" class="text-sm text-emerald-700"></span>
+          </div>
+          <p id="mapCaptureError" class="text-sm text-red-600 mt-2 hidden"></p>
+          <div id="mapCapturePreview" class="mt-3 hidden">
+            <p class="text-xs text-slate-500 mb-1">Preview (boundary area only — this will be sent for analysis):</p>
+            <img id="mapCapturePreviewImg" alt="Map capture" class="max-h-32 rounded border border-slate-300" />
+            <button type="button" id="analyzeMapCaptureBtn"
+              class="mt-3 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium inline-flex items-center gap-2">
+              <i class="fas fa-chart-line"></i>Analyze this image
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-upload text-emerald-600"></i>
+            Or upload your own image
+          </h3>
+          <div class="flex items-center gap-2 mb-4">
+            <input type="checkbox" id="useBoundaryCheckbox"
+              class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+            <label for="useBoundaryCheckbox" class="text-sm text-slate-700">Analyze within selected farm boundary
+              only</label>
+          </div>
+          <p class="text-sm text-slate-600 mb-2">Or try instantly with a sample field image (great for demos &amp;
+            judges):</p>
+          <button type="button" id="trySampleImageBtn"
+            class="btn-glass mb-4 px-4 py-2 text-amber-700 rounded-xl font-medium border-amber-200/80">
+            <i class="fas fa-magic mr-2"></i>Try with sample image
+          </button>
+          <form id="uploadForm" class="space-y-4">
+            <div
+              class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-emerald-400 transition">
+              <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4"></i>
+              <p class="text-slate-600 mb-2">Choose an image file (optional if you used &quot;Capture map&quot; above)
+              </p>
+              <input type="file" id="imageFile" name="file" accept="image/*"
+                class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+            </div>
+            <p id="uploadError" class="text-sm text-red-600 hidden"></p>
+            <p id="analyzeHint" class="text-sm text-slate-500">Draw boundary and capture map, or upload an image to
+              enable Analyze.</p>
+            <button type="submit" id="analyzeBtn"
+              class="btn-primary w-full py-3 text-white font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled>
+              <span id="analyzeBtnText">Analyze Image</span>
+              <span id="analyzeSpinner" class="hidden">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </button>
+          </form>
+        </div>
+
+        <!-- How to Capture Good Images -->
+        <div class="bg-blue-50 rounded-xl shadow-md border border-blue-200 p-6 mb-6">
+          <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
+            <i class="fas fa-camera text-blue-600"></i>
+            How to Capture Good Images
+          </h3>
+          <ul class="space-y-2 text-sm text-blue-700">
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check text-blue-500 mt-0.5"></i>
+              <span>Capture during daylight hours for best visibility</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check text-blue-500 mt-0.5"></i>
+              <span>Avoid heavy shadows that can hide crop areas</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check text-blue-500 mt-0.5"></i>
+              <span>Keep camera steady to avoid motion blur</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check text-blue-500 mt-0.5"></i>
+              <span>Ensure the full field is visible in the image</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Save place modal -->
+        <div id="savePlaceModal"
+          class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <h4 class="text-lg font-semibold text-slate-800 mb-4">
+              <i class="fas fa-save text-emerald-600 mr-2"></i>Save this place
+            </h4>
+            <p class="text-sm text-slate-600 mb-4">Give it a name so you can load it next time without redrawing the
+              map.</p>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Place name *</label>
+                <input type="text" id="savePlaceName" placeholder="e.g., North field, Main farm"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Place / city (optional)</label>
+                <input type="text" id="savePlaceLocation" placeholder="e.g., Delhi"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Pincode (optional)</label>
+                <input type="text" id="savePlacePincode" placeholder="e.g., 110001"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              </div>
+            </div>
+            <div class="flex gap-3 mt-4">
+              <button type="button" id="savePlaceConfirmBtn"
+                class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">
+                Save
+              </button>
+              <button type="button" id="savePlaceCancelBtn"
+                class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Card -->
+        <div id="resultsCard" class="hidden glass-card rounded-2xl p-6 border border-white/40">
+          <div id="withinBoundaryMessage"
+            class="hidden mb-4 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800">
+            <i class="fas fa-info-circle mr-2"></i>Analysis performed within selected farm boundary.
+          </div>
+          <div id="savePlaceResultRow" class="hidden mb-4">
+            <button type="button" id="savePlaceFromResultsBtn"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+              <i class="fas fa-save mr-2"></i>Save this place for next time
+            </button>
+          </div>
+          <h3 class="text-lg font-semibold text-slate-800 mb-6">Analysis Results</h3>
+
+          <!-- Image Previews (larger map windows) - aligned panels -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 items-start">
+            <div class="text-center flex flex-col">
+              <div class="analysis-panel-caption mb-2">
+                <p class="text-xs font-medium text-slate-500">Original</p>
+              </div>
+              <div
+                class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                <img id="originalPreview" src="" alt="Original"
+                  class="w-full h-full object-cover hidden min-h-[220px]" />
+                <span id="originalPlaceholder"
+                  class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
+              </div>
+            </div>
+            <div class="text-center flex flex-col">
+              <div class="analysis-panel-caption mb-2">
+                <p class="text-xs font-medium text-slate-500">Binary Mask</p>
+              </div>
+              <div
+                class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                <img id="binaryMaskPreview" src="" alt="Binary mask"
+                  class="w-full h-full object-cover hidden min-h-[220px]" />
+                <span id="binaryMaskPlaceholder"
+                  class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
+              </div>
+            </div>
+            <div class="text-center flex flex-col">
+              <div class="analysis-panel-caption mb-2">
+                <p class="text-xs font-medium text-slate-500">Overlay</p>
+              </div>
+              <div
+                class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                <img id="overlayMaskPreview" src="" alt="Overlay mask"
+                  class="w-full h-full object-cover hidden min-h-[220px]" />
+                <span id="overlayMaskPlaceholder"
+                  class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
+              </div>
+            </div>
+            <div class="text-center flex flex-col">
+              <div class="analysis-panel-caption mb-2">
+                <p class="text-xs font-medium text-slate-500">Land use</p>
+                <p class="text-xs text-slate-400">Water · Roads · Buildings · Vegetation · Bare soil</p>
+              </div>
+              <div
+                class="aspect-[4/3] min-h-[220px] rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                <img id="landUseMaskPreview" src="" alt="Land use mask"
+                  class="w-full h-full object-cover hidden min-h-[220px]" />
+                <span id="landUseMaskPlaceholder"
+                  class="text-slate-400 text-sm flex items-center justify-center min-h-[220px]">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Key Metrics -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-emerald-700 font-medium">Cultivated %</span>
+                <button type="button" class="info-tooltip-btn"
+                  data-tooltip="Percentage of your land currently under crop growth.">
+                  <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
+                </button>
+              </div>
+              <p id="cultivatedPct" class="text-3xl font-bold text-emerald-800">—</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-amber-700 font-medium">Stress %</span>
+              </div>
+              <p id="stressPct" class="text-3xl font-bold text-amber-800">—</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-blue-700 font-medium">Confidence</span>
+                <button type="button" class="info-tooltip-btn"
+                  data-tooltip="Reliability score based on image quality and segmentation clarity.">
+                  <i class="fas fa-info-circle text-blue-600 text-xs"></i>
+                </button>
+              </div>
+              <p id="trustScore" class="text-3xl font-bold text-blue-800">—</p>
+            </div>
+          </div>
+
+          <!-- Classification -->
+          <div class="mb-6 rounded-lg bg-slate-50 border border-slate-200 px-4 py-3 text-center">
+            <p class="text-slate-600 text-sm mb-1 flex items-center justify-center gap-2">
+              Classification
+              <button type="button" class="info-tooltip-btn" data-tooltip="Shows how well your field is cultivated.">
+                <i class="fas fa-info-circle text-emerald-600 text-xs"></i>
+              </button>
+            </p>
+            <p id="classificationResult" class="font-semibold text-xl text-slate-800">—</p>
+          </div>
+
+          <!-- Detailed Stats -->
+          <div class="mb-6 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <p class="text-slate-600 text-sm font-medium mb-3">Area Statistics</p>
+            <div id="boundaryPortionStats"
+              class="hidden mb-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200 text-sm">
+              <p class="font-medium text-emerald-800 mb-2">Selected region vs full image</p>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-700">
+                <span>Full image</span>
+                <span id="fullImagePixels" class="font-mono text-right">—</span>
+                <span>Selected region (inside boundary)</span>
+                <span id="insideBoundaryPct" class="font-mono text-right">—</span>
+                <span>Remaining (outside boundary)</span>
+                <span id="outsideBoundaryPct" class="font-mono text-right">—</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <span class="text-slate-500">Total pixels <span id="totalPixelsLabel" class="text-slate-400">(in
+                  selected region)</span></span>
+              <span id="totalPixels" class="font-mono text-slate-800 text-right">—</span>
+              <span class="text-slate-500">Cultivated pixels</span>
+              <span id="cultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+              <span class="text-slate-500">Non-cultivated pixels</span>
+              <span id="nonCultivatedPixels" class="font-mono text-slate-800 text-right">—</span>
+              <span class="text-slate-500">Coverage ratio</span>
+              <span id="coverageRatio" class="font-mono text-slate-800 text-right">—</span>
+            </div>
+          </div>
+
+          <!-- Advisory -->
+          <div class="pt-4 border-t border-slate-200 text-center mb-6">
+            <p class="text-slate-600 text-sm mb-2">Advisory</p>
+            <p id="advisory" class="font-semibold text-xl text-slate-800">—</p>
+          </div>
+          <div class="flex flex-wrap gap-3 justify-center mb-6">
+            <button type="button" id="downloadReportBtn"
+              class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition font-medium">
+              <i class="fas fa-file-pdf mr-2"></i>Download / Print report
+            </button>
+          </div>
+
+          <!-- Land Use Breakdown -->
+          <div id="landUseBreakdown"
+            class="hidden mb-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200 p-6">
+            <h4 class="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-map text-indigo-600"></i>
+              Detected Land Use Breakdown
+            </h4>
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                <span class="text-sm text-slate-600 w-24">Vegetation</span>
+                <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                  <div id="barVegetation"
+                    class="landuse-bar-fill h-full rounded-full bg-emerald-500 transition-all duration-300"
+                    style="width:0%; min-width:0"></div>
+                </div>
+                <span id="pctVegetation" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-blue-500 flex-shrink-0"></span>
+                <span class="text-sm text-slate-600 w-24">Water</span>
+                <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                  <div id="barWater"
+                    class="landuse-bar-fill h-full rounded-full bg-blue-500 transition-all duration-300"
+                    style="width:0%; min-width:0"></div>
+                </div>
+                <span id="pctWater" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-gray-400 flex-shrink-0"></span>
+                <span class="text-sm text-slate-600 w-24">Roads</span>
+                <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                  <div id="barRoads"
+                    class="landuse-bar-fill h-full rounded-full bg-gray-400 transition-all duration-300"
+                    style="width:0%; min-width:0"></div>
+                </div>
+                <span id="pctRoads" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-amber-700 flex-shrink-0"></span>
+                <span class="text-sm text-slate-600 w-24">Buildings</span>
+                <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                  <div id="barBuildings"
+                    class="landuse-bar-fill h-full rounded-full bg-amber-700 transition-all duration-300"
+                    style="width:0%; min-width:0"></div>
+                </div>
+                <span id="pctBuildings" class="text-sm font-semibold text-slate-800 w-14 text-right shrink-0">0%</span>
+              </div>
+              <div class="flex items-center gap-3 pt-2 border-t border-slate-200">
+                <span class="w-3 h-3 rounded-full bg-lime-500 flex-shrink-0"></span>
+                <span class="text-sm text-slate-700 font-medium w-24">Farmable</span>
+                <div class="flex-1 min-w-0 h-6 bg-slate-200 rounded-full overflow-hidden flex">
+                  <div id="barFarmable"
+                    class="landuse-bar-fill h-full rounded-full bg-lime-500 transition-all duration-300"
+                    style="width:0%; min-width:0"></div>
+                </div>
+                <span id="pctFarmable" class="text-sm font-bold text-lime-700 w-14 text-right shrink-0">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Crop Recommendations -->
+          <div id="cropRecommendationsSection" class="hidden mb-6">
+            <div
+              class="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-xl border border-emerald-200 p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-emerald-900 text-lg flex items-center gap-2">
+                  <i class="fas fa-seedling text-emerald-600"></i>
+                  AI Crop Recommendations
+                </h4>
+                <span id="cropSeasonBadge"
+                  class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800"></span>
+              </div>
+              <p id="cropSummaryText" class="text-sm text-emerald-700 mb-1"></p>
+              <p id="cropConditionsText" class="text-xs text-slate-500 mb-4"></p>
+
+              <!-- Loading state -->
+              <div id="cropLoading" class="hidden flex items-center justify-center py-8">
+                <i class="fas fa-spinner fa-spin text-emerald-500 text-2xl mr-3"></i>
+                <span class="text-emerald-700">Analyzing conditions &amp; finding best crops...</span>
+              </div>
+
+              <!-- Primary recommendation + sub-suggestions -->
+              <div id="cropPrimarySection" class="hidden mb-4">
+                <h5 class="font-semibold text-emerald-800 mb-2 flex items-center gap-2">
+                  <i class="fas fa-star text-yellow-500"></i> Top recommendation
+                </h5>
+                <div id="cropPrimaryCard" class="mb-4"></div>
+                <h6 class="font-medium text-teal-800 mb-2 flex items-center gap-2 text-sm">
+                  <i class="fas fa-list-ul text-teal-500"></i> Also consider
+                </h6>
+                <div id="cropSubSuggestions" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"></div>
+              </div>
+
+              <!-- Highly Recommended (fallback) -->
+              <div id="cropHighlyRecommended" class="hidden">
+                <h5 class="font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+                  <i class="fas fa-star text-yellow-500"></i> Highly Recommended
+                </h5>
+                <div id="cropHighList" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+              </div>
+
+              <!-- Moderately Suitable -->
+              <div id="cropModeratelySuitable" class="hidden">
+                <button type="button" id="toggleModCrops"
+                  class="w-full flex items-center justify-between py-2 px-3 rounded-lg bg-white/60 hover:bg-white/80 border border-emerald-200 mb-3 transition">
+                  <span class="text-sm font-semibold text-teal-800 flex items-center gap-2">
+                    <i class="fas fa-thumbs-up text-teal-500"></i> Moderately Suitable
+                    <span id="modCropCount" class="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full"></span>
+                  </span>
+                  <span id="modCropToggleIcon" class="text-teal-600 text-sm">&#9660;</span>
+                </button>
+                <div id="cropModList" class="hidden grid grid-cols-1 md:grid-cols-2 gap-3 mb-4"></div>
+              </div>
+
+              <!-- Summary footer -->
+              <div id="cropFooter" class="hidden pt-3 border-t border-emerald-200">
+                <p class="text-xs text-slate-500">
+                  <i class="fas fa-info-circle mr-1"></i>
+                  <span id="cropEvalSummary"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low Confidence Warning -->
+          <div id="lowConfidenceWarning" class="hidden rounded-lg border border-red-300 bg-red-50 p-4 mb-4">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+              <div>
+                <p class="font-semibold text-red-800 mb-1">Image Quality Warning</p>
+                <p class="text-sm text-red-700">Image quality is low. Please capture a clearer aerial image for better
+                  accuracy.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Explanation Section -->
+          <div class="border-t border-slate-200 pt-6">
+            <button type="button" id="explanationToggle"
+              class="w-full flex items-center justify-between text-left py-3 px-4 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+              <span class="font-semibold text-emerald-800 flex items-center gap-2">
+                <i class="fas fa-lightbulb"></i>
+                <span>Learn How This Analysis Works</span>
+              </span>
+              <span id="explanationToggleIcon" class="text-emerald-600">▼</span>
+            </button>
+            <div id="explanationSection" class="hidden mt-4 space-y-4">
+              <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-800 mb-2">1️⃣ What is Vegetation Detection?</h4>
+                <p class="text-sm text-slate-700 mb-2">AGNI detects green crop regions using a vegetation index that
+                  highlights plant growth areas.</p>
+                <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This ensures only crop areas
+                  are counted, not soil or non-farm regions.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-800 mb-2">2️⃣ Why Are Roads and Rivers Removed?</h4>
+                <p class="text-sm text-slate-700 mb-2">AGNI automatically removes permanent features such as roads,
+                  water bodies, and buildings.</p>
+                <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This improves accuracy by
+                  focusing only on farmable land.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-800 mb-2">3️⃣ What Does Cultivated Area Percentage Mean?</h4>
+                <p class="text-sm text-slate-700">This value shows how much of your field is actively cultivated.
+                  Higher percentages indicate more land under crop growth.</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-800 mb-2">4️⃣ What Is Mask Confidence Score?</h4>
+                <p class="text-sm text-slate-700 mb-3">This score indicates how reliable the analysis is. It is
+                  calculated using image clarity, segmentation consistency, and area stability.</p>
+                <div class="text-xs text-slate-600 space-y-1">
+                  <p><strong>Interpretation:</strong></p>
+                  <p>• <strong>80–100</strong> → Highly reliable</p>
+                  <p>• <strong>60–80</strong> → Moderately reliable</p>
+                  <p>• <strong>Below 60</strong> → Re-upload clearer image</p>
+                </div>
+              </div>
+              <div class="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                <h4 class="font-semibold text-slate-800 mb-2">5️⃣ What Is the Polygon Boundary?</h4>
+                <p class="text-sm text-slate-700 mb-2">The highlighted boundary shows the exact cultivated region
+                  detected within your field.</p>
+                <p class="text-xs text-slate-600 italic"><strong>Why it matters:</strong> This helps measure actual
+                  cultivated area accurately.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Suggestion Page (plot-based advice for farmers) -->
+      <div id="page-ai-suggestion" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+            <i class="fas fa-lightbulb text-amber-500"></i>
+            Get suggestions for your plot
+          </h3>
+          <p class="text-sm text-slate-600 mb-4">Select a plot (use your last analyzed image data or current location)
+            to see whether it is suitable for agriculture and get crop and farming suggestions.</p>
+          <div class="flex flex-wrap gap-3">
+            <button type="button" id="aiSuggestionUseLastPlotBtn"
+              class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-image mr-2"></i>Use last analyzed plot
+            </button>
+            <button type="button" id="aiSuggestionUseLocationBtn"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+              <i class="fas fa-map-marker-alt mr-2"></i>Use current location
+            </button>
+          </div>
+          <p id="aiSuggestionPlotHint" class="text-sm text-slate-500 mt-2">If you have not analyzed an image yet, use
+            &quot;Use current location&quot; and optionally enter land-use estimates below.</p>
+        </div>
+        <div id="aiSuggestionFormCard" class="glass-card rounded-2xl p-6 mb-6">
+          <h4 class="font-semibold text-slate-800 mb-3">Plot location (required) and details</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Latitude</label>
+              <input type="number" id="aiSuggestionLat" step="any" placeholder="e.g. 20.59"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Longitude</label>
+              <input type="number" id="aiSuggestionLon" step="any" placeholder="e.g. 78.96"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Cultivated %</label>
+              <input type="number" id="aiSuggestionCultivatedPct" min="0" max="100" value="50" step="1"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Water %</label>
+              <input type="number" id="aiSuggestionWaterPct" min="0" max="100" value="5" step="0.5"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Farmable space %</label>
+              <input type="number" id="aiSuggestionFarmablePct" min="0" max="100" value="50" step="1"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600 mb-1">Building %</label>
+              <input type="number" id="aiSuggestionBuildingPct" min="0" max="100" value="0" step="1"
+                class="input-glass w-full px-3 py-2 rounded-xl">
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button type="button" id="aiSuggestionGetBtn"
+              class="btn-primary px-6 py-2 text-white rounded-xl font-medium">
+              <i class="fas fa-magic mr-2"></i>Get suggestion
+            </button>
+            <span id="aiSuggestionStatus" class="text-sm text-slate-500 self-center"></span>
+          </div>
+        </div>
+        <div id="aiSuggestionResult" class="hidden space-y-6">
+          <div id="aiSuggestionSuitabilityCard" class="glass-card rounded-2xl p-6">
+            <h4 class="font-semibold text-slate-800 mb-2 flex items-center gap-2">
+              <i class="fas fa-check-circle text-emerald-600" id="aiSuggestionSuitabilityIcon"></i>
+              <span id="aiSuggestionSuitabilityLabel">Suitability</span>
+            </h4>
+            <p id="aiSuggestionSuitabilityMessage" class="text-slate-700 mb-4"></p>
+            <ul id="aiSuggestionBullets" class="list-disc list-inside space-y-1 text-slate-600 text-sm"></ul>
+          </div>
+          <div id="aiSuggestionWeatherCropRow" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="aiSuggestionWeatherCard" class="glass-card rounded-2xl p-6 hidden">
+              <h4 class="font-semibold text-slate-800 mb-2"><i class="fas fa-cloud-sun text-blue-500 mr-2"></i>Weather
+                at plot</h4>
+              <p id="aiSuggestionWeatherText" class="text-slate-600"></p>
+            </div>
+            <div id="aiSuggestionCropsCard" class="glass-card rounded-2xl p-6">
+              <h4 class="font-semibold text-slate-800 mb-2"><i class="fas fa-seedling text-emerald-600 mr-2"></i>Top
+                crop suggestions</h4>
+              <p id="aiSuggestionSeason" class="text-sm text-slate-500 mb-3"></p>
+              <div id="aiSuggestionCropsList" class="space-y-2"></div>
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="button" id="aiSuggestionDownloadReportBtn"
+              class="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-800 transition font-medium">
+              <i class="fas fa-file-pdf mr-2"></i>Download / Print suggestion report
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animal Suggestion Page -->
+      <div id="page-animal-suggestion" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-2 flex items-center gap-2">
+            <i class="fas fa-paw text-amber-600"></i>
+            AI Animal Farm Suggestions
+          </h3>
+          <p class="text-sm text-slate-600 mb-6">Get optimized livestock and animal farming recommendations based on
+            your local environment.</p>
+
+          <div id="animalSuggestionLoading" class="hidden py-12 text-center text-slate-500">
+            <i class="fas fa-spinner fa-spin text-3xl text-emerald-500 mb-4"></i>
+            <p class="animate-pulse">Tailoring livestock suggestions for your climate...</p>
+          </div>
+
+          <div id="animalSuggestionContent" class="space-y-6">
+            <div id="animalSuggestionsList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Recommendations will be injected here -->
+            </div>
+            <div class="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-4">
+              <div class="text-amber-500 text-xl pt-1">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <p class="text-sm text-amber-800">
+                <strong>Livestock Tip:</strong> Animal health is highly dependent on hydration during peak summer.
+                Ensure cooling systems are active if temperature exceeds 32°C.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weather Page -->
+      <div id="page-weather" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-map-marker-alt text-emerald-600"></i>
+            Location
+          </h3>
+          <div class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+            <div class="flex items-center gap-2 text-sm text-emerald-700">
+              <i class="fas fa-info-circle"></i>
+              <span>Using your current location by default. You can search for other locations if needed.</span>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <input type="text" id="weatherLocation" placeholder="Search city name (optional)"
+              class="input-glass flex-1 px-4 py-2 rounded-xl">
+            <button id="fetchWeatherBtn" class="btn-primary px-6 py-2 text-white rounded-xl">
+              <i class="fas fa-search mr-2"></i>Get Weather
+            </button>
+            <button id="useMyLocationBtn"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <i class="fas fa-crosshairs mr-2"></i>My Location
+            </button>
+          </div>
+          <p id="weatherLocationStatus" class="text-sm text-slate-500 mt-2"></p>
+        </div>
+
+        <div id="weatherContent" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl text-white p-6 border border-white/20">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-blue-100 text-sm mb-1" id="weatherLocationName">Loading...</p>
+                <p class="text-2xl font-bold" id="weatherTemp">—</p>
+              </div>
+              <div class="text-6xl" id="weatherIcon">
+                <i class="fas fa-sun"></i>
+              </div>
+            </div>
+            <p class="text-blue-100 mb-4" id="weatherDescription">—</p>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-blue-400">
+              <div>
+                <p class="text-blue-100 text-xs mb-1">Feels Like</p>
+                <p class="text-xl font-semibold" id="weatherFeelsLike">—</p>
+              </div>
+              <div>
+                <p class="text-blue-100 text-xs mb-1">Humidity</p>
+                <p class="text-xl font-semibold" id="weatherHumidity">—</p>
+              </div>
+              <div>
+                <p class="text-blue-100 text-xs mb-1">Wind Speed</p>
+                <p class="text-xl font-semibold" id="weatherWind">—</p>
+              </div>
+              <div>
+                <p class="text-blue-100 text-xs mb-1">Pressure</p>
+                <p class="text-xl font-semibold" id="weatherPressure">—</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Agricultural Impact</h3>
+            <div id="weatherImpact" class="space-y-3">
+              <div class="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg">
+                <i class="fas fa-seedling text-emerald-600 mt-1"></i>
+                <div>
+                  <p class="font-medium text-slate-800">Crop Conditions</p>
+                  <p class="text-sm text-slate-600" id="cropConditions">Analyzing...</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                <i class="fas fa-tint text-blue-600 mt-1"></i>
+                <div>
+                  <p class="font-medium text-slate-800">Irrigation Advice</p>
+                  <p class="text-sm text-slate-600" id="irrigationAdvice">Analyzing...</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-lg">
+                <i class="fas fa-calendar-alt text-amber-600 mt-1"></i>
+                <div>
+                  <p class="font-medium text-slate-800">Field Work Recommendation</p>
+                  <p class="text-sm text-slate-600" id="fieldWorkAdvice">Analyzing...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5-Day Forecast -->
+          <div id="weatherForecast" class="mt-8 hidden">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-calendar-week text-blue-600"></i>
+              5-Day Agricultural Forecast
+            </h3>
+            <div id="forecastList" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <!-- Forecast cards injected via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Geo & Seasonal Context Page -->
+      <div id="page-geo-context" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <i class="fas fa-globe-asia text-emerald-600"></i>
+              Geographical & Seasonal Context
+            </h3>
+            <div
+              class="flex items-center gap-2 text-sm font-medium text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              <i class="fas fa-clock"></i>
+              <span id="geoTimeDisplay">Current Time</span>
+            </div>
+          </div>
+          <p class="text-sm text-slate-600 mb-6">Understand the environmental factors affecting your crops based on
+            location and time of year.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 bg-emerald-50/50 border-emerald-100">
+              <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-mountain text-amber-600"></i>
+                Geographical Features
+              </h4>
+              <div class="space-y-4">
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Region Type</span>
+                  <span id="geoRegionType" class="text-sm font-semibold text-slate-800">Tropical Subtropical</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Elevation (Est.)</span>
+                  <span id="geoElevation" class="text-sm font-semibold text-slate-800">250m ASL</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Average Rainfall</span>
+                  <span id="geoRainfall" class="text-sm font-semibold text-slate-800">800-1200mm/year</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-slate-600">Daylight Hours</span>
+                  <span id="geoDaylight" class="text-sm font-semibold text-slate-800">11.5 - 13.2 hrs</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 bg-blue-50/50 border-blue-100">
+              <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-calendar-check text-blue-600"></i>
+                Seasonal Context
+              </h4>
+              <div class="space-y-4">
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Current Season</span>
+                  <span id="seasonalName" class="text-sm font-semibold text-blue-800">Rabi (Winter)</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Phase</span>
+                  <span id="seasonalPhase" class="text-sm font-semibold text-slate-800">Mid-Season</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-200 pb-2">
+                  <span class="text-sm text-slate-600">Agricultural Cycle</span>
+                  <span id="seasonalCycle" class="text-sm font-semibold text-slate-800">Sowing to Vegetable
+                    Growth</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-slate-600">Suitability Index</span>
+                  <div class="flex items-center gap-1">
+                    <div class="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                      <div id="seasonalSuitabilityBar" class="h-full bg-emerald-500" style="width: 85%"></div>
+                    </div>
+                    <span id="seasonalSuitabilityPct" class="text-xs font-bold text-emerald-600">85%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-4">
+            <div class="text-amber-500 text-xl pt-1">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <p class="text-sm text-amber-800">
+              <strong>Agricultural Insight:</strong> The current Rabi season is critical for wheat and pulses.
+              Maintain regular irrigation but watch for soil temperature drops below 10°C, which can slow root
+              growth.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Farm Intelligence Page -->
+      <div id="page-farm-intel" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-brain text-indigo-600"></i>
+            Farm Intelligence
+          </h3>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Yield Prediction -->
+              <div class="glass-card rounded-2xl p-6 bg-indigo-50/30 border-indigo-100">
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="font-bold text-slate-800">Estimated Yield Potential</h4>
+                  <span class="text-xs font-bold px-2 py-1 bg-indigo-100 text-indigo-700 rounded-lg">AI
+                    PREDICTION</span>
+                </div>
+                <div class="flex items-end gap-4 mb-6">
+                  <div id="yieldGauge" class="text-5xl font-black text-indigo-600">82%</div>
+                  <div class="text-sm text-slate-500 pb-1">Efficiency based on current cultivation and health
+                    markers.
+                  </div>
+                </div>
+                <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shadow-inner">
+                  <div id="yieldProgressBar" class="h-full bg-gradient-to-r from-indigo-400 to-indigo-600 shadow-lg"
+                    style="width: 82%"></div>
+                </div>
+                <div class="grid grid-cols-3 mt-4 text-center">
+                  <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Resilience</p>
+                    <p class="text-sm font-bold text-slate-700">High</p>
+                  </div>
+                  <div class="border-x border-slate-200">
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Gro Rate</p>
+                    <p class="text-sm font-bold text-emerald-600">+2.4% / wk</p>
+                  </div>
+                  <div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Crop Risk</p>
+                    <p class="text-sm font-bold text-amber-600">Low-Mid</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Soil Details -->
+              <div class="glass-card rounded-2xl p-6">
+                <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <i class="fas fa-vial text-amber-600"></i>
+                  Regional Soil Profile
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div
+                    class="p-4 rounded-xl bg-slate-50 border border-slate-200 group hover:bg-white hover:shadow-md transition">
+                    <p class="text-xs text-slate-500 mb-1">Recommended Soil Type</p>
+                    <p id="intelSoilType" class="font-bold text-slate-800 text-lg">Alluvial / Loamy</p>
+                  </div>
+                  <div
+                    class="p-4 rounded-xl bg-slate-50 border border-slate-200 group hover:bg-white hover:shadow-md transition">
+                    <p class="text-xs text-slate-500 mb-1">Estimated PH Range</p>
+                    <p id="intelSoilPH" class="font-bold text-slate-800 text-lg">6.5 - 7.5 (Neutral)</p>
+                  </div>
+                  <div
+                    class="p-4 rounded-xl bg-slate-50 border border-slate-200 group hover:bg-white hover:shadow-md transition">
+                    <p class="text-xs text-slate-500 mb-1">Moisture Level</p>
+                    <p id="intelSoilMoisture" class="font-bold text-blue-600 text-lg">Optimal (65%)</p>
+                  </div>
+                  <div
+                    class="p-4 rounded-xl bg-slate-50 border border-slate-200 group hover:bg-white hover:shadow-md transition">
+                    <p class="text-xs text-slate-500 mb-1">Nitrogen Status</p>
+                    <p id="intelSoilOrganic" class="font-bold text-emerald-600 text-lg">Moderate (3.2%)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Intelligence Insights -->
+            <div class="space-y-6">
+              <div
+                class="glass-card rounded-2xl p-6 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-xl shadow-emerald-200/50">
+                <h4 class="font-bold mb-3 flex items-center gap-2">
+                  <i class="fas fa-lightbulb"></i>
+                  AI Insights
+                </h4>
+                <p class="text-sm text-emerald-50 leading-relaxed mb-4">
+                  Based on your regional soil type and seasonal context, adding 15% more nitrogen-based fertilizer
+                  early next month could boost your yield by up to 8% for wheat crops.
+                </p>
+                <button class="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-bold transition">View
+                  Full Strategy</button>
+              </div>
+
+              <div class="glass-card rounded-2xl p-6 border-slate-200 bg-slate-50">
+                <h4 class="font-bold text-slate-800 mb-3 text-sm italic">"Intelligence is not just data, it's
+                  knowing
+                  what to do with it."</h4>
+                <p class="text-xs text-slate-500 leading-relaxed">AGNI Farm Intelligence uses regional agronomical
+                  databases combined with your field analysis to provide these customized insights for your specific
+                  plot.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Science & Equations Page -->
+      <div id="page-student-equations" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-graduation-cap text-slate-700"></i>
+            Science & Algorithm Reference
+          </h3>
+          <p class="text-sm text-slate-600 mb-8">A technical guide for students and researchers to understand the
+            mathematical models behind AGNI's precision analysis.</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Equation 1 -->
+            <div
+              class="p-6 rounded-2xl border border-slate-200 hover:border-emerald-300 transition-all hover:shadow-lg group bg-white">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  01</div>
+                <h4 class="font-bold text-slate-800">Excess Green Index (ExG)</h4>
+              </div>
+              <div
+                class="bg-slate-900 text-emerald-400 p-5 rounded-xl font-mono text-center mb-4 shadow-xl border border-white/10">
+                ExG = 2G - R - B
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                The primary index for vegetation extraction. It maximizes the green component relative to red and
+                blue, allowing for robust plant detection even in varying lighting conditions.
+              </p>
+            </div>
+
+            <!-- Equation 2 -->
+            <div
+              class="p-6 rounded-2xl border border-slate-200 hover:border-blue-300 transition-all hover:shadow-lg group bg-white">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  02</div>
+                <h4 class="font-bold text-slate-800">Cultivated Area Ratio</h4>
+              </div>
+              <div
+                class="bg-slate-900 text-blue-400 p-5 rounded-xl font-mono text-center mb-4 shadow-xl border border-white/10">
+                Ratio = P_veg / P_total
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                Quantifying productivity: <code class="bg-slate-100 px-1 rounded text-red-500">P_veg</code> is the
+                number of pixels identified as vegetation and <code
+                  class="bg-slate-100 px-1 rounded text-red-500">P_total</code> is the total area of the field
+                boundary or frame.
+              </p>
+            </div>
+
+            <!-- Equation 3 -->
+            <div
+              class="p-6 rounded-2xl border border-slate-200 hover:border-indigo-300 transition-all hover:shadow-lg group bg-white">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  03</div>
+                <h4 class="font-bold text-slate-800">Deterministic Confidence Score</h4>
+              </div>
+              <div
+                class="bg-slate-900 text-indigo-400 p-5 rounded-xl font-mono text-xs mb-4 shadow-xl border border-white/10 text-left overflow-x-auto whitespace-nowrap">
+                Score = Σ (w_i * S_i) <br>
+                S = {Clarity, Fragmentation, Consistency, Plausibility}
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                A multi-factor reliability score. It evaluates image sharpness (Laplacian variance), patch
+                consistency, and area size plausibility compared to common farm plots globally.
+              </p>
+            </div>
+
+            <!-- Equation 4 -->
+            <div
+              class="p-6 rounded-2xl border border-slate-200 hover:border-amber-300 transition-all hover:shadow-lg group bg-white">
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center font-black group-hover:scale-110 transition-transform">
+                  04</div>
+                <h4 class="font-bold text-slate-800">HSV Thresholding for Stress</h4>
+              </div>
+              <div
+                class="bg-slate-900 text-amber-400 p-5 rounded-xl font-mono text-xs mb-4 shadow-xl border border-white/10 text-left">
+                H ∈ [18, 45], S ∈ [50, 255], V ∈ [80, 255]
+              </div>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                Targeting the 'yellow' spectral range to identify chlorosis (yellowing of leaves) which accurately
+                predicts nutrient deficiency or water stress in crops.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-8 p-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-center">
+            <p class="text-slate-500 italic">"Mathematics is the foundation of modern precision agriculture.
+              Students
+              are encouraged to explore these models in the ImageProcessor.py source."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- News Page -->
+      <div id="page-news" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fas fa-newspaper text-emerald-600"></i>
+            Latest Agricultural News
+          </h3>
+          <div id="newsList" class="space-y-4">
+            <div class="flex items-center justify-center py-8">
+              <i class="fas fa-spinner fa-spin text-slate-400 text-2xl"></i>
+              <span class="ml-3 text-slate-600">Loading news...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Lands Page -->
+      <div id="page-my-lands" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <i class="fas fa-map-marked-alt text-emerald-600"></i>
+              My Lands
+            </h3>
+            <button type="button" id="addLandBtn"
+              class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+              <i class="fas fa-plus mr-2"></i>Add New Land
+            </button>
+          </div>
+          <p class="text-sm text-slate-600 mb-4">Manage your multiple farm locations. Click a place to see current
+            weather and crop analysis.</p>
+          <div id="landsList" class="space-y-4">
+            <p class="text-slate-400 text-sm text-center py-8">No lands saved yet. Click "Add New Land" or save a
+              place from Image Analyzer.</p>
+          </div>
+        </div>
+
+        <!-- Land/Place detail modal (current weather + crops) -->
+        <div id="landDetailModal"
+          class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-slate-200 flex-shrink-0">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h4 id="landDetailName" class="text-xl font-semibold text-slate-800">—</h4>
+                  <p id="landDetailLocation" class="text-sm text-slate-600 mt-1">—</p>
+                </div>
+                <button type="button" id="closeLandDetailModal" class="text-slate-400 hover:text-slate-600">
+                  <i class="fas fa-times text-xl"></i>
+                </button>
+              </div>
+            </div>
+            <div id="landDetailLoading" class="p-6 flex items-center justify-center gap-2 text-slate-500">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Loading current weather &amp; analysis...</span>
+            </div>
+            <div id="landDetailContent" class="hidden flex-1 overflow-y-auto p-6 space-y-4">
+              <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                <h5 class="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                  <i class="fas fa-cloud-sun"></i> Current weather
+                </h5>
+                <p id="landDetailWeatherTemp" class="text-2xl font-bold text-blue-800">—</p>
+                <p id="landDetailWeatherDesc" class="text-sm text-blue-700">—</p>
+                <p id="landDetailWeatherExtra" class="text-xs text-blue-600 mt-2">—</p>
+              </div>
+              <div id="landDetailCropsBox" class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                <h5 class="font-semibold text-emerald-900 mb-2 flex items-center gap-2">
+                  <i class="fas fa-seedling"></i> Crop recommendations (current conditions)
+                </h5>
+                <p id="landDetailCropsSummary" class="text-sm text-emerald-800">—</p>
+                <div id="landDetailCropsPrimary" class="mt-2 p-3 bg-white rounded-lg border border-emerald-200">
+                </div>
+                <div id="landDetailCropsSub" class="mt-2 space-y-1 text-sm text-emerald-800"></div>
+              </div>
+            </div>
+            <div class="p-4 border-t border-slate-200 flex-shrink-0 flex gap-2">
+              <button type="button" id="landDetailOpenAnalyzerBtn"
+                class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium text-sm hidden">
+                <i class="fas fa-map mr-2"></i>Open in Image Analyzer
+              </button>
+              <button type="button" id="closeLandDetailModalBtn"
+                class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 font-medium text-sm">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add/Edit Land Modal -->
+        <div id="landModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-xl font-semibold text-slate-800" id="landModalTitle">Add New Land</h4>
+              <button type="button" id="closeLandModal" class="text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times text-xl"></i>
+              </button>
+            </div>
+            <form id="landForm" class="space-y-4">
+              <input type="hidden" id="landId" />
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-tag mr-2 text-emerald-600"></i>Land Name
+                </label>
+                <input type="text" id="landName" required
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g., North Field, Main Farm" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-map-pin mr-2 text-emerald-600"></i>Pincode
+                </label>
+                <input type="text" id="landPincode"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g., 110001" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-city mr-2 text-emerald-600"></i>Place / City
+                </label>
+                <input type="text" id="landPlace" required
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="e.g., Delhi, New Delhi" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fas fa-info-circle mr-2 text-emerald-600"></i>Notes (optional)
+                </label>
+                <textarea id="landNotes" rows="3"
+                  class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  placeholder="Additional details about this land..."></textarea>
+              </div>
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="landUseFingerprint"
+                  class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                <label for="landUseFingerprint" class="text-sm text-slate-700">
+                  <i class="fas fa-fingerprint mr-1"></i>Require fingerprint to access this land
+                </label>
+              </div>
+              <div class="flex gap-3 pt-2">
+                <button type="submit"
+                  class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium">
+                  <i class="fas fa-save mr-2"></i>Save
+                </button>
+                <button type="button" id="cancelLandForm"
+                  class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition font-medium">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Page -->
+      <div id="page-profile" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-6">Profile Information</h3>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+              <input type="text" id="profileUsername" readonly
+                class="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-600">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+              <input type="email" id="profileEmail"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                placeholder="your.email@example.com">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Farm Name</label>
+              <input type="text" id="profileFarmName"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                placeholder="Your Farm Name">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">Location</label>
+              <input type="text" id="profileLocation"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                placeholder="City, State">
+            </div>
+            <button id="saveProfileBtn"
+              class="w-full py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
+              <i class="fas fa-save mr-2"></i>Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div id="page-settings" class="page-content hidden">
+        <div class="glass-card rounded-2xl p-6">
+          <h3 class="text-lg font-semibold text-slate-800 mb-6">Settings</h3>
+          <div class="space-y-6">
+            <div>
+              <h4 class="font-medium text-slate-700 mb-3">Notifications</h4>
+              <div class="space-y-3">
+                <label
+                  class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                  <span class="text-slate-700">Email notifications</span>
+                  <input type="checkbox" class="toggle-checkbox">
+                </label>
+                <label
+                  class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                  <span class="text-slate-700">Analysis alerts</span>
+                  <input type="checkbox" checked class="toggle-checkbox">
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-medium text-slate-700 mb-3">Display Preferences</h4>
+              <div class="space-y-3">
+                <label
+                  class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                  <span class="text-slate-700">Dark mode</span>
+                  <input type="checkbox" id="settingsDarkMode" class="toggle-checkbox">
+                </label>
+                <label
+                  class="flex items-center justify-between p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50">
+                  <span class="text-slate-700">Compact view</span>
+                  <input type="checkbox" class="toggle-checkbox">
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-medium text-slate-700 mb-3">Units</h4>
+              <select class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500">
+                <option>Metric (Celsius, km)</option>
+                <option>Imperial (Fahrenheit, miles)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- Location Locked Overlay Template -->
+  <div id="locationLockedOverlay"
+    class="hidden absolute inset-0 bg-white/40 backdrop-blur-xl z-50 flex flex-col items-center justify-center text-center p-8 rounded-2xl animate-fade-in">
+    <div
+      class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 text-white rounded-3xl flex items-center justify-center mb-6 text-4xl shadow-lg shadow-emerald-200 rotate-12 group-hover:rotate-0 transition-transform">
+      <i class="fas fa-map-marked-alt"></i>
+    </div>
+    <h3 class="text-2xl font-black text-slate-800 mb-3">Location Required</h3>
+    <p class="text-slate-600 max-w-xs mb-8 font-medium">Precision agricultural data requires a specific location.
+      Please set your farm's region to unlock these insights.</p>
+    <button onclick="navigateToPage('weather')"
+      class="px-8 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-xl hover:shadow-slate-200">
+      <i class="fas fa-location-arrow mr-2"></i>Select Location Now
+    </button>
+  </div>
+  </main>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin></script>
@@ -1400,13 +1947,17 @@
       // Update page title
       const titles = {
         dashboard: { title: 'Dashboard', subtitle: 'Welcome back! Here\'s your overview' },
-        analyzer: { title: 'Image Analyzer', subtitle: 'Upload and analyze your field images' },
-        'ai-suggestion': { title: 'AI Suggestion', subtitle: 'Get farming suggestions for your plot' },
-        weather: { title: 'Weather & Climate', subtitle: 'Check weather conditions for your farm' },
-        'my-lands': { title: 'My Lands', subtitle: 'Your saved farm locations' },
-        news: { title: 'Agricultural News', subtitle: 'Stay updated with latest farming news' },
-        profile: { title: 'Profile', subtitle: 'Manage your account information' },
-        settings: { title: 'Settings', subtitle: 'Customize your preferences' }
+        analyzer: { title: 'Image Analyzer', subtitle: 'Detailed vegetation and stress analysis' },
+        'ai-suggestion': { title: 'AI Crop Advice', subtitle: 'Intelligent crop recommendations for your plot' },
+        'animal-suggestion': { title: 'Animal Farm Advice', subtitle: 'AI-driven livestock and farming suggestions' },
+        'geo-context': { title: 'Geo & Seasonal Context', subtitle: 'Environmental and seasonal factors' },
+        'farm-intel': { title: 'Farm Intelligence', subtitle: 'Yield predictions and soil profile insights' },
+        weather: { title: 'Weather Insights', subtitle: 'Real-time agricultural weather data' },
+        'my-lands': { title: 'My Fields', subtitle: 'Manage and monitor your farm locations' },
+        'student-equations': { title: 'Science & Equations', subtitle: 'Mathematical models for students' },
+        news: { title: 'Agri-News', subtitle: 'Stay updated with latest farming trends' },
+        profile: { title: 'Profile', subtitle: 'Manage your personal AGNI account' },
+        settings: { title: 'Settings', subtitle: 'System preferences and notifications' }
       };
       if (titles[pageName]) {
         pageTitle.textContent = titles[pageName].title;
@@ -1420,15 +1971,55 @@
         fetchNews();
       } else if (pageName === 'dashboard') {
         updateDashboard();
+      } else if (pageName === 'geo-context') {
+        if (checkLocationAccess('geo-context')) updateGeoContext();
+      } else if (pageName === 'farm-intel') {
+        if (checkLocationAccess('farm-intel')) updateFarmIntel();
       } else if (pageName === 'analyzer') {
         initFarmMapIfNeeded();
         if (typeof refreshSavedPlacesDropdown === 'function') refreshSavedPlacesDropdown();
         if (typeof updateAnalyzeButtonState === 'function') updateAnalyzeButtonState();
       } else if (pageName === 'my-lands') {
         loadMyLands();
+      } else if (pageName === 'animal-suggestion') {
+        if (checkLocationAccess('animal-suggestion')) updateAnimalSuggestions();
       } else if (pageName === 'ai-suggestion') {
-        if (typeof updateAiSuggestionLastPlotButton === 'function') updateAiSuggestionLastPlotButton();
+        if (checkLocationAccess('ai-suggestion')) {
+          if (typeof updateAiSuggestionLastPlotButton === 'function') updateAiSuggestionLastPlotButton();
+        }
       }
+    }
+
+    function checkLocationAccess(pageId) {
+      const hasLocation = userLocation || selectedLocationData || (confirmedBoundaryCoords && confirmedBoundaryCoords.length > 0);
+      const overlay = document.getElementById('locationLockedOverlay');
+
+      if (!hasLocation) {
+        // Find the page content and append overlay if not already there
+        const page = document.getElementById(`page-${pageId}`);
+        if (page && overlay) {
+          // Clone overlay and show it inside the page
+          const existingOverlay = page.querySelector('.location-lock-instance');
+          if (!existingOverlay) {
+            const newOverlay = overlay.cloneNode(true);
+            newOverlay.id = '';
+            newOverlay.classList.remove('hidden');
+            newOverlay.classList.add('location-lock-instance');
+            page.style.position = 'relative';
+            page.style.minHeight = '400px';
+            page.appendChild(newOverlay);
+          }
+          return false;
+        }
+      } else {
+        // Remove overlay if location exists
+        const page = document.getElementById(`page-${pageId}`);
+        if (page) {
+          const existingOverlay = page.querySelector('.location-lock-instance');
+          if (existingOverlay) existingOverlay.remove();
+        }
+      }
+      return true;
     }
 
     // --- Farm boundary map (Leaflet) ---
@@ -1860,9 +2451,36 @@
       appLayout.classList.remove('hidden');
       sidebarUsername.textContent = username || 'User';
       document.getElementById('profileUsername').value = username || '';
+      initSettings();
       updateDashboard();
       fetchHistory();
     }
+
+    function initSettings() {
+      const darkMode = localStorage.getItem('agni_dark_mode') === 'true';
+      const darkModeToggle = document.getElementById('settingsDarkMode');
+      if (darkModeToggle) {
+        darkModeToggle.checked = darkMode;
+        if (darkMode) document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+      }
+
+      // Notification settings (mock)
+      const alerts = localStorage.getItem('agni_alerts') !== 'false';
+      const alertToggle = document.querySelector('input[checked].toggle-checkbox');
+      if (alertToggle) alertToggle.checked = alerts;
+    }
+
+    // Settings Event Listeners
+    document.getElementById('settingsDarkMode')?.addEventListener('change', function (e) {
+      if (e.target.checked) {
+        document.body.classList.add('dark');
+        localStorage.setItem('agni_dark_mode', 'true');
+      } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem('agni_dark_mode', 'false');
+      }
+    });
 
     function showLogin() {
       loginScreen.classList.remove('hidden');
@@ -1875,6 +2493,183 @@
 
     logoutBtn.addEventListener('click', showLogin);
 
+    // --- New Tab Functions (Geo & Intel) ---
+    async function updateGeoContext() {
+      const timeDisplay = document.getElementById('geoTimeDisplay');
+      if (timeDisplay) {
+        timeDisplay.textContent = new Date().toLocaleString();
+      }
+
+      // Use last plot data or current location if available
+      let lat = 20.59, lon = 78.96; // Default
+      if (userLocation) {
+        lat = userLocation.lat;
+        lon = userLocation.lon;
+      } else if (selectedLocationData) {
+        lat = selectedLocationData.lat;
+        lon = selectedLocationData.lon;
+      } else if (confirmedBoundaryCoords && confirmedBoundaryCoords.length > 0) {
+        lat = confirmedBoundaryCoords[0][0];
+        lon = confirmedBoundaryCoords[0][1];
+      }
+
+      const now = new Date();
+      const month = now.getMonth() + 1;
+
+      let season = "Rabi (Winter)";
+      let cycle = "Sowing to Vegetable Growth";
+      let phase = "Early-Mid Season";
+
+      if (month >= 6 && month <= 10) {
+        season = "Kharif (Monsoon)";
+        cycle = "Growth to Harvest Readiness";
+        phase = "Vegetative Stage";
+      } else if (month >= 3 && month <= 5) {
+        season = "Zaid (Summer)";
+        cycle = "Soil Preparation & Short Crops";
+        phase = "Preparation Phase";
+      }
+
+      document.getElementById('seasonalName').textContent = season;
+      document.getElementById('seasonalCycle').textContent = cycle;
+      document.getElementById('seasonalPhase').textContent = phase;
+
+      // Regions based on lat
+      if (lat > 28) { // North (Mountains/High altitude)
+        document.getElementById('geoRegionType').textContent = 'Temperate / Alpine-Edge';
+        document.getElementById('geoElevation').textContent = '1,200m - 2,500m ASL';
+        document.getElementById('geoRainfall').textContent = '1500-2500mm/year';
+        document.getElementById('geoDaylight').textContent = '10.5 - 14.1 hrs';
+      } else if (lat > 22) { // Central/North Plains
+        document.getElementById('geoRegionType').textContent = 'Subtropical / Semi-Arid';
+        document.getElementById('geoElevation').textContent = '200m - 500m ASL';
+        document.getElementById('geoRainfall').textContent = '600-1100mm/year';
+        document.getElementById('geoDaylight').textContent = '11.0 - 13.5 hrs';
+      } else { // South/Tropical
+        document.getElementById('geoRegionType').textContent = 'Tropical / Humid';
+        document.getElementById('geoElevation').textContent = '50m - 300m ASL';
+        document.getElementById('geoRainfall').textContent = '1200-3000mm/year';
+        document.getElementById('geoDaylight').textContent = '11.8 - 12.5 hrs';
+      }
+
+      document.getElementById('seasonalSuitabilityPct').textContent = '88%';
+      document.getElementById('seasonalSuitabilityBar').style.width = '88%';
+    }
+
+    async function updateFarmIntel() {
+      const history = JSON.parse(localStorage.getItem('agni_history') || '[]');
+      let yieldPct = 82; // Base
+      let cultivated = 50;
+
+      if (history.length > 0) {
+        const last = history[0];
+        cultivated = last.cultivated_percentage || 50;
+        // Mock yield: interaction between cultivated area and health (stress)
+        const healthCoeff = 1 - ((last.stress_percentage || 5) / 100);
+        yieldPct = Math.round(cultivated * healthCoeff * 1.1);
+        yieldPct = Math.min(96, Math.max(15, yieldPct));
+      }
+
+      const gauge = document.getElementById('yieldGauge');
+      const progress = document.getElementById('yieldProgressBar');
+      if (gauge) gauge.textContent = yieldPct + '%';
+      if (progress) progress.style.width = yieldPct + '%';
+
+      // Soil details logic
+      const soils = [
+        { type: "Alluvial / Loamy", ph: "6.5 - 7.5", moisture: "Optimal (68%)", organic: "High (3.4%)" },
+        { type: "Black Cotton Soil", ph: "7.2 - 8.5", moisture: "Medium (55%)", organic: "Moderate (2.1%)" },
+        { type: "Red Sandy Soil", ph: "5.5 - 7.0", moisture: "Low (42%)", organic: "Low (1.2%)" }
+      ];
+
+      const soil = soils[cultivated % 3]; // Deterministic mock
+      document.getElementById('intelSoilType').textContent = soil.type;
+      document.getElementById('intelSoilPH').textContent = soil.ph;
+      document.getElementById('intelSoilMoisture').textContent = soil.moisture;
+      document.getElementById('intelSoilOrganic').textContent = soil.organic;
+    }
+
+    async function updateAnimalSuggestions() {
+      const loading = document.getElementById('animalSuggestionLoading');
+      const content = document.getElementById('animalSuggestionContent');
+      const list = document.getElementById('animalSuggestionsList');
+      if (!list) return;
+
+      loading.classList.remove('hidden');
+      content.classList.add('hidden');
+
+      // Determine location/weather
+      let lat = 20.59, lon = 78.96;
+      if (userLocation) { lat = userLocation.lat; lon = userLocation.lon; }
+      else if (selectedLocationData) { lat = selectedLocationData.lat; lon = selectedLocationData.lon; }
+
+      // Fetch weather to adjust animals
+      let temp = 25;
+      try {
+        const wRes = await fetch(`${API_BASE}/weather-by-coords?lat=${lat}&lon=${lon}`, { headers: { 'Authorization': 'Bearer ' + token } });
+        if (wRes.ok) {
+          const wData = await wRes.json();
+          temp = wData.temp || 25;
+        }
+      } catch (e) { }
+
+      // Animal Recommendation Logic
+      const animals = [
+        {
+          name: "Dairy Cattle (Cow)",
+          suitability: temp > 32 ? "Marginal" : "High",
+          suitabilityColor: temp > 32 ? "text-amber-600" : "text-emerald-600",
+          desc: "Ideal for your current temperature. Ensure consistent water supply and shaded housing.",
+          icon: "fa-cow",
+          stats: ["Temp Limit: 30°C", "Water: High", "Care: Moderate"]
+        },
+        {
+          name: "Poultry (Broilers)",
+          suitability: temp > 35 ? "Risk" : "High",
+          suitabilityColor: temp > 35 ? "text-red-600" : "text-emerald-600",
+          desc: "Highly profitable but sensitive to heat stress. ventilation is crucial in your region.",
+          icon: "fa-egg",
+          stats: ["Temp Limit: 32°C", "Water: Moderate", "Care: High"]
+        },
+        {
+          name: "Goat Farming",
+          suitability: "Very High",
+          suitabilityColor: "text-emerald-600",
+          desc: "Excellent resilience for your semi-arid climate. Low water footprint compared to cattle.",
+          icon: "fa-paw",
+          stats: ["Temp Limit: 40°C", "Water: Low", "Care: Low"]
+        },
+        {
+          name: "Fish Farming (Aquaculture)",
+          suitability: temp < 15 ? "Low" : "Moderate",
+          suitabilityColor: temp < 15 ? "text-red-600" : "text-blue-600",
+          desc: "Suitable if you have a local water source. Monitor DO levels during monsoon.",
+          icon: "fa-fish",
+          stats: ["Temp: 22-28°C", "Water: Massive", "Care: High"]
+        }
+      ];
+
+      setTimeout(() => {
+        list.innerHTML = animals.map(a => `
+          <div class="glass-card rounded-2xl p-6 border border-slate-100 group hover:shadow-xl transition-all">
+            <div class="flex items-center justify-between mb-4">
+              <div class="p-3 rounded-xl bg-amber-50 text-amber-600 text-2xl group-hover:scale-110 transition-transform">
+                <i class="fas ${a.icon}"></i>
+              </div>
+              <span class="text-xs font-bold px-2 py-1 rounded-lg bg-slate-100 ${a.suitabilityColor}">${a.suitability} Suitability</span>
+            </div>
+            <h4 class="text-xl font-bold text-slate-800 mb-2">${a.name}</h4>
+            <p class="text-sm text-slate-600 mb-4">${a.desc}</p>
+            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-50">
+              ${a.stats.map(s => `<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">${s}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+        loading.classList.add('hidden');
+        content.classList.remove('hidden');
+      }, 800);
+    }
+
     // Dashboard functions
     async function updateDashboard() {
       await fetchHistory();
@@ -1886,6 +2681,7 @@
         document.getElementById('avgCultivation').textContent = avgCult.toFixed(1) + '%';
         document.getElementById('avgConfidence').textContent = Math.round(avgConf);
       }
+
       const judgeCard = document.getElementById('judgeSummaryCard');
       if (judgeCard) {
         if (lastJudgeSummary) {
@@ -1896,6 +2692,107 @@
           judgeCard.classList.add('hidden');
         }
       }
+
+      // Upgrade: Load Featured News (Most Important)
+      loadFeaturedNews();
+
+      // Upgrade: Load Field Comparisons
+      loadFieldComparisons();
+    }
+
+    function loadFeaturedNews() {
+      const container = document.getElementById('featuredNewsList');
+      if (!container) return;
+
+      // Believable urgent agricultural/weather news
+      const urgentNews = [
+        {
+          title: "Critical Weather Alert",
+          summary: "Sudden temperature drop expected in northern regions. Protect sensitive seedlings.",
+          icon: "fa-exclamation-triangle",
+          color: "text-red-500",
+          bg: "bg-red-50"
+        },
+        {
+          title: "Market Trends: Wheat Prices",
+          summary: "Export demand surges. Farmers advised to monitor storage moisture for long-term hold.",
+          icon: "fa-chart-line",
+          color: "text-emerald-500",
+          bg: "bg-emerald-50"
+        }
+      ];
+
+      container.innerHTML = urgentNews.map(news => `
+        <div class="flex gap-4 p-3 rounded-xl border border-slate-100 ${news.bg} transition-all hover:scale-[1.02]">
+          <div class="${news.color} text-xl pt-1">
+            <i class="fas ${news.icon}"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-800 text-sm">${news.title}</h4>
+            <p class="text-xs text-slate-600 line-clamp-2">${news.summary}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadFieldComparisons() {
+      const body = document.getElementById('fieldComparisonBody');
+      const noFields = document.getElementById('noFieldsComparison');
+      if (!body) return;
+
+      const lands = JSON.parse(localStorage.getItem('agni_lands') || '[]');
+      const savedPlaces = JSON.parse(localStorage.getItem('agni_saved_places') || '[]');
+      const history = JSON.parse(localStorage.getItem('agni_history') || '[]');
+
+      const allFields = [];
+      lands.forEach(l => allFields.push({ name: l.name, location: l.place || 'Unknown', type: 'land' }));
+      savedPlaces.forEach(p => allFields.push({ name: p.name || 'Saved Place', location: p.place || 'Unknown', type: 'place' }));
+
+      if (allFields.length === 0) {
+        body.innerHTML = '';
+        noFields.classList.remove('hidden');
+        return;
+      }
+
+      noFields.classList.add('hidden');
+      body.innerHTML = allFields.map((f, i) => {
+        // Mock health/cultivation based on history or random-ish but stable values
+        const health = 75 + (i * 3) % 20;
+        const cultivation = 40 + (i * 7) % 50;
+        const healthColor = health > 85 ? 'text-emerald-600' : (health > 70 ? 'text-amber-600' : 'text-red-600');
+
+        return `
+          <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+            <td class="py-4 pr-4">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold">
+                  ${f.name.charAt(0)}
+                </div>
+                <span class="font-bold text-slate-800">${f.name}</span>
+              </div>
+            </td>
+            <td class="py-4 pr-4">
+              <span class="text-slate-500"><i class="fas fa-map-marker-alt mr-1"></i>${f.location}</span>
+            </td>
+            <td class="py-4 pr-4">
+              <div class="flex items-center gap-2">
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden max-w-[60px]">
+                  <div class="h-full ${health > 80 ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${health}%"></div>
+                </div>
+                <span class="font-bold ${healthColor}">${health}%</span>
+              </div>
+            </td>
+            <td class="py-4 pr-4">
+              <span class="font-medium text-slate-700">${cultivation}% Area</span>
+            </td>
+            <td class="py-4">
+              <button onclick="navigateToPage('my-lands')" class="p-2 text-slate-400 hover:text-emerald-600 transition">
+                <i class="fas fa-external-link-alt"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     async function fetchHistory() {
@@ -1975,6 +2872,7 @@
             }
           };
           displayWeather(weatherData);
+          fetchForecast(city);
         } else {
           throw new Error('Weather API returned error');
         }
@@ -2020,10 +2918,64 @@
       document.getElementById('fieldWorkAdvice').textContent = fieldWork;
     }
 
+    async function fetchForecast(city) {
+      try {
+        const res = await fetch(`${API_BASE}/forecast?city=${encodeURIComponent(city)}`, {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+        const data = await res.json();
+        if (data.success) displayForecast(data.forecast);
+      } catch (err) { console.error('Forecast fetch error:', err); }
+    }
+
+    async function fetchForecastByCoords(lat, lon) {
+      try {
+        const res = await fetch(`${API_BASE}/forecast-by-coords?lat=${lat}&lon=${lon}`, {
+          headers: { 'Authorization': 'Bearer ' + token },
+        });
+        const data = await res.json();
+        if (data.success) displayForecast(data.forecast);
+      } catch (err) { console.error('Forecast fetch error:', err); }
+    }
+
+    function displayForecast(forecast) {
+      const list = document.getElementById('forecastList');
+      const container = document.getElementById('weatherForecast');
+      if (!list || !forecast) return;
+
+      container.classList.remove('hidden');
+      list.innerHTML = forecast.map(day => {
+        const date = new Date(day.date);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum = date.getDate();
+
+        let icon = 'fa-cloud-sun';
+        let color = 'text-blue-500';
+        if (day.weather_main === 'Clear') { icon = 'fa-sun'; color = 'text-amber-500'; }
+        else if (day.weather_main === 'Rain') { icon = 'fa-cloud-showers-heavy'; color = 'text-blue-600'; }
+        else if (day.weather_main === 'Clouds') { icon = 'fa-cloud'; color = 'text-slate-500'; }
+
+        return `
+          <div class="glass-card p-4 rounded-xl text-center border border-slate-100 hover:shadow-lg transition-all group">
+            <p class="text-xs font-bold text-slate-400 uppercase mb-1">${dayName} ${dayNum}</p>
+            <div class="text-3xl ${color} mb-3 group-hover:scale-110 transition-transform">
+              <i class="fas ${icon}"></i>
+            </div>
+            <p class="text-lg font-bold text-slate-800">${Math.round(day.temp)}°C</p>
+            <p class="text-[10px] text-slate-500 capitalize">${day.weather_description}</p>
+            <div class="mt-2 pt-2 border-t border-slate-50 flex items-center justify-center gap-1">
+              <i class="fas fa-tint text-[10px] text-blue-400"></i>
+              <span class="text-[10px] font-bold text-slate-600">${day.humidity}%</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
     // Location method toggle (Map vs Pincode/Place)
     let currentLocationMethod = 'map';
     let selectedLocationData = null;
-    
+
     document.getElementById('locationMethodMap').addEventListener('click', () => {
       currentLocationMethod = 'map';
       document.getElementById('locationMethodMap').classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
@@ -2035,7 +2987,7 @@
       document.getElementById('locationMapHint').classList.add('hidden');
       initFarmMapIfNeeded();
     });
-    
+
     document.getElementById('locationMethodPincode').addEventListener('click', () => {
       currentLocationMethod = 'pincode';
       document.getElementById('locationMethodPincode').classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-700');
@@ -2045,7 +2997,7 @@
       document.getElementById('locationMethodPincodePanel').classList.remove('hidden');
       document.getElementById('locationMethodMapPanel').classList.add('hidden');
     });
-    
+
     document.getElementById('confirmLocationBtn').addEventListener('click', async () => {
       const pincode = document.getElementById('farmPincode').value.trim();
       const place = document.getElementById('farmPlace').value.trim();
@@ -2095,7 +3047,7 @@
 
     // Weather: Use geolocation by default
     let userLocation = null;
-    
+
     async function fetchWeatherByLocation() {
       if (!userLocation) {
         if (navigator.geolocation) {
@@ -2131,6 +3083,7 @@
                     }
                   };
                   displayWeather(weatherData);
+                  fetchForecastByCoords(userLocation.lat, userLocation.lon);
                   document.getElementById('weatherLocationStatus').textContent = `Showing weather for: ${data.name || 'Your location'}`;
                 }
               } catch (err) {
@@ -2172,6 +3125,7 @@
               }
             };
             displayWeather(weatherData);
+            fetchForecastByCoords(userLocation.lat, userLocation.lon);
             document.getElementById('weatherLocationStatus').textContent = `Showing weather for: ${data.name || 'Your location'}`;
           }
         } catch (err) {
@@ -2179,12 +3133,12 @@
         }
       }
     }
-    
+
     document.getElementById('useMyLocationBtn').addEventListener('click', () => {
       userLocation = null;
       fetchWeatherByLocation();
     });
-    
+
     document.getElementById('fetchWeatherBtn').addEventListener('click', () => {
       const city = document.getElementById('weatherLocation').value.trim();
       if (city) {
@@ -2195,13 +3149,13 @@
 
     // My Lands Management (includes both manual lands and saved analyzed places)
     let myLands = JSON.parse(localStorage.getItem('agni_lands') || '[]');
-    
+
     function getSavedPlacesForLands() {
       try {
         return JSON.parse(localStorage.getItem('agni_saved_places') || '[]');
       } catch (e) { return []; }
     }
-    
+
     function loadMyLands() {
       const landsList = document.getElementById('landsList');
       const savedPlaces = getSavedPlacesForLands();
@@ -2261,27 +3215,27 @@
         });
       });
     }
-    
-    window.deleteSavedPlace = function(idx) {
+
+    window.deleteSavedPlace = function (idx) {
       const list = getSavedPlacesForLands();
       list.splice(idx, 1);
       localStorage.setItem('agni_saved_places', JSON.stringify(list));
       loadMyLands();
       if (typeof refreshSavedPlacesDropdown === 'function') refreshSavedPlacesDropdown();
     };
-    
-    window.openInAnalyzer = function(savedPlaceIndex) {
+
+    window.openInAnalyzer = function (savedPlaceIndex) {
       const list = getSavedPlacesForLands();
       const place = list[savedPlaceIndex];
       if (!place || !place.boundary) return;
       if (typeof loadSavedPlaceOntoMap === 'function') {
         navigateToPage('analyzer');
-        setTimeout(function() { loadSavedPlaceOntoMap(place); }, 300);
+        setTimeout(function () { loadSavedPlaceOntoMap(place); }, 300);
       } else {
         navigateToPage('analyzer');
       }
     };
-    
+
     async function openLandDetail(type, index) {
       const modal = document.getElementById('landDetailModal');
       const loading = document.getElementById('landDetailLoading');
@@ -2293,7 +3247,7 @@
       loading.classList.remove('hidden');
       content.classList.add('hidden');
       openAnalyzerBtn.classList.add('hidden');
-      
+
       let name = '', place = '', pincode = '', lat = null, lon = null;
       if (type === 'land') {
         const land = myLands[index];
@@ -2316,12 +3270,12 @@
           lon = p.boundary.reduce((s, c) => s + c[1], 0) / p.boundary.length;
         }
         openAnalyzerBtn.classList.remove('hidden');
-        openAnalyzerBtn.onclick = function() { openInAnalyzer(index); };
+        openAnalyzerBtn.onclick = function () { openInAnalyzer(index); };
       }
-      
+
       nameEl.textContent = name;
       locationEl.textContent = [place, pincode].filter(Boolean).join(' · ') || '—';
-      
+
       if (!token) { loading.textContent = 'Please log in.'; return; }
       try {
         let weatherData = null;
@@ -2347,7 +3301,7 @@
             weatherData.wind_speed != null ? 'Wind ' + weatherData.wind_speed + ' m/s' : ''
           ].filter(Boolean).join('  ·  ');
         }
-        
+
         const temp = weatherData && weatherData.temp != null ? weatherData.temp : 25;
         const humidity = weatherData && weatherData.humidity != null ? weatherData.humidity : 60;
         const cropLat = lat != null ? lat : 20.5937;
@@ -2380,15 +3334,15 @@
       loading.classList.add('hidden');
       content.classList.remove('hidden');
     }
-    
-    document.getElementById('closeLandDetailModal').addEventListener('click', function() {
+
+    document.getElementById('closeLandDetailModal').addEventListener('click', function () {
       document.getElementById('landDetailModal').classList.add('hidden');
     });
-    document.getElementById('closeLandDetailModalBtn').addEventListener('click', function() {
+    document.getElementById('closeLandDetailModalBtn').addEventListener('click', function () {
       document.getElementById('landDetailModal').classList.add('hidden');
     });
-    
-    window.editLand = function(idx) {
+
+    window.editLand = function (idx) {
       const land = myLands[idx];
       document.getElementById('landId').value = idx;
       document.getElementById('landName').value = land.name;
@@ -2399,30 +3353,30 @@
       document.getElementById('landModalTitle').textContent = 'Edit Land';
       document.getElementById('landModal').classList.remove('hidden');
     };
-    
-    window.deleteLand = function(idx) {
+
+    window.deleteLand = function (idx) {
       if (confirm('Are you sure you want to delete this land?')) {
         myLands.splice(idx, 1);
         localStorage.setItem('agni_lands', JSON.stringify(myLands));
         loadMyLands();
       }
     };
-    
+
     document.getElementById('addLandBtn').addEventListener('click', () => {
       document.getElementById('landId').value = '';
       document.getElementById('landForm').reset();
       document.getElementById('landModalTitle').textContent = 'Add New Land';
       document.getElementById('landModal').classList.remove('hidden');
     });
-    
+
     document.getElementById('closeLandModal').addEventListener('click', () => {
       document.getElementById('landModal').classList.add('hidden');
     });
-    
+
     document.getElementById('cancelLandForm').addEventListener('click', () => {
       document.getElementById('landModal').classList.add('hidden');
     });
-    
+
     document.getElementById('landForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const idx = document.getElementById('landId').value;
@@ -2517,58 +3471,63 @@
         if (res.status === 401) { showLogin(); return; }
         if (!res.ok) { alert(data.detail || 'Analysis failed'); return; }
         try {
-        const uploadErrorEl = document.getElementById('uploadError');
-        if (uploadErrorEl) uploadErrorEl.classList.add('hidden');
-        const withinBoundaryMsg = document.getElementById('withinBoundaryMessage');
-        const savePlaceResultRow = document.getElementById('savePlaceResultRow');
-        if (withinBoundaryMsg) withinBoundaryMsg.classList.add('hidden');
-        if (savePlaceResultRow) savePlaceResultRow.classList.add('hidden');
-        const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-        setText('cultivatedPct', data.cultivated_percentage + '%');
-        setText('stressPct', data.stress_percentage + '%');
-        setText('trustScore', data.trust_score);
-        setText('classificationResult', data.classification || '—');
-        setText('advisory', data.advisory || '—');
-        setText('totalPixels', (data.total_pixels || 0).toLocaleString());
-        setText('cultivatedPixels', (data.cultivated_pixels || 0).toLocaleString());
-        setText('nonCultivatedPixels', (data.non_cultivated_pixels || 0).toLocaleString());
-        setText('coverageRatio', ((data.coverage_ratio || 0) * 100).toFixed(2) + '%');
-        const binaryMaskPreview = document.getElementById('binaryMaskPreview');
-        const overlayMaskPreview = document.getElementById('overlayMaskPreview');
-        const landUseMaskPreview = document.getElementById('landUseMaskPreview');
-        const segmentationPreview = document.getElementById('segmentationPreview');
-        if (data.binary_mask_base64 && binaryMaskPreview) {
-          binaryMaskPreview.src = 'data:image/png;base64,' + data.binary_mask_base64;
-          binaryMaskPreview.classList.remove('hidden');
-          const ph = document.getElementById('binaryMaskPlaceholder');
-          if (ph) ph.classList.add('hidden');
-        }
-        if (data.overlay_mask_base64 && overlayMaskPreview) {
-          overlayMaskPreview.src = 'data:image/png;base64,' + data.overlay_mask_base64;
-          overlayMaskPreview.classList.remove('hidden');
-          const ph = document.getElementById('overlayMaskPlaceholder');
-          if (ph) ph.classList.add('hidden');
-        }
-        if (data.land_use_mask_base64 && landUseMaskPreview) {
-          landUseMaskPreview.src = 'data:image/png;base64,' + data.land_use_mask_base64;
-          landUseMaskPreview.classList.remove('hidden');
-          const ph = document.getElementById('landUseMaskPlaceholder');
-          if (ph) ph.classList.add('hidden');
-        }
-        if (data.segmentation_image_base64 && segmentationPreview) {
-          segmentationPreview.src = 'data:image/png;base64,' + data.segmentation_image_base64;
-        }
-        if (data.water_percentage !== undefined && typeof displayLandUseBreakdown === 'function') {
-          const section = document.getElementById('landUseBreakdown');
-          if (section) displayLandUseBreakdown(data);
-        }
-        const resultsCard = document.getElementById('resultsCard');
-        if (resultsCard) resultsCard.classList.remove('hidden');
-        fetchHistory();
-        updateDashboard();
-        fetchWeatherAndRecommendCrops(data);
-        const analyzeHint = document.getElementById('analyzeHint');
-        if (analyzeHint) analyzeHint.textContent = 'Demo completed. You can upload your own image next.';
+          const uploadErrorEl = document.getElementById('uploadError');
+          if (uploadErrorEl) uploadErrorEl.classList.add('hidden');
+          const withinBoundaryMsg = document.getElementById('withinBoundaryMessage');
+          const savePlaceResultRow = document.getElementById('savePlaceResultRow');
+          if (withinBoundaryMsg) withinBoundaryMsg.classList.add('hidden');
+          if (savePlaceResultRow) savePlaceResultRow.classList.add('hidden');
+          const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+          setText('cultivatedPct', data.cultivated_percentage + '%');
+          setText('stressPct', data.stress_percentage + '%');
+          setText('trustScore', data.trust_score);
+          setText('classificationResult', data.classification || '—');
+          setText('advisory', data.advisory || '—');
+          setText('totalPixels', (data.total_pixels || 0).toLocaleString());
+          setText('cultivatedPixels', (data.cultivated_pixels || 0).toLocaleString());
+          setText('nonCultivatedPixels', (data.non_cultivated_pixels || 0).toLocaleString());
+          setText('coverageRatio', ((data.coverage_ratio || 0) * 100).toFixed(2) + '%');
+          const binaryMaskPreview = document.getElementById('binaryMaskPreview');
+          const overlayMaskPreview = document.getElementById('overlayMaskPreview');
+          const landUseMaskPreview = document.getElementById('landUseMaskPreview');
+          const segmentationPreview = document.getElementById('segmentationPreview');
+          if (data.binary_mask_base64 && binaryMaskPreview) {
+            binaryMaskPreview.src = 'data:image/png;base64,' + data.binary_mask_base64;
+            binaryMaskPreview.classList.remove('hidden');
+            const ph = document.getElementById('binaryMaskPlaceholder');
+            if (ph) ph.classList.add('hidden');
+          }
+          if (data.overlay_mask_base64 && overlayMaskPreview) {
+            overlayMaskPreview.src = 'data:image/png;base64,' + data.overlay_mask_base64;
+            overlayMaskPreview.classList.remove('hidden');
+            const ph = document.getElementById('overlayMaskPlaceholder');
+            if (ph) ph.classList.add('hidden');
+          }
+          if (data.land_use_mask_base64 && landUseMaskPreview) {
+            landUseMaskPreview.src = 'data:image/png;base64,' + data.land_use_mask_base64;
+            landUseMaskPreview.classList.remove('hidden');
+            const ph = document.getElementById('landUseMaskPlaceholder');
+            if (ph) ph.classList.add('hidden');
+          }
+          if (data.segmentation_image_base64 && segmentationPreview) {
+            segmentationPreview.src = 'data:image/png;base64,' + data.segmentation_image_base64;
+          }
+          if (data.water_percentage !== undefined && typeof displayLandUseBreakdown === 'function') {
+            const section = document.getElementById('landUseBreakdown');
+            if (section) displayLandUseBreakdown(data);
+          }
+          const resultsCard = document.getElementById('resultsCard');
+          if (resultsCard) resultsCard.classList.remove('hidden');
+          fetchHistory();
+          updateDashboard();
+          fetchWeatherAndRecommendCrops(data);
+          const analyzeHint = document.getElementById('analyzeHint');
+          if (analyzeHint) analyzeHint.textContent = 'Demo completed. You can upload your own image next.';
+
+          // Auto-scroll to results
+          setTimeout(() => {
+            if (resultsCard) resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
         } catch (displayErr) {
           console.error('Demo display error:', displayErr);
           const rc = document.getElementById('resultsCard');
@@ -2729,6 +3688,11 @@
 
         // --- Auto-fetch weather + crop recommendations ---
         fetchWeatherAndRecommendCrops(data);
+
+        // Auto-scroll to results
+        setTimeout(() => {
+          resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
       } catch (err) {
         alert('Network error. Is the backend running?');
       } finally {
