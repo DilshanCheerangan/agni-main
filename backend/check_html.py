@@ -1,4 +1,4 @@
-f = open(r'c:\Users\Tony Stark\Desktop\projects\agni-main\frontend\index.html', 'r', encoding='utf-8')
+f = open(r'c:\Users\Tony Stark\Desktop\projects\agni-main\frontend\index.html', 'r', encoding='utf-8')  # project name now KRISHI
 content = f.read()
 f.close()
 

@@ -1,5 +1,5 @@
 """
-AGNI - Real OpenCV image analysis (vegetation and stress detection).
+KRISHI – Knowledge-driven Real-time Intelligent System for Harvest Improvement - Real OpenCV image analysis (vegetation and stress detection).
 No mock data; all values from actual image processing.
 Resolution-agnostic vegetation detection via Excess Green (ExG) index.
 

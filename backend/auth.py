@@ -1,5 +1,5 @@
 """
-AGNI - Simple JWT-based mock authentication.
+KRISHI – Knowledge-driven Real-time Intelligent System for Harvest Improvement - Simple JWT-based mock authentication.
 """
 from datetime import datetime, timedelta
 from typing import Optional
@@ -7,8 +7,8 @@ from typing import Optional
 from jose import JWTError, jwt
 
 # Mock user (no database)
-MOCK_USER = {"username": "agni", "password": "farm2025"}
-SECRET_KEY = "agni-demo-secret-key-change-in-production"
+MOCK_USER = {"username": "krishi", "password": "farm2025"}
+SECRET_KEY = "krishi-demo-secret-key-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

@@ -1,5 +1,5 @@
 """
-AGNI - Crop Recommendation Engine
+KRISHI – Knowledge-driven Real-time Intelligent System for Harvest Improvement - Crop Recommendation Engine
 Real rule-based crop suggestion using temperature, humidity, season, water availability,
 soil (moisture, type, pH), and farmable space. Data from agronomic ranges and regional
 practices (India/subtropical/temperate). No mock data; no external AI API required.

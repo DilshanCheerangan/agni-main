@@ -1,5 +1,5 @@
 """
-AGNI - Real trust scoring and blur detection (OpenCV Laplacian).
+KRISHI – Knowledge-driven Real-time Intelligent System for Harvest Improvement - Real trust scoring and blur detection (OpenCV Laplacian).
 No mock data; trust score and blur from actual metrics and image.
 """
 import cv2

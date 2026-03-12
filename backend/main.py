@@ -1,5 +1,5 @@
 """
-AGNI - Adaptive Geo-secured Network for Intelligent Agriculture.
+KRISHI – Knowledge-driven Real-time Intelligent System for Harvest Improvement.
 FastAPI backend: auth, real OpenCV image analysis, trust score, advisory, crop recommendations.
 """
 import base64
@@ -39,7 +39,7 @@ from crop_database import recommend_crops, get_season, get_season_display_name
 OUTPUTS_DIR = Path(__file__).resolve().parent / "outputs"
 OUTPUTS_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="AGNI API", version="1.0.0")
+app = FastAPI(title="KRISHI API", version="1.0.0")
 
 # Serve saved overlay images at /outputs
 app.mount("/outputs", StaticFiles(directory=str(OUTPUTS_DIR)), name="outputs")
